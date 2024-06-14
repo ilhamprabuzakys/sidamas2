@@ -1,0 +1,49 @@
+/* Variabel */
+:root {
+   --border-color: #c2fffb;
+   --sidebar-nav-link-active: #08757C;
+   --bg-sidebar: #00A0A9;
+}
+
+aside#layout-menu.bg-menu-theme {
+   background-color: var(--bg-sidebar) !important;
+   color: #ffffff;
+}
+
+aside#layout-menu.bg-menu-theme.menu-vertical .menu-item.active>.menu-link:not(.menu-toggle) {
+   background: var(--sidebar-nav-link-active);   
+   color: #fff !important
+}
+
+aside#layout-menu.bg-menu-theme.menu-vertical .menu-item.active>.menu-link:not(.menu-toggle) {   
+   box-shadow: 0px 2px 6px 0px var(--bg-sidebar);
+   color: #fff !important
+}
+
+aside#layout-menu.bg-menu-theme .menu-inner .menu-item.open>.menu-link.menu-toggle,.layout-menu-hover.layout-menu-collapsed aside#layout-menu.bg-menu-theme .menu-inner .menu-item.open>.menu-link.menu-toggle,aside#layout-menu.bg-menu-theme .menu-inner .menu-item.active>.menu-link.menu-toggle,.layout-menu-hover.layout-menu-collapsed aside#layout-menu.bg-menu-theme .menu-inner .menu-item.active>.menu-link.menu-toggle {
+   background: var(--sidebar-nav-link-active);
+}
+
+html:not(.layout-menu-collapsed) aside#layout-menu.bg-menu-theme .menu-inner .menu-item:not(.active)>.menu-link:hover,.layout-menu-hover.layout-menu-collapsed aside#layout-menu.bg-menu-theme .menu-inner .menu-item:not(.active)>.menu-link:hover {
+   background: var(--sidebar-nav-link-active)
+}
+
+
+li.menu-item hr {
+   background-color: var(--border-color);
+   margin: 0 15px;
+}
+
+.light-style .menu .app-brand.demo {
+   border-bottom: 1px solid var(--border-color);
+}
+
+#btn-role {
+   background-color: var(--bg-sidebar) !important;
+   color: #fff;
+   padding: 5px 25px;
+   border-radius: 25px;
+   font-family: 'Squada One';
+   font-size: 1.8rem;
+   text-transform: uppercase;
+}

@@ -1,0 +1,258 @@
+@font-face {
+    font-family: "SquadaOne";
+    src: url("../../../fonts/SquadaOne-Regular.ttf") format("truetype");
+    font-weight: normal;
+    font-style: normal;
+}
+
+/* ==========================
+ * CUSTOM DASHBOARD SETTINGS
+ * V1
+============================= */
+
+:root {
+    --text-important: #00a0a9;
+}
+
+/* ======= SCROLLBAR ======= */
+::-webkit-scrollbar {
+    width: 15px;
+}
+
+::-webkit-scrollbar-thumb {
+    height: 6px;
+    border: 4px solid rgba(0, 0, 0, 0);
+    background-clip: padding-box;
+    -webkit-border-radius: 7px;
+    background-color: #a9a9a9;
+}
+
+/* ======= HTML ELEMENT ======= */
+a[disabled] {
+    cursor: default;
+}
+
+/* ==========================
+ * UTILITY
+============================= */
+.vertical-align-top {
+    vertical-align: top;
+}
+
+.vertical-align-middle {
+    vertical-align: middle;
+}
+
+.vertical-align-bottom {
+    vertical-align: bottom;
+}
+
+.action-disabled {
+    cursor: not-allowed;
+    /* pointer-events: none; */
+}
+
+.pointer-none {
+    pointer-events: none;
+}
+
+.text-capitilize {
+    text-transform: capitalize;
+}
+
+.ms-0-15r {
+    margin-left: 0.15rem;
+}
+
+.text-important {
+    color: var(--text-important) !important;
+}
+
+.hr-light {
+    color: #dadada;
+}
+
+.ms-0-15r {
+    margin-left: 0.15rem;
+}
+
+sup.ms-0-15r.text-danger {
+    user-select: none;
+}
+
+sup.required {
+    color: red;
+    margin-left: 0.15rem;
+    user-select: none;
+}
+
+.all-unset {
+    all: unset;
+}
+
+/* ==========================
+ * TABLE
+============================= */
+
+/* ======= THEAD ======= */
+table thead th {
+    vertical-align: middle !important;
+}
+
+/* ======= TBODY ======= */
+table tbody tr td {
+    vertical-align: top;
+}
+
+table tbody tr td:first-child {
+    text-align: center;
+}
+
+table tbody tr td[scope="row"] {
+    text-align: center;
+}
+
+table tbody tr.align-td-middle td {
+    vertical-align: middle;
+}
+
+table tbody.align-tr-middle tr td {
+    vertical-align: middle;
+}
+
+table ul li span.label {
+    width: 150px;
+    display: inline-block;
+}
+
+table ul li span.value {
+    padding-left: 10px;
+    font-weight: bold;
+}
+
+td>.list-button {
+    vertical-align: bottom;
+}
+
+/* ======= FIX TABLE BORDER ======= */
+section table.table {
+    border-left: 2px solid #eee;
+    border-right: 2px solid #eee;
+}
+
+/* ==========================
+ * BUTTON STYLING
+============================= */
+.list-button {
+    text-align: left !important;
+}
+
+.list-button a {
+    display: block;
+    text-transform: uppercase;
+}
+
+.list-button button {
+    border: 0;
+    text-transform: uppercase;
+    padding: 0.5em 1em;
+    text-align: center;
+    width: -webkit-fill-available;
+}
+
+#btn-role {
+    text-transform: uppercase !important;
+}
+
+/* ==========================
+ * SELECT2
+============================= */
+.select2-container {
+    width: auto !important;
+    display: block;
+}
+
+/* ==========================
+ * OVERRIDING DEFAULT THEME
+============================= */
+
+/* ======= SIDEAR ======= */
+aside#layout-menu.bg-menu-theme .menu-header {
+    color: #fff;
+}
+
+aside#layout-menu.bg-menu-theme .menu-link,
+aside#layout-menu.bg-menu-theme .menu-horizontal-prev,
+aside#layout-menu.bg-menu-theme .menu-horizontal-next {
+    color: #fff;
+}
+
+aside#layout-menu.bg-menu-theme .menu-item.open:not(.menu-item-closing)>.menu-toggle,
+.bg-menu-theme .menu-item.active>.menu-link {
+    color: #ffffff;
+}
+
+aside#layout-menu.bg-menu-theme .menu-inner .menu-sub .menu-item:not(.active)>.menu-link::before {
+    color: #fff !important;
+}
+
+aside#layout-menu ul.menu-inner.menu-inner-logout {
+    height: 100px;
+}
+
+aside#layout-menu ul.menu-inner.menu-inner-logout li.menu-item.logout-item {
+    margin-top: 20px;
+    position: fixed;
+    bottom: 0;
+}
+
+/* ======= SIDEBAR BRAND ======= */
+.app-brand-link img {
+    width: 50px;
+    object-fit: contain;
+    position: absolute;
+    left: 20px;
+}
+
+.app-brand-text.demo {
+    padding-left: 50px !important;
+}
+
+/* ==========================
+ * MODAL BOOTSTRAP
+============================= */
+.modal.modal-literasi .modal-body {
+    padding: 0;
+}
+
+.modal.modal-literasi .modal-body .container-fluid {
+    padding: 5px;
+}
+
+/* ==========================
+ * CKEDITOR CUSTOM CSS
+============================= */
+.ck-editor__editable {
+    min-height: 250px;
+}
+
+/* ==========================
+ * RESPONSIVE BREAKPOINTS
+============================= */
+@media (max-width: 800px) {
+    a#btn-role {
+        font-size: 1.3rem;
+    }
+
+    ul li.user-info-dropdown a .row .col:nth-child(2),
+    ul li.user-info-dropdown a .row .col:nth-child(3) {
+        display: none;
+    }
+}
+
+@media (max-width: 450px) {
+    a#btn-role {
+        font-size: 0.8rem;
+        padding: 6px 15px;
+    }
+}

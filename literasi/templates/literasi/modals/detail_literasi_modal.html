@@ -1,0 +1,32 @@
+{% load static %}
+<!-- Literasi Detail Modal -->
+<div class="modal fade modal-literasi" id="detailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Detail <b><span id="target_detail">Modul literasi A</span></b>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <embed id="wadah" src="" width="100%" height="600px" autoplay="false" />
+                    
+                    {% comment %} <video controls width="100%" height="600px" id="wadah">
+                        <source src="{% static 'assets/home/sample/video.mp4' %}" type="video/mp4">
+                        Your browser does not support the video tag.
+                    </video> {% endcomment %}
+                    {% comment %} <embed src="{% static 'assets/home/sample/book.pdf' %}" type="application/pdf" width="100%"
+                        height="600px" /> {% endcomment %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal"><i
+                        class="fas fa-xmark me-2"></i>Tutup</button>
+                <a href="{% static 'assets/home/sample/book.pdf' %}" download="book.pdf" class="btn btn-primary"><i
+                        class="fas fa-download me-2"></i>Unduh</a>
+            </div>
+        </div>
+    </div>
+</div>

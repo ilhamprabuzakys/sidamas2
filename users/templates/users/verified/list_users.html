@@ -1,0 +1,242 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Verifikasi
+{% endblock %}
+{% block content %}
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Daftar Pengguna</h3>
+        <span class="mb-0"><span class="text-muted fw-light">Daftar Pengguna /</span><span
+                class="ms-1 fw-medium">Verifikasi</span></span>
+    </div>
+</div>
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Verifikasi Data Pengguna</h3>
+                <hr />
+            </div>
+            <div class="table-responsive">
+                {% include 'verified/table_users.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include "verified/modal_users.html" %}
+{% endblock modal_tambahan %}
+
+{% block js_tambahan %}
+<script>
+    // persiapan variable
+    var g_id_profil;
+    var id_pengguna;
+
+    $(document).ready(function () {
+        const CSRF_TOKEN = getCookie('csrftoken');
+
+        $("#formEdit").submit(function(event){
+            event.preventDefault();
+
+            status = $("#status").val();
+
+            if (status == 1) {
+                status = true;
+            } else {
+                status = false;
+            }
+
+            var formData = {
+                satker: $("#satker").val(),
+                is_verified: status
+            };
+
+            axios.put('/users/api/v1/profile/'+g_id_profil+'/', formData)
+                .then(function (response) {
+                    Swal.fire({
+                        icon: "success",
+                        title: "Update data berhasil !",
+                        text: "Data tersimpan !",
+                        showConfirmButton: false,
+                        timer: 1000
+                    }).then((result) => {
+                        if (result.dismiss === Swal.DismissReason.timer) {
+                            location.reload();
+                        }
+                    });
+                    
+                })
+                .catch(function (error) {
+                    Swal.fire({
+                        icon: "error",
+                        title: "Terjadi kesalahan !",
+                        text: "API bermasalah !",
+                    });
+            }); 
+        });
+
+        let dataTable = $('#__table').DataTable({
+            language: dt_lang_config(),
+            columnDefs: [{
+                targets: [1, 2, 5],
+                visible: false,
+            }],
+            order: [[1, 'desc']]
+        });
+
+        $('#__table tbody').on('click', '.button_verifikasi', function () {
+
+            let rowData = dataTable.row($(this).closest('tr')).data();
+
+            let id_profile = rowData[1]; // ID Profile
+            let id_user = rowData[2]; // ID User (profile.user)
+
+            let user_username = rowData[4];
+            const CSRF_TOKEN = getCookie('csrftoken');
+            let is_admin = $(this).hasClass('button_verifikasi_admin');
+
+            let url = `${window.location.origin}`;
+            let param;
+
+            if (is_admin) {
+                url = `/users/api/v1/profile/${id_profile}/update_is_staff/`;
+                param = "admin"
+            } else {
+                url = `/users/api/v1/profile/${id_profile}/`;
+                param = "pegawai"
+            }
+
+            Swal.fire({
+                //title: `Verifikasi akun ${users} sebagai ${param} ?`,
+                title: 'Verifikasi akun ' + user_username + ' sebagai ' + param + '?',
+                icon: 'warning',
+                html: `Dengan memverifikasi <strong>akun user</strong>, akan mengizinkan user <strong>${user_username}</strong> untuk menggunakan aplikasi <strong>SIDAMAS</strong> sebagai <strong>${param}</strong>`,
+                showDenyButton: true,
+                confirmButtonText: " Ya ",
+                denyButtonText: `Tidak`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire({
+                        title: "Tunggu sebentar",
+                        icon: "info",
+                        html: "Sedang memverifikasi data user . .",
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
+                    // Mengganti penggunaan $.ajax dengan Axios
+                    axios.put(url, {
+                            user: id_user,
+                            is_verified: true
+                        }, {
+                            headers: {
+                                'X-CSRFToken': CSRF_TOKEN,
+                                'Content-Type': 'application/json',
+                            }
+                        })
+                        .then((response) => {
+                            Swal.close();
+                            Swal.fire({
+                                title: 'Success!',
+                                text: 'Data berhasil diupdate!',
+                                icon: 'success',
+                            }).then(() => {
+                                window.location.reload();
+                                //dataTable.ajax.reload();
+                            });
+                        })
+                        .catch((error) => {
+                            console.error('Error performing Axios request:', error);
+                        });
+                } else if (result.isDenied) {
+                    console.log('User denied action');
+                }
+            });
+        });
+
+        $('#__table tbody').on('click', '.button_edit', function () {
+            let rowData = dataTable.row($(this).closest('tr')).data();
+            let id = rowData[1];
+
+            axios.get('/users/api/v1/profile/' + id + '/', {
+                    headers: {
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then((response) => {
+                    data_mentah = response.data;
+                    g_id_profil = data_mentah.id 
+                    id_pengguna = data_mentah.get_data_user_profil.id;
+                    satker = data_mentah.get_data_user_satker.id;
+                    status = data_mentah.is_verified;
+
+                    console.log(status);
+
+                    if (status == true) {
+                        status = 1;
+                    } else {
+                        status = 2;
+                    }
+
+                    $("#satker").val(satker);
+                    $("#status").val(status);
+
+                    $("#satker").change();
+                    $("#status").change();
+
+                    $("#editDataUserModal").modal('show');
+                })
+                .catch((error) => {
+                    console.error('Error performing Axios request:', error);
+                });
+
+        });
+
+        $('#__table tbody').on('click', '.button_delete', function () {
+            let rowData = dataTable.row($(this).closest('tr')).data();
+            let id = rowData[1];
+
+            Swal.fire({
+                title: "Peringatan !",
+                text: "Hapus data pengguna ?",
+                icon: "warning",
+                showDenyButton: true,
+                confirmButtonText: "Hapus !",
+                denyButtonText: "Batal" 
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    axios.delete('/users/api/v1/profile/'+id+'/')
+                        .then(function (response) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Delete data berhasil !",
+                                text: "Data terhapus !",
+                                showConfirmButton: false,
+                                timer: 1000
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            });
+                        })
+                        .catch(function (error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Terjadi kesalahan !",
+                                text: "API bermasalah !",
+                            });
+                    });
+
+                } else if (result.isDenied) {
+                }
+            });
+        });
+    });
+</script>
+{% endblock %}

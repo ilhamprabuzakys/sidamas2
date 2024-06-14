@@ -1,0 +1,88 @@
+<div class="modal fade" id="editModal">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Data <b><span id="target_edited"></span></b></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formUpdate" onsubmit="handleUpdate(event)">
+                <div class="modal-body">
+                    <input type="hidden" id="edit__id">
+
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label for="first_name" class="required col-form-label">Nama depan:</label>
+                            <input type="text" class="form-control" id="edit__first_name" required />
+                        </div>
+
+                        <div class="col-6 mb-3">
+                            <label for="last_name" class="optional col-form-label">Nama belakang:</label>
+                            <input type="text" class="form-control" id="edit__last_name" />
+                        </div>
+
+                        <div class="col-6 mb-3">
+                            <label for="edit__username" class="required col-form-label">Username:</label>
+                            <input type="text" class="form-control" id="edit__username" required />
+                        </div>
+
+                        <div class="col-6 mb-3">
+                            <label for="edit__nomor_telepon" class="optional col-form-label">Nomor telepon:</label>
+                            <input type="text" class="form-control mask-phone input-maxlength"
+                                id="edit__nomor_telepon" maxlength="15" placeholder="0812-3456-7890" />
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="edit__email" class="col-form-label">Alamat Email:</label>
+                            <input type="email" class="form-control" id="edit__email" />
+                        </div>
+                    </div>
+
+
+                    <span id="edit__info" class="text-muted small">
+                        Mengedited data pengguna tidak akan <b>merubah password</b>, sehingga data password akan tetap
+                        sama seperti semula.
+                    </span>
+
+                    <input type="hidden" id="edit__satker" />
+
+                    <!-- <hr class="mx-n4 mt-4 mb-3" />
+
+                    <div class="mb-3">
+                        <label for="edit__satker" class="required col-form-label">Satuan Kerja:</label>
+                        <select id="edit__satker" class="form-control select2">
+                            <option value="" selected disabled>--Pilih Satuan Kerja--</option>
+                            {% for item in list_satker %}
+                            <option value="{{ item.id }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div> -->
+
+
+                    <!--
+                    <hr class="mx-n4 my-4" />
+                    <div class="col-12">
+                        <label for="edit__status" class="required me-3">Status Akun:</label>
+
+                        <label class="switch">
+                            <input type="checkbox" class="switch-input" id="edit__status">
+                            <span class="switch-toggle-slider">
+                                <span class="switch-on"></span>
+                                <span class="switch-off"></span>
+                            </span>
+                            <span class="switch-label">Aktif</span>
+                        </label>
+                    </div> -->
+
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal"><i
+                            class="fas fa-xmark me-2"></i>Batalkan</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

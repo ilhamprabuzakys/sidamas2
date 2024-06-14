@@ -1,0 +1,921 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Hasil SKM Tes Urine {% endblock title %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+
+<style>
+    #myTable tbody tr td:nth-child(1) {
+        background-color: #effff2 !important;
+    }
+
+    #myTable2 tbody tr td:nth-child(1) {
+        background-color: #effff2 !important;
+    }
+
+    #__table_kesimpulan_perhitungan tbody tr th:nth-child(1) {
+        width: 90%;
+    }
+
+    .hi-font {
+        font-size: 17px;
+    }
+
+    .high-font {
+        font-size: 24px;
+    }
+
+    .text-primary {
+        color: #007bff;
+    }
+
+    .text-success {
+        color: #28a745;
+    }
+
+    .text-warning {
+        color: #ffc107;
+    }
+
+    .text-danger {
+        color: #dc3545;
+    }
+
+    #layout-menu {
+        display: none;
+    }
+
+    #layout-container {
+        padding-left: 1rem;
+    }
+
+    .layout-navbar {
+        display: none;
+    }
+
+    .font_height{
+        font-weight: 900;
+    }
+
+    footer {
+        display: none;
+    }
+</style>
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            Hasil SKM Tes Urine
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">Hasil SKM Tes Urine</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <a class="btn btn-secondary" href="{% url 'psm_skm_tes_urine' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Kembali ke daftar survei
+                    </a>
+                    <button class="btn btn-primary" onclick="lihat_chart()">
+                        <i class="fas fa-chart-area me-2"></i>Lihat Chart
+                    </button>
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="fas fa-file-export me-2"></i>Export Excel
+                    </button>
+                </div>
+            </div>
+
+            <div id="headline" class="my-5 mb-3">
+                <h3 class="text-center">Hasil Survei Data SKM Tes Urine 2024</h3>
+            </div>
+
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Nilai Unsur Pelayanan</h3>
+            </div>
+
+            <table id="myTable" class="table display table-bordered">
+                <thead>
+                    <th class="bg-soft-green font_height">NO</th>
+                    <th class="font_height">U1</th>
+                    <th class="font_height">U2</th>
+                    <th class="font_height">U3</th>
+                    <th class="font_height">U4</th>
+                    <th class="font_height">U5</th>
+                    <th class="font_height">U6</th>
+                    <th class="font_height">U7</th>
+                    <th class="font_height">U8</th>
+                    <th class="font_height">U9</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <table id="myTable2" class="table display table-bordered">
+                <thead>
+                    <th style="width: 85px;" class="bg-soft-success font_height"></th>
+                    <th class="font_height">U1</th>
+                    <th class="font_height">U2</th>
+                    <th class="font_height">U3</th>
+                    <th class="font_height">U4</th>
+                    <th class="font_height">U5</th>
+                    <th class="font_height">U6</th>
+                    <th class="font_height">U7</th>
+                    <th class="font_height">U8</th>
+                    <th class="font_height">U9</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <table id="myTable3" class="table display table-bordered d-none">
+                <thead>
+                    <th class="font_height"></th>
+                    <th class="font_height"></th>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <table class="table table-sm table-bordered" id="__table_kesimpulan_perhitungan">
+                <tbody>
+                    <tr>
+                        <th scope="row" class="bg-soft-success font_height">Jumlah Responden</th>
+                        <td class="align-middle"><span class="jumlah_responden"></span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="bg-soft-success font_height">NRR Tertimbang/Unsur</th>
+                        <td class="align-middle"><span class="nrr_tertimbang"></span></td>
+                    </tr>
+                    <tr>
+                        <th scope="row" class="bg-soft-success font_height">IKM Unit Pelayanan</th>
+                        <td class="align-middle"><span class="ikm_unit_pelayanan"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br>
+
+            <div class="container-fluid" style="padding: 0px;">
+                <div class="row">
+                    <div class="col">
+                        <div class="card" id="card_keterangan">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;">Keterangan :</h5>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - U1 s.d U<span class="jumlah_daftar_pertanyaan"></span>
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Unsur-Unsur Pelayanan
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - NRR
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Nilai Rata Rata
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - IKM
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Indeks Kepuasan Masyarakat
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - *)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Jumlah NRR IKM Tertimbang
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - **)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Jumlah NRR Tertimbang x 25
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - NRR Per Unsur
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Jumlah nilai per unsur dibagi jumlah kusioner yang terisi
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - NRR Tertimbang Per Unsur
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        NRR perunsur x 0.11
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <table id="myTable_keterangan" class="table display table-bordered d-none">
+                            <tbody>
+                                <tr>
+                                    <td>- U1 s.d U10</td>
+                                    <td>=</td>
+                                    <td>Unsur-Unsur Pelayanan</td>
+                                </tr>
+                                <tr>
+                                    <td>- NRR</td>
+                                    <td>=</td>
+                                    <td>Nilai Rata Rata</td>
+                                </tr>
+                                <tr>
+                                    <td>- IKM</td>
+                                    <td>=</td>
+                                    <td>Indeks Kepuasan Masyarakat</td>
+                                </tr>
+                                <tr>
+                                    <td>- *)</td>
+                                    <td>=</td>
+                                    <td>Jumlah NRR IKM Tertimbang</td>
+                                </tr>
+                                <tr>
+                                    <td>- **)</td>
+                                    <td>=</td>
+                                    <td>Jumlah NRR Tertimbang x 25</td>
+                                </tr>
+                                <tr>
+                                    <td>- NRR Per Unsur</td>
+                                    <td>=</td>
+                                    <td>Jumlah nilai per unsur dibagi jumlah kusioner yang terisi</td>
+                                </tr>
+                                <tr>
+                                    <td>- NRR Tertimbang Per Unsur</td>
+                                    <td>=</td>
+                                    <td>NRR perunsur x 0.11</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <br>
+
+                        <div class="card" id="card_hasil_akhir">
+                            <div class="card-body">
+                                <h4 id="ikm" class="card-title" style="margin: 0px; font-weight: bold;"></h4>
+                                <h5 id="akreditas" class="card-title" style="margin: 0px; font-weight: bold;"></h5>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;">Mutu Pelayanan :</h5>
+                                <div class="row high-font">
+                                    <div class="col-3 text-success">
+                                        A (Sangat Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        88,31 - 100,00
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-primary">
+                                        B (Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        76,61 - 88,30
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-warning">
+                                        C (Kurang Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        65,00 - 76,60
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-danger">
+                                        D (Tidak Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        25,00 - 64,99
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col">
+                        <div class="card">
+                            <table class="table" id="myTable_soal">
+                                <thead class="bg-soft-warning">
+                                    <tr>
+                                        <th class="font_height" scope="col">No</th>
+                                        <th class="font_height" scope="col">Unsur Pelayanan</th>
+                                        <th class="font_height" scope="col">Nilai Rata-Rata</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% include "survei/hasil_survei/modal_export.html" %}
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    let pertanyaan;
+    let jumlah_responden;
+    var jumlah_daftar_pertanyaan = 0;
+    var id_number;
+    const CSRF_TOKEN = getCookie('csrftoken');
+
+    let array_jawaban_responden = [];
+    let g_sigma_nilai = [];
+    let g_nrr = [];
+    let g_nrrt = [];
+    let g_responden;
+    let g_nrrtu;
+    let g_ikm1;
+    let g_ikm2;
+    let g_bulan;
+    let g_tahun;
+    let g_satker;
+
+    const tableKesimpulanPerhitungan = $('#__table_kesimpulan_perhitungan');
+
+    $(document).ready(function () {
+        const CSRF_TOKEN = getCookie('csrftoken');
+        var currentUrl = window.location.href;
+        var data_id = getNumberFromUrl(currentUrl);
+
+        g_bulan = data_id[0];
+        g_tahun = data_id[1];
+        g_satker = data_id[2];
+
+        Swal.fire({
+            title: "Tunggu sebentar",
+            icon: "info",
+            allowOutsideClick: false,
+            html: "Sedang memuat data !",
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        const data_triwulan = {
+            triwulan: filterByTriwulan(data_id),
+            tipe: "SKM Tes Urine"
+        }
+
+        console.log('Payload awal:', data_triwulan);
+
+        if (data_id != "kosong") {
+            axios.post('/survei/api/v1/datasurvei/triwulan/', data_triwulan, {
+                    headers: {
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then((response) => {
+                    if (response.data.length != 0) {
+                        id_number = response.data[0].id
+                        parseDataMentahan(response);
+                    } else {
+                        Swal.fire({
+                            icon: "error",
+                            title: 'Terjadi kesalahan !',
+                            text: 'Data tidak ada',
+                            allowOutsideClick: false,
+                            showConfirmButton: true,
+                            confirmButtonText: 'Kembali',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                var customButtonUrl = "{% url 'psm_skm_tes_urine' %}";
+                                window.location.href = customButtonUrl;
+                            }
+                        });
+                    }
+
+                    if (response.data[0].get_jumlah_responden === 0) {
+                        Swal.fire({
+                            icon: "error",
+                            title: 'Terjadi kesalahan !',
+                            text: 'Belum ada responden',
+                            allowOutsideClick: false,
+                            showConfirmButton: true,
+                            confirmButtonText: 'Kembali',
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                var customButtonUrl = "{% url 'psm_skm_tes_urine' %}";
+                                window.location.href = customButtonUrl;
+                            }
+                        });
+                    }
+                })
+                .catch((error) => {
+                    console.error('Error performing Axios request:', error);
+                });
+        } else {
+            Swal.close();
+            Swal.fire({
+                title: "Terjadi Kesalahan",
+                text: "ID tidak valid",
+                icon: "error"
+            });
+        }
+    });
+
+    function mengolah_data_mentah(res) {
+        let data_isian_mentah = res.data.get_data_isian;
+        let banyak_data = data_isian_mentah.length;
+
+        pertanyaan = res.data.get_data_tipe[0].daftar_pertanyaan;
+        jumlah_daftar_pertanyaan = pertanyaan.length;
+
+        $('#card_keterangan .jumlah_daftar_pertanyaan').html(jumlah_daftar_pertanyaan);
+
+        let resultArray = [];
+
+        for (let i = 0; i < banyak_data; i++) {
+            let data_mentahan;
+            if (isValidJSON(data_isian_mentah[i].data_mentahan)) {
+                var jsonObject = $.parseJSON(data_isian_mentah[i].data_mentahan);
+                data_mentahan = checkArrayAndAddData(jsonObject);
+            } else {
+                data_mentahan = checkArrayAndAddData(data_isian_mentah[i].data_mentahan);
+            }
+
+            let array_sementara = [];
+            for (let j = 0; j < data_mentahan.length; j++) {
+                let currentObject = {
+                    ["U" + data_mentahan[j].no]: data_mentahan[j].bobot
+                };
+                array_sementara.push(currentObject);
+            }
+            resultArray.push(array_sementara);
+        }
+        jumlah_responden = resultArray.length+1;
+        tableKesimpulanPerhitungan.find('tbody tr td span.jumlah_responden').html(jumlah_responden);
+        g_responden = jumlah_responden;
+        console.log("ini g responden = " + g_responden);
+
+        menampilkan_data_jawaban(resultArray.reverse());
+    }
+
+    function perhitungan(dataArray) {
+        const sums = Array.from({
+            length: 10
+        }, () => 0);
+        const nrrs = Array.from({
+            length: 10
+        }, () => 0);
+        const nrrts = Array.from({
+            length: 10
+        }, () => 0);
+
+        for (let i = 0; i < dataArray.length; i++) {
+            let data_mentahan = dataArray[i];
+
+            // ngebuat, sum dari sigma nilai, nilai rata-rata / panjang array
+            for (let j = 0; j < 10-1; j++) {
+                sums[j] += parseInt(data_mentahan[j]['U' + (j + 1)]);
+                nrrs[j] += parseInt(data_mentahan[j]['U' + (j + 1)]) / dataArray.length;
+            }
+        }
+
+        // Menghitung nilai rata-rata tertimbang * 0.11
+        for (let k = 0; k < 10-1; k++) {
+            nrrts[k] = nrrs[k] * 0.11;
+        }
+
+        // sum nilai rata-rata tertimbang
+        const sum_nrrt = nrrts.reduce((sum, nrrt) => sum + nrrt, 0);
+        const res_nrrt = removeDec(sum_nrrt);
+        const ikm_unit_pelayanan = res_nrrt * 25;
+
+        implementasi(sums, nrrs, nrrts, sum_nrrt, ikm_unit_pelayanan)
+    }
+
+    function implementasi(sigma_nilai, nrr, nrrt, sum_nrrt, ikm_unit_pelayanan) {
+        const res_nrr = removeDecimal(nrr);
+        const res_nrrt = removeDecimal(nrrt);
+        var table = $('#myTable2').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false,
+        });
+
+        function createRowData(label, values) {
+            return [label, ...values];
+        }
+
+        var rowData = createRowData("Σ Nilai", sigma_nilai);
+        var rowData2 = createRowData("NRR", res_nrr);
+        var rowData3 = createRowData("NRRT", res_nrrt);
+
+        table.row.add(removeElementAtIndex(rowData, 10)).draw();
+        table.row.add(removeElementAtIndex(rowData2, 10)).draw();
+        table.row.add(removeElementAtIndex(rowData3, 10)).draw();
+
+        g_sigma_nilai = sigma_nilai;
+        g_nrr = res_nrr;
+        g_nrrt = res_nrrt;
+
+        make_kesimpulan(sum_nrrt, ikm_unit_pelayanan);
+        tabel_pertanyaan(res_nrr);
+    }
+
+    function menampilkan_data_jawaban(resultArray) {
+        var table = $('#myTable').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false,
+        });
+
+        resultArray.forEach(function (rowData, index) {
+            var row = [index + 1];
+
+            rowData.forEach(function (cellData) {
+                row.push(cellData[Object.keys(cellData)[0]]);
+            });
+
+            // table.row.add(row).draw();
+            table.row.add(removeElementAtIndex(row, 10)).draw();
+        });
+
+        array_jawaban_responden = removeU10FromArray(resultArray);
+        perhitungan(resultArray);
+    }
+
+    function make_kesimpulan(sum_nrrt, ikm_unit_pelayanan) {
+        let var_nrrt = removeDec(sum_nrrt);
+        let var_ikm;
+        let var_ikm2;
+
+        var_ikm = removeDec(ikm_unit_pelayanan);
+        var_ikm2 = removeDec(ikm_unit_pelayanan);
+
+        var category = convertToCategory(var_ikm);
+
+        let card = $('#card_hasil_akhir');
+        //card.find('#ikm').html(`SKM UNIT PELAYANAN : ${var_ikm}`).addClass(category.colorClass);
+        //card.find('#akreditas').html(`Akreditas          : ${category.category}`).addClass(category.colorClass);
+
+        $('#ikm').text("SKM UNIT PELAYANAN  : " + var_ikm2 + " " + category.category).addClass(category.colorClass);
+
+        var table = $('#myTable3').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false,
+        });
+
+        tableKesimpulanPerhitungan.find('tbody tr td span.ikm_unit_pelayanan').html(var_ikm);
+        tableKesimpulanPerhitungan.find('tbody tr td span.nrr_tertimbang').html(var_nrrt);
+        tableKesimpulanPerhitungan.find('tbody tr td span.jumlah_responden').html(jumlah_responden);
+
+        g_nrrtu = var_nrrt;
+        g_ikm1 = var_ikm;
+        g_ikm2 = var_ikm2;
+
+        table.row.add(["JUMLAH RESPONDEN", jumlah_responden]).draw(false);
+        table.row.add(["NRR TERTIMBANG/UNSUR", var_nrrt]).draw(false);
+        table.row.add(["IKM UNIT PELAYANAN", var_ikm]).draw(false);
+    }
+
+    test = ["Persyaratan pelayanan", "Prosedur pelayanan", "Waktu pelayanan", "Biaya / tarif pelayanan", "Produk Pelayanan", "Kompetensi petugas pelayanan", "Perilaku petugas pelayanan", "Sarana dan prasarana", "Penanganan pengaduan layanan"]
+
+    function tabel_pertanyaan(nrr) {
+        // if (haveSameLength(nrr, pertanyaan)) {
+            for (let index = 0; index < nrr.length-1; index++) {
+                const element_nrr = nrr[index];
+                const element_pertanyaan = test[index];
+                let rowindex = index + 1;
+                var newRow = $(`<tr>
+                    <td>U${rowindex}</td>
+                    <td>${element_pertanyaan}</td>
+                    <td>${element_nrr.toFixed(3)}</td>
+                </tr>`);
+                $('#myTableBody').append(newRow);
+            }
+        // } else {
+        //     var newRow = $('<tr><td>#</td><td>Terjadi Kesalahan</td><td>Data Tidak Sinkron</td></tr>');
+        //     $('#myTableBody').append(newRow);
+        // }
+        Swal.close();
+    }
+
+    // pengecekan untuk array panjangnya sama
+    function haveSameLength(array1, array2) {
+        return array1.length === array2.length;
+    }
+
+    // function kostum
+    function removeDecimal(arr) {
+        return arr.map(num => parseFloat(num.toFixed(3)));
+    }
+
+    function removeDec(num) {
+        return parseFloat(num.toFixed(3));
+    }
+
+    function getNumberFromUrl(url) {
+        // Split the URL by '/' and find the index of 'hasil_triwulan/'
+        var parts = url.split('/');
+        var index = parts.indexOf('hasil_triwulan');
+
+        // Extract parameters after 'hasil_triwulan/'
+        if (index !== -1 && index < parts.length - 1) {
+            var params = parts.slice(index + 1);
+            // Filter out empty strings
+            params = params.filter(function(param) {
+                return param !== "";
+            });
+            return params;
+        } else {
+            return [];
+        }
+    }
+
+    function isValidJSON(str) {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function convertToCategory(data) {
+        if (data >= 88.31 && data <= 100.00) {
+            return {
+                category: "A (sangat baik)",
+                colorClass: "text-success"
+            };
+        } else if (data >= 76.61 && data <= 88.30) {
+            return {
+                category: "B (baik)",
+                colorClass: "text-primary"
+            };
+        } else if (data >= 65.00 && data <= 76.60) {
+            return {
+                category: "C (kurang baik)",
+                colorClass: "text-warning"
+            };
+        } else if (data >= 25.00 && data <= 64.99) {
+            return {
+                category: "D (tidak baik)",
+                colorClass: "text-danger"
+            };
+        } else {
+            return {
+                category: "Tidak valid",
+                colorClass: ""
+            };
+        }
+    }
+
+    function checkArrayAndAddData(array) {
+        if (array.length !== 10) {
+            var remainingLength = 10 - array.length;
+            for (var i = 0; i < remainingLength; i++) {
+                array.push({
+                    no: array.length +  1,
+                    jawaban: 0,
+                    bobot: '0',
+                    pilihan: 'x'
+                });
+            }
+        }
+        return array;
+    }
+
+    window.jsPDF = window.jspdf.jsPDF
+    window.html2canvas = html2canvas
+
+    function downloadHTMLAsPDF() {
+        $.ajax({
+            url: '/survei/generate_spreadsheet_tu/',
+            type: 'POST',
+            data: JSON.stringify({
+                jawaban: array_jawaban_responden,
+                sigma_nilai: removeAtIndex(g_sigma_nilai, 9),
+                nrr: removeAtIndex(g_nrr, 9),
+                nrrt: removeAtIndex(g_nrrt, 9),
+                responden: g_responden,
+                nrrtu: g_nrrtu,
+                ikm1: g_ikm1,
+                ikm2: g_ikm2,
+                kode : id_number
+            }),
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', CSRF_TOKEN);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+            },
+            success: function(response) {
+                window.open('/survei/download_tu/');
+            },
+            error: function(xhr, status, error) {
+            }
+        });
+    }
+
+    function lihat_chart() {
+        var currentUrl = window.location.href;
+        var data_id = getNumberFromUrl(currentUrl);
+        window.location.href = '/survei/chart_triwulan/' + data_id[0] + '/' + data_id[1] + '/';
+    }
+
+    function removeElementAtIndex(arr, indexToRemove) {
+        if (indexToRemove < 0 || indexToRemove >= arr.length) {
+            console.error("Index out of bounds");
+            return arr;
+        }
+
+        arr.splice(indexToRemove, 1);
+        return arr;
+    }
+
+    function removeU10FromArray(data) {
+        return data.map(function(subArray) {
+            return subArray.filter(function(obj) {
+                return !("U10" in obj);
+            });
+        });
+    }
+
+    function removeAtIndex(array, index) {
+        if (index > -1 && index < array.length) {
+            var newArray = array.slice(0); // Make a copy of the original array
+            newArray.splice(index, 1);
+            return newArray;
+        } else {
+            return array; // Return the original array if index is out of bounds
+        }
+    }
+
+    function filterByTriwulan(params) {
+        var monthMap = {
+            "T1": [1, 2, 3], // January, February, March
+            "T2": [4, 5, 6], // April, May, June
+            "T3": [7, 8, 9], // July, August, September
+            "T4": [10, 11, 12] // October, November, December
+        };
+
+        var triwulan = params[0];
+        var year = parseInt(params[1]);
+        var satker = parseInt(params[2]);
+
+        if (monthMap.hasOwnProperty(triwulan)) {
+            return [monthMap[triwulan], year, satker];
+        } else {
+            return [[], year, satker];
+        }
+    }
+
+    $("#unitPelayananForm").submit(function(event) {
+        event.preventDefault();
+
+        var unitPelayanan = $('#unitPelayanan').val();
+        var alamat = $('#alamat').val();
+        var tlpFax = $('#tlpFax').val();
+
+        const payload = {
+            jawaban: array_jawaban_responden,
+            sigma_nilai: removeAtIndex(g_sigma_nilai, 9),
+            nrr: removeAtIndex(g_nrr, 9),
+            nrrt: removeAtIndex(g_nrrt, 9),
+            responden: g_responden ?? "",
+            nrrtu: g_nrrtu,
+            ikm1: g_ikm1,
+            ikm2: g_ikm2,
+            kode : id_number,
+            unitpelayanan : unitPelayanan,
+            alamat : alamat,
+            tlpFax : tlpFax,
+            bulan : g_bulan,
+            tahun : g_tahun,
+            satker : g_satker
+        };
+
+        console.log(payload);
+
+        //return;
+
+        $.ajax({
+            url: '/survei/generate_spreadsheet_tu/',
+            type: 'POST',
+            data: JSON.stringify(payload),
+            beforeSend: function(xhr) {
+                xhr.setRequestHeader('X-CSRFToken', CSRF_TOKEN);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+            },
+            success: function(response) {
+                window.open('/survei/download_tu/');
+            },
+            error: function(xhr, status, error) {
+            }
+        });
+    });
+
+    function parseDataMentahan(jsonData) {
+        let resultArray = [];
+        data_awal = jsonData.data;
+        for (let index = 0; index < data_awal.length; index++) {
+            const data_isian = data_awal[index].get_data_isian;
+            if (data_isian.length != 0) {
+                for (let i = 0; i < data_isian.length; i++) {
+                    let data_mentahan;
+                    if (isValidJSON(data_isian[i].data_mentahan)) {
+                        var jsonObject = $.parseJSON(data_isian[i].data_mentahan);
+                        data_mentahan = checkArrayAndAddData(jsonObject);
+                    } else {
+                        data_mentahan = checkArrayAndAddData(data_isian[i].data_mentahan);
+                    }
+
+                    let array_sementara = [];
+                    for (let j = 0; j < data_mentahan.length; j++) {
+                        let currentObject = {
+                            ["U" + data_mentahan[j].no]: data_mentahan[j].bobot
+                        };
+                        array_sementara.push(currentObject);
+                    }
+                    resultArray.push(array_sementara);
+                }
+            } else {
+
+            }
+        }
+        jumlah_responden = resultArray.length;
+        g_responden = jumlah_responden;
+        menampilkan_data_jawaban(resultArray.reverse());
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Ambil semua elemen td pertama di dalam tbody tr pada tabel #myTable
+        var firstColumnCells = document.querySelectorAll('#myTable tbody tr td:nth-child(1)');
+
+        // Tambahkan class 'bg-soft-success' pada setiap elemen
+        firstColumnCells.forEach(function (cell) {
+            cell.classList.add('bg-soft-success');
+        });
+    });
+</script>
+{% endblock js_tambahan %}

@@ -1,0 +1,23 @@
+JS:
+
+$(function() {
+        // Menangkap event select2:select dan meneruskannya sebagai custom event
+        $('#kategori').on('select2:select', function(e) {
+            var selectedValue = e.params.data.id;
+            this.dispatchEvent(new CustomEvent('custom-select2-select', { detail: { value: selectedValue } }));
+        });
+    });
+
+HTML :
+    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="kategori">Kategori</label>
+                        <div class="col-sm-9">
+                            <select id="kategori" class="select2 form-select" data-allow-clear="true" x-on:custom-select2-select="formData.set('kategori', $event.detail.value)">
+                                <option value="">--Pilih kategori--</option>
+                                <option value="buku">Buku</option>
+                                <option value="audio">Audio</option>
+                                <option value="video">Video</option>
+                                <option value="video_youtube">Video Youtube</option>
+                            </select>
+                        </div>
+                    </div>

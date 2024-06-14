@@ -1,0 +1,142 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+
+{% block title %} Laporan Kinerja Harian {% endblock title %}
+
+
+{% block css_tambahan %}
+<!-- CK EDITOR -->
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
+{% endblock css_tambahan %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            Laporan Kinerja Harian
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Laporan Kinerja Harian/</span>
+            <span class="ms-1 fw-medium">{{ nama_direktorat }}</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">PENGELOLAAN DATA LAPORAN KINERJA HARIAN TAHUN 2024</h3>
+                <hr>
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData">
+                        <i class="fas fa-file-export me-2"></i>Ekspor Data
+                    </button>
+                    <button class="btn btn-primary" type="button" data-bs-toggle="modal" data-bs-target="#tambahData">
+                        <i class="fas fa-plus me-2"></i>Tambah Data
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                {% include "laporan_kegiatan/table_lk.html" %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    let table = $('#__table').DataTable({
+        language: dt_lang_config()
+    });
+
+    ClassicEditor
+        .create(document.querySelector('#kegiatan'), {
+            height: 500 // Ganti dengan tinggi yang diinginkan (dalam piksel)
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+
+    $('.cetak-link').on('click', () => {
+        const surveyCode = '177013';
+        const surveyUrl = `${window.location.origin}/survei?id=${surveyCode}`;
+
+        Swal.fire({
+            title: `Kode survei : ${surveyCode}`,
+            html: `
+                Silahkan salin kode anda : <br><br>
+                <strong>${surveyUrl}</strong>
+            `,
+            icon: "success",
+            confirmButtonText: "Salin link",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const clipboard = new ClipboardJS('.swal2-confirm', {
+                    text: function () {
+                        return surveyUrl;
+                    }
+                });
+
+                clipboard.on('success', function (e) {
+                    toastr.success('Link berhasil disalin ke clipboard', 'Berhasil');
+                });
+
+                clipboard.on('error', function (e) {
+                    toastr.error('Gagal menyalin link ke clipboard', 'Error');
+                });
+            }
+        });
+    });
+
+
+    $('.delete-data').on('click', function () {
+        Swal.fire({
+            title: "Apakah anda yakin?",
+            html: `Data yang <strong>dihapus</strong> tidak dapat dipulihkan kembali.`,
+            icon: "warning",
+            showCancelButton: true,
+            cancelButtonText: "Batalkan",
+            confirmButtonText: "Ya, hapus data ini!",
+            //confirmButtonColor: "#3f858a",
+            //cancelButtonColor: '#d33',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('User clicked the confirm button ...');
+
+                Swal.fire({
+                    title: "Tunggu sebentar",
+                    icon: "info",
+                    html: `Menghapus <b>data</b> yang anda dipilih..`,
+                    timer: 2000,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.timer) {
+                        Swal.fire({
+                            title: "Berhasil",
+                            html: `Data yang dipilih telah <strong>berhasil</strong> dihapus.`,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                            timer: 2000,
+                        });
+                    }
+                });
+            }
+        })
+    });
+</script>
+{% endblock js_tambahan %}
+
+{% block modal_tambahan %}
+{% include "laporan_kegiatan/create_lk.html" %}
+{% endblock modal_tambahan %}

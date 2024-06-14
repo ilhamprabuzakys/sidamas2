@@ -1,0 +1,115 @@
+<script>
+    const ActionBTN = {
+        name: 'ActionBTN',
+        props: ['id', 'status', 'nama', 'level', 'itemlevel'],
+        delimiters: ['{', '}'],
+        mounted() {
+            // console.log('Mounted ...', this.id, this.status, this.level, this.itemlevel);
+        },
+        template: `
+            <div class="list-button gx-3 text-uppercase">
+                <div v-if="level != 2">
+                    <a href="javascript:void(0);" @click='handleKirim'
+                        :class="isKirimable ? 'bg-primary' : 'bg-secondary'"
+                        class="badge text-white text-decoration-none mb-1">
+                        <i class="fas fa-paper-plane me-2"></i>Kirim
+                    </a>
+                </div>
+                
+                <div v-if="itemlevel == level || level == 2">
+                    <a href="javascript:void(0);" @click='handleEdit'
+                        :class="isEditable ? 'bg-success' : 'bg-secondary'"
+                        class="badge text-white text-decoration-none mb-1">
+                        <i class="fas fa-edit me-2"></i>Edit
+                    </a>
+                    
+                    <a href="javascript:void(0);" @click='handleDestroy'
+                        :class="isEditable ? 'bg-danger' : 'bg-secondary'"
+                        class="badge text-white text-decoration-none mb-1">
+                        <i class="fas fa-trash-alt me-2"></i>Hapus
+                    </a>
+                </div>
+            </div>
+        `,
+        computed: {
+            kirimArgs() {
+                const keteranganStatus = {
+                    0: 'BNNP',
+                    1: 'Pusat'
+                };
+
+                return {
+                    id: this.id,
+                    nama: this.nama,
+                    keterangan: keteranganStatus[this.status] || '?'
+                }
+            },
+            isKirimable() {
+                return this.level !== 2 && ((this.level === 0 && this.status < 2) || (this.level === 1 && this.status === 0));
+            },
+            isEditable() {
+                return this.level == 2 || (this.level == 0 && this.status == 1) || (this.level == 1 && this.status == 0)
+            },
+            buttonKirim() {
+                return `<div v-if="statusPengiriman">
+                    <a href="javascript:void(0);" @click='handleKirim'
+                        class="badge bg-primary text-white text-decoration-none mb-1">
+                        <i class="fas fa-paper-plane me-2"></i>Kirim
+                    </a>
+                </div>
+                <div v-else>
+                    <a href="javascript:void(0);" class="badge bg-secondary text-white text-decoration-none mb-1">
+                        <i class="fas fa-paper-plane me-2"></i>Kirim
+                    </a>
+                </div>`;
+            }
+        },
+        methods: {
+            async handleKirim() {
+                if (!this.isKirimable) return
+
+                const args = this.kirimArgs;
+
+                const confirmResult = await showSwalConfirm(`Apakah anda yakin untuk mengirim kegiatan ID ${args.id} dari Satuan Kerja <b>${args.nama}</b> ke <b>${args.keterangan}</b>`, 'Ya, kirim data');
+
+                if (!confirmResult.isConfirmed) return;
+
+                showSwalLoading();
+
+                await sleep(1000);
+
+                try {
+                    const response = await axios.post('/kegiatan/api/v1/dayatif/pemetaan_potensi/kirim_kegiatan/', { kegiatan_id : args.id });
+
+                    console.log('Respose :', response);
+
+                    const sendedToParent = response.data.parent.keterangan;
+
+                    showSwalSuccess('Berhasil', `Data <b>kegiatan</b> dari <b>${this.nama}</b> telah berhasil <b>dikirimkan ke <b>${sendedToParent}</b></b>`);
+
+                    this.$emit('update');
+
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                }
+            },
+            handleEdit() {
+                this.$emit('edit', this.id);
+            },
+            async handleDestroy() {
+                const deleteArgs = {
+                    id: this.id,
+                    name: 'kegiatan',
+                    detail_name: this.nama,
+                    apiURL: '/kegiatan/api/v1/dayatif/pemetaan_potensi',
+                    usingDT: false,
+                };
+
+                const res = await handleDelete(deleteArgs);
+
+                if (res) this.$emit('update');
+            }
+        }
+    };
+</script>

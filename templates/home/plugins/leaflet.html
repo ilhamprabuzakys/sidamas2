@@ -1,0 +1,27 @@
+{% load static %}
+
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.min.css' %}" />
+{% comment %} <link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.src.css' %}" /> {% endcomment %}
+<link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.mobile.min.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-coordinates/leaflet-coordinates.css' %}" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+{% comment %} <link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet.css' %}" />
+<script src="{% static 'assets/plugins/leaflet/leaflet.js' %}"></script> {% endcomment %}
+
+<!-- Leaflet plugins -->
+<script src="{% static 'assets/plugins/leaflet/leaflet.time.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/spin.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet.spin.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet-html-overlay.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.min.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet-coordinates/leaflet-coordinates.js' %}"></script>
+{% comment %} <script src="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.src.js' %}"></script> {% endcomment %}
+
+<!-- Leaflet gesture handling (ctrl + zoom) -->
+{% comment %} <link rel="stylesheet" href="//unpkg.com/leaflet-gesture-handling/dist/leaflet-gesture-handling.min.css" type="text/css">
+<script src="//unpkg.com/leaflet-gesture-handling"></script> {% endcomment %}

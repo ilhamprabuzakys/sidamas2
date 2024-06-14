@@ -1,0 +1,465 @@
+/* Styling Untuk Interaktif Survei */
+/* Version : 0.1 */
+
+main {
+   background-image: url("../images/bg-survei.png");
+   background-size: cover;
+   /* atau contain, sesuai kebutuhan */
+   background-repeat: no-repeat;
+   height: 100vh;
+   /* Sesuaikan dengan tinggi yang diinginkan */
+}
+
+/* #survei-container {
+   position: relative;
+   display: block;
+} */
+
+.image-overlay {
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   display: none;
+}
+
+#button-keluar {
+   width: 50%;
+}
+
+/* Blok Pertanyaan */
+#pertanyaan .card {
+   background-color: #f1f1f1 !important;
+   border: 0;
+   height: 130px;
+}
+
+#pertanyaan .card .card-body {
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   padding: 0 3rem;
+}
+
+/* Daftar Pilihan - Jenis Kelamin */
+#radio-pilihan {
+   align-items: end;
+   height: 320px;
+}
+
+#radio-pilihan .card .card-title {
+   text-align: center;
+   margin-bottom: 8px;
+}
+
+#radio-pilihan .card {
+   position: relative;
+   height: 100px !important;
+   cursor: pointer;
+   transition: background-color 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
+   /* Tambahkan transition di sini */
+}
+
+#radio-pilihan .pilihan .card:hover {
+   transition: 0.5 s ease-in-out;
+   margin-bottom: 10px;
+}
+
+/* Khusus untuk perempuan */
+#jenis_kelamin-P.form-check-input:checked {
+   background-color: #f90dfd;
+   border-color: #fd0daf;
+}
+
+#jenis_kelamin-P.form-check-input:checked:focus {
+   box-shadow: 0 0 0 0.2rem #eabbf8;
+   /* Ganti warna shadow saat masih dalam fokus */
+}
+
+/* Daftar Pilihan */
+#daftar-pilihan .row {
+   align-items: end;
+}
+
+#daftar-pilihan .card .card-title {
+   text-align: center;
+   margin-bottom: 8px;
+}
+
+#daftar-pilihan .card {
+   position: relative;
+   color: #fff;
+   height: 300px !important;
+   cursor: pointer;
+   transition: background-color 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
+   /* Tambahkan transition di sini */
+}
+
+#daftar-pilihan .pilihan .card:hover {
+   transition: 0.5 s ease-in-out;
+   margin-bottom: 10px;
+}
+
+#daftar-pilihan .pilihan:hover::after {
+   transition: 0.5 s ease-in-out;
+}
+
+#daftar-pilihan .card .card-body {
+   position: relative;
+   color: #fff;
+   height: 282px !important;
+   cursor: pointer;
+   transition: background-color 0.3s ease-in-out, margin-bottom 0.3s ease-in-out;
+}
+
+#daftar-pilihan .card .card-body img {
+   position: absolute;
+   top: 65%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   width: 8rem;
+}
+
+/* #daftar-pilihan .card.level-4 .card-body img {
+   top: 54%;
+   width: 8.5rem;
+} */
+
+@media (min-width: 990px) {
+   #daftar-pilihan .card .card-body img {
+      width: 11rem;
+   }
+
+   /* #daftar-pilihan .card.level-4 .card-body img {
+      width: 11rem;
+   } */
+
+   #daftar-pilihan .card .card-title {
+      font-size: 1.9rem;
+      color: blue;
+   }
+
+   #daftar-pilihan .row {
+      height: 320px;
+   }
+}
+
+@media (max-width: 990px) {
+   #daftar-pilihan .card .card-body img {
+      width: 8rem;
+   }
+
+   #daftar-pilihan .card.level-2 .card-body img {
+      top: 51%;
+   }
+   
+   
+   /* #daftar-pilihan .card.level-4 .card-body img {
+      top: 55%;
+      width: 8rem;
+   } */
+
+   #daftar-pilihan .card .card-title {
+      font-size: 1.2rem;
+   }
+
+   #daftar-pilihan .row {
+      height: 240px;
+   }
+
+   #daftar-pilihan .card {    
+      height: 220px !important;      
+   }
+}
+
+/* Tablet */
+@media (max-width: 908px) {
+   #daftar-pilihan .card .card-title {
+      font-size: 1.1rem;
+   }
+
+   #daftar-pilihan .card {
+      height: 180px !important;
+   }
+
+   #daftar-pilihan .row {
+      height: 200px;
+   }
+
+   #daftar-pilihan .card .card-body img {
+      width: 8rem;
+      top: 55%;
+   }
+
+   /* #daftar-pilihan .card.level-4 .card-body img {
+      width: 6.6rem;
+      top: 59%;
+   } */
+
+   button.btn-mulai {
+      width: 90%;
+      margin-bottom: 2rem;
+   }
+
+   #usia-container #usia-daftar-pilihan .pilihan:nth-child(3) {
+      margin-top: 1.5rem;
+   }
+
+   #usia-container #usia-daftar-pilihan .pilihan:nth-child(3).col-sm-6 .row .col-4 {
+      width: 30%
+   }
+
+   #selesai-container #button-keluar {
+      width: 63%;
+   }
+}
+
+/* Big Phone */
+@media (max-width: 767px) {
+   #daftar-pilihan .pilihan .card:hover {
+      transition: 0.5 s ease-in-out;
+      margin-bottom: 0;
+   }
+
+   #daftar-pilihan .pilihan:hover::after {
+      transition: 0.5 s ease-in-out;
+   }  
+
+   #survei-container #pertanyaan .card .card-text {
+      font-size: 0.95rem;
+   }
+
+   #daftar-pilihan .card .card-title {
+      font-size: 1.1rem;
+   }
+
+   section#mulai-container .img-mulai {
+      width: 300px;
+   }
+
+   section#mulai-container .text-mulai {
+      font-size: 1.9rem;
+   }
+
+   section#mulai-container .btn-mulai {
+      width: 60%;
+      margin-left: 25px;
+   }
+}
+
+/* Phone */
+@media (max-width: 450px) {
+   /* .row>* {
+      padding-right: calc(var(--bs-gutter-x) * 0.2);
+      padding-left: calc(var(--bs-gutter-x) * 0.2);
+   } */
+
+   .pilihan {
+      padding-right: calc(var(--bs-gutter-x) * 0.5);
+      padding-left: calc(var(--bs-gutter-x) * 0.5);
+   }
+   #jenis_kelamin-container #pertanyaan .card .card-text {
+      font-size: 1.3rem;
+   }
+
+   #usia-container #pertanyaan .card .card-text {
+      font-size: 1.3rem;
+   }
+
+   #usia-container #usia-daftar-pilihan .pilihan .row .col-4 {
+      justify-content: center;
+   }
+
+   #usia-container #usia-daftar-pilihan .pilihan .row .col-7 {
+      justify-content: start;
+   }
+
+   #pendidikan_terakhir-container #pertanyaan .card .card-text {
+      font-size: 1.3rem;
+   }
+
+   #pertanyaan .card .card-text {
+      font-size: 0.8rem;
+   }
+
+   #pertanyaan .card .card-body {
+      padding: 0 1rem;
+   }
+
+   #daftar-pilihan .pilihan .card:hover {
+      transition: 0.5 s ease-in-out;
+      margin-bottom: 0;
+   }
+
+   #daftar-pilihan .pilihan:hover::after {
+      transition: 0.5 s ease-in-out;
+   }
+
+   #mulai-container .text-mulai {
+      padding: 1.5rem 2rem 0;
+      font-size: 2rem;
+   }
+
+   #mulai-container img.img-mulai {
+      width: 300px;
+   }
+   
+   section#mulai-container .btn-mulai {
+      width: 90%;
+      margin-left: 0;
+   }
+
+   #usia-container #usia-daftar-pilihan .pilihan:nth-child(3) {
+      margin-top: 0;
+   }
+
+   #usia-container #usia-daftar-pilihan .pilihan:nth-child(3).col-sm-6 .row .col-4 {
+      width: 33.33333333%;
+   }
+
+   #selesai-container h3 {
+      margin-top: 1rem;
+      padding: 0 2rem;
+      text-align: center;
+   }
+
+   #selesai-container #button-keluar {
+      width: 90%;
+   }
+}
+
+/* #daftar-pilihan .card .card-body img {
+   position: absolute;
+   top: 50%;
+   left: 50%;
+   transform: translate(-50%, -50%);
+   width: 200px;
+}
+
+#daftar-pilihan .card.level-4 .card-body img {
+   top: 54%;
+   width: 160px;
+} */
+
+#daftar-pilihan .pilihan:hover {
+   margin-bottom: 10px;
+   transition: 0.1s ease-in-out;
+}
+
+#daftar-pilihan .pilihan:hover::after {
+   transition: 0.1s ease-in-out;
+}
+
+#daftar-pilihan .card .card-body img {
+   align-self: flex-end;
+   /* Tambahkan ini untuk posisi gambar di bagian bawah */
+}
+
+#daftar-pilihan .card.level-1 {
+   background-color: #ff7e0a;
+}
+
+#daftar-pilihan .card.level-1 {
+   background-color: #ff7e0a;
+}
+
+#daftar-pilihan .card.level-1:hover,
+#daftar-pilihan .card.level-1:active,
+#daftar-pilihan .card.level-1:focus {
+   background-color: #aa5408;
+}
+
+#daftar-pilihan .card.level-2 {
+   background-color: #ebbd86;
+}
+
+#daftar-pilihan .card.level-2:hover,
+#daftar-pilihan .card.level-2:active,
+#daftar-pilihan .card.level-2:focus {
+   background-color: #b18958;
+}
+
+#daftar-pilihan .card.level-3 {
+   background-color: #9bd8dc;
+}
+
+#daftar-pilihan .card.level-3:hover,
+#daftar-pilihan .card.level-3:active,
+#daftar-pilihan .card.level-3:focus {
+   background-color: #5f9da1;
+}
+
+#daftar-pilihan .card.level-4 {
+   background-color: #99ea59;
+}
+
+#daftar-pilihan .card.level-4:hover,
+#daftar-pilihan .card.level-4:active,
+#daftar-pilihan .card.level-4:focus {
+   background-color: #63a035;
+}
+
+/* Effect */
+.fade-in-out {
+   opacity: 1;
+   transition: opacity 0.2s ease-in-out;
+}
+
+.fade-out {
+   opacity: 0.7;
+}
+
+/* Container */
+#mulai-container {
+   /* margin: 5rem 0 6rem 0; */
+   margin: 2rem 0;
+}
+
+#mulai-container .img-mulai {
+   width: 400px;
+}
+
+#masukan-container {
+   /* margin: 5rem 0 6rem 0; */
+   margin: 10rem 0;
+}
+
+#masukan-container .btn-mulai {
+   /* margin: 5rem 0 6rem 0; */
+   width: 58%;
+}
+
+.btn-mulai {
+   background-color: #5ad65f !important;
+   border-radius: 25px;
+   color: white !important;
+   height: 2.7rem;
+   font-size: 1.2rem;
+   width: 60%;
+}
+
+.btn-mulai:hover {
+   background-color: #359738 !important;
+}
+
+.btn-mulai:active {
+   background-color: #359738 !important;
+}
+
+.btn-mulai:focus {
+   background-color: #359738 !important;
+}
+
+.text-mulai {
+   font-size: 2.2rem;
+}
+
+#selesai-container {
+   margin: 8rem 0;
+}
+
+/* Utility */
+.w-250px {
+   width: 250px !important;
+}

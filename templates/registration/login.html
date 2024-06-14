@@ -1,0 +1,35 @@
+{% extends "base_generic.html" %}
+{% block content %}
+  <div id="alert" v-if="alert">{{ alert }}</div>
+
+  <form method="POST">
+    {% csrf_token %} 
+    <label>
+      Email or username
+      <input type="text" name="username" />
+    </label>
+    <label>
+      Password
+      <input type="password" name="password" />
+    </label>
+    <button type="submit">Log in</button>
+  </form>
+{% endblock %}
+
+{% block script %}
+<script>
+</script>
+
+<style scoped>
+  button,
+  input {
+    display: block;
+    margin-bottom: 10px;
+  }
+
+  #alert {
+    color: red;
+    margin-bottom: 10px;
+  }
+</style>
+{% endblock %}

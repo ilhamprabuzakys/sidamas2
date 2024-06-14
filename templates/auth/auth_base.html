@@ -1,0 +1,42 @@
+{% extends 'home/home_base.html' %}
+{% load static %}
+
+{% block css_tambahan %}
+<!-- Auth CSS -->
+<link rel="stylesheet" href="{% static 'assets/home/css/auth.css' %}">
+{% endblock css_tambahan %}
+
+{% block content %}
+<section id="auth">
+    <div class="container">
+        <div class="row">
+            <div
+                class="col-lg-6 d-flex justify-content-center align-self-start align-content-start order-lg-1 order-sm-2">
+                <img src="{% block auth_img %}
+            {% endblock %}" alt="" class="auth-img" />
+            </div>
+            <div class="col-lg-6 order-lg-2 order-sm-1">
+                <h4 class="text-center">Sistem Informasi DAYAMAS</h4>
+                <div class="card auth-card">
+                    <div class="card-body">
+                        {% block auth_content %}
+                        {% endblock %}
+                        <!-- <div class="text-center" id="eula">
+                            <a href="javascript:void(0);" class="eula-text" data-bs-target="#eulaModal"
+                                data-bs-toggle="modal">Persyaratan dan Kondisi</a>
+                        </div> -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include 'home/partials/modal.html' %}
+{% endblock %}

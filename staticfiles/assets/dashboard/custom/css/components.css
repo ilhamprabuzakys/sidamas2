@@ -1,0 +1,54 @@
+/* ==========================
+ * IMAGE INPUT COMPONENT
+============================= */
+
+.image_input__container {
+    border: 2px dashed #ccc;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+}
+
+.image_input__preview_container {
+    border: 1px dashed #d6d6d6;
+    border-top: 0;
+    padding: 20px !important;
+}
+
+.image_input__preview_inner {
+    background-color: #f0f0f0
+}
+
+.image__input__preview_image {
+    height: 300px;
+    width: -webkit-fill-available;
+    object-fit: contain;
+}
+
+.image__input__preview_clear_button {
+    color: red;
+    border: 0;
+    background: transparent;
+
+    position: absolute;
+    right: 30px;
+    top: 20px;
+    font-size: 25pt;
+}
+
+/* ==========================
+ * TABLE ITEM - LOKASI ITEM
+============================= */
+.location__container {
+    text-align: left;
+}
+
+.location__container .location__label {
+    width: 150px;
+    display: inline-block;
+    font-weight: bold;
+}
+
+.location__container .location__value {
+    padding-left: 10px;
+}

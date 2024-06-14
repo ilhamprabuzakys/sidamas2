@@ -1,0 +1,30 @@
+#beranda-kegiatan .card {
+    background-color: #f6f6f6 !important;
+    border: 0;
+}
+
+.filter-survei span {
+    font-size: 0.8rem;
+}
+
+.filter-survei a {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.filter-survei a.bg-unchecked {
+    background-color: rgb(180, 180, 180);
+}
+
+.filter-survei a.bg-unchecked:hover {
+    background-color: rgb(163, 163, 163);
+}
+
+.filter-survei a.bg-unchecked:focus {
+    background-color: rgb(163, 163, 163);
+}
+
+h6 {
+    color: #535353;
+}

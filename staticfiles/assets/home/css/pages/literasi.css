@@ -1,0 +1,27 @@
+/*
+   Syling untuk LITERASI
+*/
+
+main {
+    min-height: 80vh;
+}
+
+#literasi {
+   padding: 0 1rem;
+}
+
+table thead.thead-dark {
+   background-color: #f8f8f8 !important;
+}
+
+.row.dt-row #table_literasi {
+   margin-top: 2rem !important;
+}
+
+.modal .modal-body {
+   padding: 0;
+}
+
+.modal .modal-body .container-fluid {
+   padding: 5px;
+}

@@ -1,0 +1,126 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} SURVEI IKRN {% endblock title %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            SURVEI IKRN
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">SURVEI IKRN</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Kelola Data SURVEI IKRN Tahun 2024</h3>
+                <hr>
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <a class="btn btn-primary" href="{% url 'dayatif_survei_ikrn_create' %}">
+                        <i class="fas fa-plus me-2"></i>Tambah Data
+                    </a>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table id="__table" class="table table-bordered">
+                    <thead class="bg-soft-green">
+                        <tr>
+                            <th class="text-center">No.</th>
+                            <th class="text-center">Kode</th>
+                            <th class="text-center">Judul</th>
+							<th style="max-width: 100px">Aksi <i class="fas fa-edit ms-2"></i></th>
+                        </tr>
+                    </thead>
+					<tbody class="align-tr-middle"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    const table = $('#__table').DataTable({
+		language: dt_lang_config(),
+		serverSide: true,
+        searching: true,
+        responsive: true,
+        pageLength: 10,
+        ajax: {
+            url: '/survei/api/v1/tipe_survei/?format=datatables&direktorat=dayatif',
+            dataSrc: 'data'
+        },
+        ordering: true,
+        columns: [
+			{ data: 'id' , visible: true},
+			{ data: 'kode', class: "text-center fw-bold" },
+			{ data: 'nama' },
+			{
+				data: 'id',
+				render: function (data, type, row) {
+					const deleteArgs = JSON.stringify({
+						id: data,
+						name: 'survei',
+						apiURL: "/survei/api/v1/tipe_survei",
+						usingDT: true,
+					});
+
+					return `
+					<div class="list-button gx-3 text-uppercase">
+						<div>
+							<a href="/survey/dayatif/survei_ikrn/${data}/"
+								class="badge bg-primary text-white mb-1"><i
+									class="fas fa-eye me-2"></i>Lihat</a>
+						</div>
+						<div>
+							<a href="/survey/dayatif/survei_ikrn/${data}/edit/"
+								class="badge bg-success text-white mb-1"><i
+									class="fas fa-pen-to-square me-2"></i>Edit</a>
+						</div>
+						<div>
+							<button onclick='handleDelete(${deleteArgs})'
+								class="badge bg-danger text-white mb-1"><i
+									class="fas fa-trash-alt me-2"></i>Hapus</button>
+						</div>
+					</div>`;
+				}
+			},
+		],
+        initComplete: function (settings, json) {
+            console.log('Hasil fetch data : ', json);
+        },
+		columnDefs: [dt_row_pagination(), {
+			"searchable": false,
+			"targets": 3
+		}],
+	});
+
+	$(function () {
+		let timeoutId;
+
+		$('#__table_wrapper input[type="search"]').on('keyup', function () {
+			table.settings()[0].jqXHR.abort();
+
+			clearTimeout(timeoutId);
+
+			timeoutId = setTimeout(function () {
+				const value = $(this).val();
+				const base = '/survei/api/v1/tipe_survei/?format=datatables&direktorat=dayatif';
+				const url = value ? `${base}&s=${value}` : base;
+				table.ajax.url(url).load();
+			}.bind(this), 500);
+		});
+
+	});
+</script>
+{% endblock js_tambahan %}

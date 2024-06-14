@@ -1,0 +1,30 @@
+{% load static %}
+<v-layouts.navbar>
+    <v-layouts.navbar.logo src="{% static 'assets/images/logo_baru.png' %}">SIDAMAS</v-layouts.navbar.logo>
+
+    <v-layouts.navbar.menu>
+        <v-layouts.navbar.menu-item href="{% url 'home:index' %}">Beranda</v-layouts.navbar.menu-item>
+        <v-layouts.navbar.menu-item href="{% url 'home:media_sosial' %}">Media Sosial</v-layouts.navbar.menu-item>
+        <v-layouts.navbar.menu-item href="https://sipenggiatp4gn.bnn.go.id/" blank="true">SI PENGGIAT</v-layouts.navbar.menu-item>
+        <v-layouts.navbar.menu-item href="{% url 'home:survei' %}">Survei</v-layouts.navbar.menu-item>
+        <v-layouts.navbar.menu-item href="{% url 'home:literasi' %}">Literasi</v-layouts.navbar.menu-item>
+
+        {% if user.is_authenticated %}
+        <v-layouts.navbar.menu-item href="{% url 'home:beranda_kegiatan' %}">Beranda Kegiatan</v-layouts.navbar.menu-item>
+
+        <v-layouts.navbar.dropdown icon="{% static 'assets/images/avatar.png' %}" text="{{ user.username }}">
+            <v-layouts.navbar.dropdown-item href="{% url 'dashboard_index' %}" icon="fa-solid fa-house me-2">
+                Kembali ke dashboard
+            </v-layouts.navbar.dropdown-item>
+
+            <v-layouts.navbar.dropdown-divider></v-layouts.navbar.dropdown-divider>
+
+            <v-layouts.navbar.dropdown-item logout="yes" icon="fa-solid fa-right-from-bracket me-3">Keluar</v-layouts.navbar.dropdown-item>
+        </v-layouts.navbar.dropdown>
+
+        {% else %}
+        <v-layouts.navbar.menu-item href="{% url 'login' %}">Masuk</v-layouts.navbar.menu-item>
+        {% endif %}
+
+    </v-layouts.navbar.menu>
+</v-layouts.navbar>

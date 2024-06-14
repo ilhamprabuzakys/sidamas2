@@ -1,0 +1,141 @@
+{% extends "home/home_base.html" %}
+{% load static %}
+
+{% block title %} {{ judul }} {% endblock title %}
+{% block container %} container {% endblock container %}
+
+{% block meta %}
+<meta name="description" content="{{ judul }} - Sistem Informasi Deputi Bidang Pemberdayaan Masyarakat" />
+<meta name="keywords" content="{% for tag in tags_list %} {{ tag }} {% endfor %} Sistem Informasi Deputi Bidang Pemberdayaan Masyarakat, DAYAMAS, SIDAMAS, DAYATIF, PSM,
+Deputi Bidang Pemberdayaan Masyarakat, BNN, Badan Narkotika Nasional" />
+<meta property="og:url" content="{% url 'home:detail_berita' id %}' %}" />
+<meta property="og:title" content="{{ judul }}" />
+<meta property="og:description" content="{{ judul }}" />
+<meta property="og:site_name" content="Sistem Informasi Deputi Bidang Pemberdayaan Masyarakat" />
+<meta property="og:updated_time" content="{{ updated_at }}" />
+<meta property="og:image" content="/media/{{ gambar_utama }}" />
+<meta property="og:image:secure_url" content="/media/{{ gambar_utama }}" />
+<meta property="og:image:width" content="1280" />
+<meta property="og:image:height" content="960" />
+<meta property="og:image:alt" content="Image - {{ judul }}" />
+<meta property="og:image:type" content="image/jpeg" />
+<meta property="article:published_time" content="{{ updated_at }}" />
+<meta property="article:modified_time" content="{{ updated_at }}" />
+{% endblock meta %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/home/css/pages/detail.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/home/plugins/image-viewer/assets/css/master.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/home/plugins/image-viewer/assets/js/main.js' %}" />
+{% endblock %}
+
+{% block tambahan_content %}
+<div id="image-viewer">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="full-image" />
+</div>
+{% endblock %}
+
+{% block content %}
+<section id="daftar-kategori">
+    <div class="text-center">
+        {% for tag in tags_list %}
+        <a href="javascript:;" class="btn btn-outline-primary text-decoration-none fw-medium me-2 mb-2">{{ tag }}</a>
+        {% endfor %}
+    </div>
+</section>
+
+<section id="judul-berita" class="mt-4">
+    <div class="text-center">
+        <h3 class="px-5">{{ judul }}</h3>
+    </div>
+</section>
+<section id="detail-berita" class="mt-4">
+    <div class="text-center">
+        <p>
+            Oleh
+            <a href="javascript:;" class="text-decoration-none">
+                {% if author %}
+                    {% if author.first_name or author.last_name %}
+                        {{ author.first_name }} {{ author.last_name }}
+                    {% else %}
+                        {{ author.username }}
+                    {% endif %}
+                {% endif %}
+            </a>
+            <span class="text-secondary ms-2 me-3">|</span> {{ created_at|date:"d-m-Y" }}
+        </p>
+    </div>
+</section>
+<section id="isi-berita" class="mt-4">
+    <div class="head-image w-100">
+        <img src="/media/{{ gambar_utama }}" alt="Gambar Utama - {{ judul }}" />
+    </div>
+    <div class="daftar-tag">
+        <p>{{ tags }}</p>
+    </div>
+    <div class="share-berita"></div>
+
+    <div class="body">
+        <p>{{ isi_berita|safe }}</p>
+    </div>
+
+    <div class="share-berita">
+        <h4>Bagikan Berita Ini.</h4>
+        <hr />
+        <button class="bagikan-facebook btn btn-primary"><i class="fa-brands fa-facebook me-2"></i>Facebook</button>
+        <button class="bagikan-twitter btn btn-info text-white"><i
+                class="fa-brands fa-twitter me-2"></i>Twitter</button>
+        <button class="bagikan-youtube btn btn-danger"><i class="fa-brands fa-youtube me-2"></i>YouTube</button>
+        <button class="bagikan-whatsapp btn btn-success"><i class="fa-brands fa-whatsapp me-2"></i>WhatsApp</button>
+        <button class="bagikan-tiktok btn btn-dark"><i class="fa-brands fa-tiktok me-2"></i>Tiktok</button>
+        <button class="bagikan-instagram btn btn-pink"><i class="fa-brands fa-instagram me-2"></i>Instagram</button>
+    </div>
+
+    {% if berita_sebelumnya or berita_selanjutnya %}
+    <div class="navigasi-berita">
+        <div class="d-flex">
+            {% if berita_sebelumnya %}
+            <div class="navigasi-item">
+                <a href="{% url 'home:detail_berita' berita_sebelumnya.slug %}">
+                    <img src="{% static 'assets/home/images/left-arrow.svg' %}" alt="" class="left-arrow" />
+                    <img src="/media/{{ berita_sebelumnya.gambar_utama }}" alt="" />
+                    <h4>Berita Sebelumnya</h4>
+                </a>
+            </div>
+            {% endif %}
+            {% if berita_selanjutnya %}
+            <div class="navigasi-item">
+                <a href="{% url 'home:detail_berita' berita_selanjutnya.slug %}">
+                    <img src="{% static 'assets/home/images/right-arrow.svg' %}" alt="" class="right-arrow" />
+                    <img src="/media/{{ berita_selanjutnya.gambar_utama }}" alt="" />
+                    <h4>Berita Selanjutnya</h4>
+                </a>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% else %}
+    {% endif %}
+</section>
+{% endblock %}
+
+{% comment %} {% block footer %}
+
+{% endblock %} {% endcomment %}
+
+{% block js_tambahan %}
+<script>
+    /*
+        Inisialisasi VUE
+    */
+    const app = Vue.createApp({
+        'name': 'Berita',
+        'el': '#app',
+    });
+
+    console.log(app);
+</script>
+<script src="{% static 'assets/home/js/detail.js' %}"></script>
+<script src="{% static 'assets/home/plugins/image-viewer/assets/js/main.js' %}"></script>
+{% endblock %}

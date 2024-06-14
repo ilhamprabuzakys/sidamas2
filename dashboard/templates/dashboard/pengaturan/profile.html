@@ -1,0 +1,415 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Pengaturan Profil {% endblock title %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Pengaturan Profil</h3>
+        <span class="mb-0"><span class="text-muted fw-light">Pengaturan Profil</span></span>
+    </div>
+</div>
+<section>
+    <div class="row">
+        <div class="col-md-12">
+            {% include "dashboard/pengaturan/partials/list_menu_settings.html" with on="profile" %}
+
+            <div class="card mb-4">
+                <div class="card-header d-flex justify-content-between pb-1">
+                    <h5>Detail Profil</h5>
+                    {% if user.profile.role is None or user.profile.satker is None %}
+                    <div id="__help_info" class="align-center">
+                        <a class="text-primary cursor-pointer user-select-none" @click="helpProfileInformation()">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Mengapa saya melihat ini?
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <hr class="my-0" />
+                <!-- Avatar -->
+                <div class="card-body mt-2">
+                    <form id="formAvatarSettings" @submit.prevent="updateAvatar" method="post"
+                        enctype="multipart/form-data">
+                        <div class="d-flex align-items-start align-items-sm-center gap-4">
+                            <img src="{% get_media_prefix %}{{ user.profile.avatar }}" alt="user-avatar"
+                                class="d-block w-px-100 h-px-100 rounded object-fit-cover" id="uploadedAvatar"
+                                ref="uploadedAvatar" />
+                            <div class="button-wrapper">
+                                <label for="upload" class="btn btn-primary me-2 mb-3" tabindex="0">
+                                    <span class="d-none d-sm-block">
+                                        <i class="fas fa-upload me-2"></i>
+                                        Unggah foto
+                                    </span>
+                                    <i class="ti ti-upload d-block d-sm-none"></i>
+                                    <input type="file" id="upload" class="account-file-input" ref="input-avatar" hidden
+                                        accept="image/x-png,image/jpg,image/jpeg" v-on:change="handleFileChange" />
+                                </label>
+
+                                <div class="text-muted small">
+                                    Diizinkan JPG, JPEG or PNG. Ukuran maksimal file
+                                    <strong>1MB</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <Transition>
+                            <div id="saveButton" class="mt-4" v-show="changeFile" v-cloak>
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-save me-2"></i>
+                                    Perbarui foto
+                                </button>
+                                <button type="button" class="btn btn-label-secondary" @click="resetFile">
+                                    <i class="fas fa-xmark me-2"></i>
+                                    Batalkan
+                                </button>
+                            </div>
+                        </Transition>
+                    </form>
+                </div>
+                <hr class="my-3" />
+                <!-- Profile Information -->
+                <div class="card-body">
+                    <h6>Informasi Profil</h6>
+                    <form id="formAccountSettings" @submit.prevent="updateProfile" method="post">
+                        <div class="row">
+                            <div class="mb-3 col-md-6">
+                                <label for="name" class="form-label">Nama Depan</label>
+                                <input class="form-control" type="text" id="name" name="name" v-model="first_name" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="name" class="form-label">Nama Belakang</label>
+                                <input class="form-control" type="text" id="name" name="name" v-model="last_name" />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="username" class="form-label">Nama Pengguna</label>
+                                <input type="text" class="form-control" id="username" name="username"
+                                    value="{{ user.username }}" readonly disabled />
+                            </div>
+                            <div class="mb-3 col-md-6">
+                                <label for="email" class="form-label">Alamat Email</label>
+                                <input class="form-control" type="text" id="email" name="email" v-model="email" placeholder="Isikan alamat email anda" />
+                            </div>
+                            <div class="mb-3 col-md-12" id="form-satker">
+                                <label class="form-label required" for="satker">Satuan Kerja</label>
+                                <select id="satker" class="select2 form-select" v-model="satker" ref="satker" disabled>
+                                    <option value="" selected disabled>Pilih Satuan Kerja</option>
+                                    {% for satker_item in daftar_satker %}
+                                    <option value="{{ satker_item }}" :selected="'{{ satker_item }}' == satker">
+                                        {{ satker_item }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if user.profile.satker is None %}
+                                <small class="text-danger">Tolong pilih satuan kerja anda</small>
+                                {% endif %}
+                            </div>
+
+                            <!-- <div class="mb-3 col-md-6">
+                                <label class="form-label required" for="direktorat">Direktorat</label>
+                                <select id="direktorat" class="form-select" v-model="direktorat" ref="direktorat">
+                                    <option value="" selected disabled>--Pilih direktorat --</option>
+                                    {% for direktorat in daftar_direktorat %}
+                                    <option value="{{ direktorat.value }}"
+                                        :selected="{{ direktorat.value }} == direktorat">{{ direktorat.label }}</option>
+                                    {% endfor %}
+                                </select>
+                                {% if user.profile.role is None %}
+                                <small class="text-danger">Tolong pilih direktorat anda</small>
+                                {% endif %}
+                            </div> -->
+
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-3">
+                            <button type="button" class="btn btn-secondary" @click="revertChanges()">
+                                <i class="fas fa-xmark me-2"></i>
+                                Urungkan Perubahan
+                            </button>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Perbarui Data
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    Vue.createApp({
+        data() {
+            return {
+                originalData: {
+                    first_name: '{% if user.first_name %}{{ user.first_name|default:"" }}{% endif %}',
+                    last_name: '{% if user.last_name %}{{ user.last_name|default:"" }}{% endif %}',
+                    email: '{{ user.email|default:"" }}',
+                    direktorat: '{{ user.profile.role|default:"" }}',
+                    satker: '{{ user.profile.satker|default:"" }}',
+                },
+                first_name: '{% if user.first_name %}{{ user.first_name|default:"" }}{% endif %}',
+                last_name: '{% if user.last_name %}{{ user.last_name|default:"" }}{% endif %}',
+                email: '{{ user.email|default:"" }}',
+                direktorat: '{{ user.profile.role|default:"" }}',
+                satker: '{{ user.profile.satker|default:"" }}',
+                avatarFile: null,
+                changeFile: false,
+                defaultAvatar: '{% get_media_prefix %}{{ user.profile.avatar }}',
+            };
+        },
+        delimiters: ['[[', ']]'],
+        computed: {
+            api() {
+                return axios.create();
+            },
+        },
+        methods: {
+            handleFileChange(event) {
+                const allowedExtensions = ["png", "jpg", "jpeg", "webp"];
+                const fileExtension = event.target.files[0].name
+                    .split(".")
+                    .pop()
+                    .toLowerCase();
+
+                if (event.target.files[0].size > 1 * 1024 * 1024) {
+                    console.error('File size too large');
+                    event.target.value = "";
+                    Swal.fire({
+                        title: "Terjadi kesalahan",
+                        html: `File yang anda upload <strong>terlalu besar</strong>, maksimal hanya <strong>1MB</strong>.`,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                    return;
+                }
+
+                if (!allowedExtensions.includes(fileExtension)) {
+                    console.error('Invalid mime type');
+                    event.target.value = "";
+                    Swal.fire({
+                        title: "Terjadi kesalahan",
+                        html: `File gagal diupload, hanya ekstensi <strong>PNG, JPG, JPEG</strong>, dan <strong>Webp</strong> yang diizinkan.`,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                    return;
+                }
+
+                console.log(event.target.files[0]);
+                this.$refs.uploadedAvatar.src = window.URL.createObjectURL(event.target.files[0]);
+
+                this.avatarFile = event.target.files[0];
+                this.changeFile = true;
+            },
+            resetFile() {
+                this.changeFile = false;
+
+                this.$refs.uploadedAvatar.src = this.defaultAvatar;
+                this.$refs.inputAvatar.value = "";
+            },
+            updateAvatar() {
+                this.showLoading();
+
+                const formData = new FormData();
+                formData.append('avatar', this.avatarFile);
+
+                this.api.post(`${window.location.origin}/dashboard/profile/?update=avatar`, formData, {
+                        headers: getHeaders('multipart/form-data'),
+                    }).then((response) => {
+                        this.changeFile = false;
+                        let newAvatar = response.data.avatar;
+
+                        console.log('Berhasil memperbarui avatar:', response.data);
+
+                        console.log('Response:', response);
+
+                        Swal.fire({
+                            title: "Berhasil",
+                            html: `Foto profil anda <strong>berhasil</strong> diperbarui.`,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        });
+
+                        $('#dropdown__user_avatar img').attr('src', newAvatar);
+                        $('#uploadedAvatar').attr('src', newAvatar);
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: "Terjadi kesalahan",
+                            html: `Tidak dapat memperbarui data direktorat anda, kontak <strong>developer</strong> untuk mengatasi masalah ini.`,
+                            icon: "error",
+                            confirmButtonText: "OK",
+                        });
+                        console.error('Terjadi kesalahan:', error);
+                    });
+            },
+            updateProfile() {
+                if (this.nothingWasChanged()) {
+                    Swal.fire({
+                        title: "Informasi",
+                        html: `Tidak ada perubahan yang diperbarui.`,
+                        icon: 'info',
+                        showConfirmButton: true,
+                    });
+                    return;
+                }
+
+                this.showLoading();
+
+                const data = {
+                    first_name: this.first_name,
+                    last_name: this.last_name,
+                    direktorat: this.direktorat,
+                    email: this.email,
+                    satker: this.satker,
+                };
+
+                const old_direktorat = '{{ user.profile.role|default:'
+                ' }}';
+                const old_satker = '{{ user.profile.satker|default:'
+                ' }}';
+
+                this.api.post(`${window.location.origin}/dashboard/profile/`, data, {
+                        headers: getHeaders(),
+                    }).then((response) => {
+                        console.log('Berhasil mengirim data:', response.data);
+                        const isSuperUser = '{{ user.is_superuser }}';
+
+                        Swal.fire({
+                            title: "Berhasil",
+                            html: `Data profil anda <strong>berhasil</strong> diperbarui.`,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                        }).then(() => {
+
+                            console.log(`OLD direktorat : ${old_direktorat}`)
+                            console.log(`NEW direktorat : ${this.direktorat}`)
+                            console.log(
+                                `Direktorat berubah : ${old_direktorat !== this.direktorat}`)
+                            console.log(`Satker berubah : ${old_satker !== this.satker}`)
+                            console.log(`OLD satker : ${old_satker}`)
+                            console.log(`NEW satker : ${this.satker}`)
+                            console.log(`Adalah superadmin : ${isSuperUser}`)
+
+                            /*
+                                Reload window jika terjadi perubahan pada data direktorat/satker
+                            */
+
+                            setTimeout(() => {
+                                if (old_direktorat !== this.direktorat || old_satker !==
+                                    this.satker && isSuperUser !==
+                                    'True') {
+                                    const isConfirmed = window.confirm(
+                                        "Data akun Anda sudah berubah. Klik OK untuk memuat perubahan."
+                                    );
+                                    if (isConfirmed) {
+                                        location.reload();
+                                    }
+                                }
+                            }, 500);
+                        });
+
+                        this.resetOriginalData();
+
+                        $('#dropdown__user_name').text(this.first_name + ' ' + this.last_name);
+                        if (isSuperUser == 'False') {
+                            $('#dropdown__user_role').text(this.direktorat == 'psm' ? 'PSM' : this
+                                .direktorat);
+                        } else {
+                            if (this.direktorat == 'psm') {
+                                $('#dropdown__user_role #dropdown__user_role_superuser').removeClass(
+                                    'text-capitalize');
+                                $('#dropdown__user_role #dropdown__user_role_superuser').addClass(
+                                    'text-uppercase');
+                                $('#dropdown__user_role #dropdown__user_role_superuser').text(this
+                                    .direktorat);
+                            } else {
+                                $('#dropdown__user_role #dropdown__user_role_superuser').removeClass(
+                                    'text-uppercase');
+                                $('#dropdown__user_role #dropdown__user_role_superuser').addClass(
+                                    'text-capitalize');
+                                $('#dropdown__user_role #dropdown__user_role_superuser').text(this
+                                    .direktorat);
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        Swal.fire({
+                            title: "Terjadi kesalahan",
+                            html: `Tidak dapat memperbarui data profil anda, kontak <strong>developer</strong> untuk mengatasi masalah ini.`,
+                            icon: "error",
+                            confirmButtonText: "OK",
+                        });
+                        console.error('Terjadi kesalahan:', error);
+                    });
+            },
+            nothingWasChanged() {
+                return this.first_name == this.originalData.first_name && this.last_name == this.originalData
+                    .last_name && this.email == this.originalData.email && this.direktorat == this.originalData
+                    .direktorat && this.satker == this
+                    .originalData.satker;
+            },
+            revertChanges() {
+                if (this.nothingWasChanged()) {
+                    toastr.info('Tidak ada perubahan yang terjadi', 'Informasi');
+                    return;
+                }
+                // Mengembalikan nilai ke nilai awal
+                this.first_name = this.originalData.first_name;
+                this.last_name = this.originalData.last_name;
+                this.direktorat = this.originalData.direktorat;
+                this.email = this.originalData.email;
+                this.satker = this.originalData.satker;
+            },
+            resetOriginalData() {
+                // Menyimpan nilai awal ke originalData
+                this.originalData.first_name = this.first_name;
+                this.originalData.last_name = this.last_name;
+                this.originalData.direktorat = this.direktorat;
+                this.originalData.email = this.email;
+                this.originalData.satker = this.satker;
+            },
+            handleSelect2Change(value, field) {
+                if (field === 'direktorat') {
+                    this.direktorat = value;
+                } else if (field === 'satker') {
+                    this.satker = value;
+                }
+            },
+            showLoading() {
+                Swal.fire({
+                    title: "Menyimpan perubahan",
+                    icon: "info",
+                    html: `Sedang menyimpan <b>perubahan</b> data ...`,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.timer) {}
+                });
+            },
+            helpProfileInformation() {
+                Swal.fire({
+                    icon: "info",
+                    title: "Informasi",
+                    html: `Sebelum melanjutkan, harap lengkapi profil anda. <br>
+                     Data <strong>Satuan Kerja</strong> dan <strong>Direktorat</strong> wajib diisi.`,
+                    confirmButtonText: "Saya mengerti",
+                });
+            }
+        },
+        mounted() {
+            this.resetOriginalData();
+            $('#satker').on('change', (event) => {
+                this.handleSelect2Change(event.target.value, 'satker');
+            });
+            $('#direktorat').on('change', (event) => {
+                this.handleSelect2Change(event.target.value, 'direktorat');
+            });
+        },
+    }).mount('#app')
+</script>
+{% endblock js_tambahan %}

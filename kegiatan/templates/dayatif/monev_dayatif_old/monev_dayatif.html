@@ -1,0 +1,217 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Monev Dayatif
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Monev Dayatif</h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Kegiatan /</span>
+            <span class="ms-1 fw-medium">Monev Dayatif</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Rekapitulasi Kegiatan Monitoring Dan Evaluasi Program Pemberdayaan Alternatif </h3>
+                <hr />
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData"><i
+                            class="fas fa-file-export me-2"></i>Ekspor Data</button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahData"><i
+                            class="fas fa-plus me-2"></i>Tambah Data</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                {% include 'dayatif/monev_dayatif/table.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/dashboard/js/bawaan/forms-extras.js' %}"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        // Handle daftar kerajinan Bimtek Lifeskill
+        $('#daftar_kerajinan').on('change', function () {
+            if (this.value == 'Lainnya' || this.value == 'Kerajinan Tangan' || this.value ==
+                'Pengolahan Makanan') {
+                $('#kerajinan_sebutkan').removeClass('d-none');
+            } else {
+                $('#kerajinan_sebutkan').addClass('d-none');
+            }
+        });
+
+        // Inisialisasi cleave
+        let create_hasilSKM = $('#hasil_skm_nilai');
+        create_hasilSKM && new Cleave(create_hasilSKM, {
+            numeral: true,
+            numeralDecimalScale: 2,
+            numeralPositiveOnly: true
+        });
+    });
+</script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+        const apiUrl = "https://ilhamprabuzakys.github.io/api-wilayah-indonesia/api/";
+
+        let selectedProvinsiId = "";
+        let selectedKotaId = "";
+        let selectedKecamatanId = "";
+
+        const pilih_provinsi = document.querySelector("#pilih_provinsi");
+        const pilih_kota = document.querySelector("#pilih_kota");
+        const pilih_kecamatan = document.querySelector("#pilih_kecamatan");
+        const pilih_desa = document.querySelector("#pilih_desa");
+
+        pilih_kota.disabled = true;
+        pilih_kecamatan.disabled = true;
+        pilih_desa.disabled = true;
+
+        const fetchData = async (url, targetId, type) => {
+            try {
+                const response = await fetch(url);
+                const data = await response.json();
+
+                const selectElement = document.getElementById(targetId);
+
+                while (selectElement.options.length > 1) {
+                    selectElement.remove(1);
+                }
+
+                data.forEach(item => {
+                    const option = document.createElement("option");
+                    option.value = item.id;
+                    option.textContent = item.name;
+                    selectElement.appendChild(option);
+                });
+
+            } catch (error) {
+                console.error("Error fetching data:", error);
+            }
+        };
+
+        const resetSelect = (selectElement) => {
+            if (selectElement == 'pilih_desa' || selectElement == 'pilih_kecamatan') {
+                $('#' + selectElement).val('').trigger('change');
+            } else {
+                $('#' + selectElement).val('');
+            }
+            $('#' + selectElement).attr('disabled', true);
+
+            //selectElement.value = "";
+            //selectElement.disabled = true;
+        };
+
+        fetchData(apiUrl + "provinces.json", "pilih_provinsi", "province");
+
+        $('#pilih_provinsi').on('change', function () {
+            resetSelect('pilih_kota');
+            resetSelect('pilih_kecamatan');
+            resetSelect('pilih_desa');
+
+            // console.log('Provinsi yang dipilih:' + this.value)
+            selectedProvinsiId = this.value;
+            selectedKotaId = "";
+            selectedKecamatanId = "";
+
+            pilih_kota.disabled = false;
+            fetchData(apiUrl + `regencies/${selectedProvinsiId}.json`, "pilih_kota", "city");
+        });
+
+        $('#pilih_kota').on('change', function () {
+            resetSelect('pilih_kecamatan');
+            resetSelect('pilih_desa');
+
+            // console.log('Kota yang dipilih:' + this.value)
+            selectedKotaId = this.value;
+            selectedKecamatanId = "";
+
+            pilih_kecamatan.disabled = false;
+
+            fetchData(apiUrl + `districts/${selectedKotaId}.json`, "pilih_kecamatan", "kecamatan");
+        });
+
+        $('#pilih_kecamatan').on('change', function () {
+            resetSelect('pilih_desa');
+
+            // console.log('Kecamatan yang dipilih:' + this.value)
+            selectedKecamatanId = this.value;
+
+            pilih_desa.disabled = false;
+            if (selectedKecamatanId) {
+                fetchData(apiUrl + `villages/${selectedKecamatanId}.json`, "pilih_desa", "village");
+            }
+        });
+    });
+</script>
+
+<script>
+    let table = $('#__table').DataTable({
+        language: dt_lang_config()
+    });
+
+    $('.delete-data').on('click', function () {
+        Swal.fire({
+            title: "Apakah anda yakin?",
+            html: `Data yang <strong>dihapus</strong> tidak dapat dipulihkan kembali.`,
+            icon: "warning",
+            showCancelButton: true,
+            cancelButtonText: "Batalkan",
+            confirmButtonText: "Ya, hapus data ini!",
+            //confirmButtonColor: "#3f858a",
+            //cancelButtonColor: '#d33',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                console.log('User clicked the confirm button ...');
+
+                Swal.fire({
+                    title: "Tunggu sebentar",
+                    icon: "info",
+                    html: `Menghapus <b>data</b> yang anda dipilih..`,
+                    timer: 2000,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    },
+                }).then((result) => {
+                    if (result.dismiss === Swal.DismissReason.timer) {
+                        Swal.fire({
+                            title: "Berhasil",
+                            html: `Data yang dipilih telah <strong>berhasil</strong> dihapus.`,
+                            icon: "success",
+                            confirmButtonText: "OK",
+                            timer: 2000,
+                        });
+                    }
+                });
+            }
+        })
+    });
+</script>
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include 'dayatif/monev_dayatif/create.html' %}
+{% include 'dayatif/monev_dayatif/create_kegiatan.html' %}
+{% include 'dayatif/monev_dayatif/detail_pelaksanaan.html' %}
+{% include 'dayatif/monev_dayatif/detail_daftar_peserta.html' %}
+{% endblock %}

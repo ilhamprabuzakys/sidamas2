@@ -1,0 +1,111 @@
+/* Variabel */
+:root {
+    --main-color-dark: #00a0a9;
+    --border-color: #00a0a9;
+    --sidebar-nav-link-active: #00a0a9;
+    --bg-sidebar: #fff0c8;
+}
+
+div.app-brand.demo .app-brand-link .app-brand-text.demo {
+    color: #00a0a9 !important;
+}
+
+aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-sub
+    .menu-item:not(.active)
+    > a.menu-link::before {
+    color: #00a0a9 !important;
+}
+
+aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-sub
+    .menu-item:hover
+    > a.menu-link::before {
+    color: #fff !important;
+}
+
+aside#layout-menu.bg-menu-theme .menu-inner .menu-header .menu-header-text,
+aside#layout-menu.bg-menu-theme .menu-inner .menu-item .menu-link {
+    color: #00a0a9;
+}
+
+aside#layout-menu.bg-menu-theme {
+    background-color: var(--bg-sidebar) !important;
+    color: #00a0a9;
+    border-right: 4px solid #d8d2c2;
+}
+
+aside#layout-menu.bg-menu-theme.menu-vertical
+    .menu-item.active
+    > .menu-link:not(.menu-toggle) {
+    background: var(--sidebar-nav-link-active);
+    color: #fff !important;
+}
+
+aside#layout-menu.bg-menu-theme.menu-vertical
+    .menu-item.active
+    > .menu-link:not(.menu-toggle) {
+    box-shadow: 0px 2px 6px 0px var(--bg-sidebar);
+    color: #fff !important;
+}
+
+aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-item.open
+    > .menu-link.menu-toggle,
+.layout-menu-hover.layout-menu-collapsed
+    aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-item.open
+    > .menu-link.menu-toggle,
+aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-item.active
+    > .menu-link.menu-toggle,
+.layout-menu-hover.layout-menu-collapsed
+    aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-item.active
+    > .menu-link.menu-toggle {
+    background: var(--sidebar-nav-link-active);
+    color: #fff !important;
+}
+
+html:not(.layout-menu-collapsed)
+    aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-item:not(.active)
+    > .menu-link:hover,
+.layout-menu-hover.layout-menu-collapsed
+    aside#layout-menu.bg-menu-theme
+    .menu-inner
+    .menu-item:not(.active)
+    > .menu-link:hover {
+    background: var(--sidebar-nav-link-active);
+    color: #fff !important;
+}
+
+li.menu-item hr {
+    background-color: var(--border-color);
+    margin: 0 15px;
+}
+
+.light-style .menu .app-brand.demo {
+    border-bottom: 1px solid var(--border-color);
+}
+
+#btn-role {
+    background-color: var(--bg-sidebar) !important;
+    color: #00a0a9;
+    padding: 5px 25px;
+    border-radius: 25px;
+    font-family: "Squada One" !important;
+    font-size: 1.8rem;
+    text-transform: uppercase;
+}
+
+.heading {
+    color: var(--main-color-dark) !important;
+ }

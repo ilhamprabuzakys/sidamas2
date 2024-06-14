@@ -1,0 +1,1181 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} SKM Tes Urine {% endblock title %}
+
+{% block modal_tambahan %}
+{% include "psm/skm_tes_urine/create.html" %}
+{% include "psm/skm_tes_urine/download_triwulan.html" %}
+{% include "psm/skm_tes_urine/download_satker.html" %}
+{% include "psm/skm_tes_urine/edit.html" %}
+{% include "psm/skm_tes_urine/detail_daftar_responden.html" %}
+{% include "psm/skm_tes_urine/detail_hasil_jawaban_responden.html" %}
+{% endblock modal_tambahan %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            SKM Tes Urine
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">SKM Tes Urine</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Pengelolaan Data SKM Tes Urine 2024</h3>
+                <hr>
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData">
+                        <i class="fas fa-file-export me-2"></i>Ekspor Data
+                    </button> -->
+                    <!-- <button class="btn btn-info" onclick="reloadTable()">
+                        <i class="fas fa-refresh me-2"></i>Reload Data
+                    </button> -->
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahDataSurveiModal">
+                        <i class="fas fa-plus me-2"></i>Tambah Data
+                    </button>
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#downloadtriwulanModal">
+                        <i class="fa-solid fa-download me-2"></i>Filter Survei Pertriwulan
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                {% include "psm/skm_tes_urine/table_datatable.html" %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    /*
+        Disini aku pake jquery find untuk set data di modal.
+        Dan memakai querySelector biasa untuk set data di modal FORM (Post, Update)
+    */
+
+    const TIPE_SURVEI = {{ tipe_survei }}
+
+    const DAFTAR_PERTANYAAN = {{ daftar_pertanyaan|safe }};
+
+
+    let table = $('#__table').DataTable({
+        language: dt_lang_config(),
+        //serverSide: true,
+        responsive: true,
+        processing: true,
+        pageLength: 5,
+        lengthMenu: [5, 10, 15],
+        ajax: {
+            url: `/survei/api/v1/data_survei/test_urine/?format=datatables`,
+
+            dataSrc: 'data'
+        },
+        ordering: true,
+        columns: [
+            // { data: 'id' , visible: false},
+            {
+                data: null,
+                // render: function (data, type, row, meta) {
+                //     return `<div class="text-center">${meta.row + 1}</div>`;
+                // }
+            },
+            { data: null, render: function (data, type, row) {
+                if (row.get_satker_name) {
+                    return `<span>${row.get_satker_name}</span>`
+                } else {
+                    return `<span>-</span>`; }
+                }
+            },
+            { data: null, render: function (data, type, row) {
+                if (row.tanggal_akhir) {
+                    return `<span>${moment(row.tanggal_awal).format('DD MMMM YYYY')} s.d. ${moment(row.tanggal_akhir).format('DD MMMM YYYY')}</span>`
+                } else {
+                    return `<span>${moment(row.tanggal_awal).format('DD MMMM YYYY')}</span>`; }
+                }
+            },
+            {
+                data: null,
+                render: function (data, type, row) {
+                    let banyakHari = '';
+
+                    if (row.tanggal_awal && row.tanggal_akhir) {
+                        const tanggalAwal = moment(row.tanggal_awal);
+                        const tanggalAkhir = moment(row.tanggal_akhir);
+                        const durasi = moment.duration(tanggalAkhir.diff(tanggalAwal));
+                        banyakHari = durasi.asDays().toFixed(0);
+                    } else {
+                        banyakHari = '1';
+                    }
+
+                    return `<div class="text-center">${banyakHari} hari</div>`
+                }
+            },
+            {
+                data: null,
+                render: function (data, type, row) {
+                    return `<div class="text-center">${row.jam_awal} - ${row.jam_akhir}</div>`;
+                }
+            },
+            {
+                data: null,
+                render: function (data, type, row) {
+                    let keteranganJam = cekDurasiWaktu(data.jam_awal, data.jam_akhir);;
+
+                    return `<div class="text-start">${keteranganJam}</div>`
+                }
+            },
+            {
+                data: null,
+                render: function (data, type, row) {
+                    let statusClass = '';
+                    let tooltipText = '';
+
+                    if (row.get_status_keberlangsungan === 'Belum dibuka') {
+                        statusClass = 'bg-secondary';
+                        tooltipText = 'Survei masih belum masuk ke waktu yang ditentukan.'
+                    } else if (row.get_status_keberlangsungan === 'Berlangsung') {
+                        statusClass = 'bg-success';
+                        tooltipText = 'Survei tengah berlangsung.'
+                    } else if (row.get_status_keberlangsungan === 'Berakhir') {
+                        statusClass = 'bg-danger';
+                        tooltipText = 'Survei sudah berakhir.'
+                    }
+                    return `
+                    <div class="text-center">
+                        <a href="javascript:;" class="badge rounded-pill ${statusClass} text-white" data-bs-toggle="tooltip" data-bs-placement="top" title="${tooltipText}">
+                            <i class="far fa-clock me-2"></i>${row.get_status_keberlangsungan}
+                        </a>
+                    </div>`;
+                }
+            },
+            {
+                data: 'batas_responden', render: function (data, type, row) { return `
+                        <div class="text-center">${row.batas_responden} orang</div>
+                    `; }
+            },
+            {
+                data: null, render: function (data, type, row) {
+                    let text = '';
+                    let additionalClass = '';
+                    if (row.get_jumlah_responden) {
+                        additionalClass = 'text-primary';
+                        text = `${row.get_jumlah_responden} orang`;
+                    } else {
+                        additionalClass = 'text-danger';
+                        text = 'Belum ada responden';
+                    }
+                    return `<div class="text-center ${additionalClass}">${text}</div>`
+                }
+            },
+            {
+                data: null, render: function (data, type, row) {
+                    // Button lihat daftar responden
+                    if (row.get_status_keberlangsungan !== 'Belum dibuka') {
+                        let badgeClass = row.get_jumlah_responden ? 'bg-primary' : 'bg-secondary';
+
+                        if (badgeClass == 'bg-secondary') {
+                            return `<a href="javascript:;" class="badge text-uppercase rounded ${badgeClass} text-white"
+                            onclick="getDaftarResponden('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}')"
+                            >
+                                <i class="fas fa-eye me-2"></i>Lihat daftar responden</a>`;
+                        } else {
+                            return `<a href="javascript:;" class="badge text-uppercase rounded ${badgeClass} text-white"
+                                onclick="getDaftarResponden('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}')">
+                                <i class="fas fa-eye me-2"></i>Lihat daftar responden</a>`;
+                        }
+                    } else {
+                        return `<a href="javascript:;" class="badge text-uppercase rounded bg-secondary pointer-none text-white" onclick="getDaftarResponden('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}')">
+                                <i class="fas fa-eye me-2"></i>Lihat daftar responden</a>`;
+                    }
+                }
+            },
+            {
+                data: null, render: function (data, type, row) {
+                    let actionButtons = '';
+
+                    // Button lihat hasil pengisian
+                    if (row.get_status_keberlangsungan !== 'Belum dibuka' && row.get_jumlah_responden != 0) {
+                        actionButtons += `<div><a href="/survei/hasil_survei/${row.id}/" target="_blank" class="badge bg-lihat-hasil text-white text-decoration-none mb-1 me-2" style="background-color:#7367f0;">
+                            <i class="fas fa-list me-2"></i>Lihat Hasil</a></div>`;
+                    } else {
+                        actionButtons += `<div><a href="javascript:void(0)" class="badge bg-secondary text-white text-decoration-none mb-1 me-2">
+                            <i class="fas fa-list me-2"></i>Lihat Hasil</a></div>`;
+                    }
+
+                    if (row.get_status_keberlangsungan == 'Berakhir') {
+                        // if (row.status_pengiriman) {
+                        //     actionButtons += `<div><a href="javascript:;" class="badge bg-secondary pointer-none text-white text-decoration-none mb-1 me-2">
+                        //                     <i class="fas fa-plane me-2"></i>Kirim Hasil</a></div>`;
+                        // } else {
+                        //     actionButtons += `<div><a href="javascript:;" onclick="kirimHasil('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}')"
+                        //                     class="badge bg-primary text-white text-decoration-none mb-1 me-2">
+                        //                     <i class="fas fa-plane me-2"></i>Kirim Hasil</a></div>`;
+                        // }
+                    } else {
+                        actionButtons += `<div><a href="javascript:;" class="badge bg-secondary pointer-none text-white text-decoration-none mb-1 me-2">
+                                            <i class="fas fa-plane me-2"></i>Kirim Hasil</a></div>`;
+                    }
+
+                    if (row.get_status_keberlangsungan === 'Berakhir') {
+                        actionButtons += `<div><a href="javascript:;" class="badge bg-secondary pointer-none text-white text-decoration-none mb-1 me-2">
+                                            <i class="fas fa-print me-2"></i>Cetak Link</a></div>`;
+                    } else {
+                        if (row.get_status_responden === 'Sudah penuh') {
+                            actionButtons += `<div><a href="javascript:;" class="badge bg-secondary pointer-none text-white text-decoration-none mb-1 me-2">
+                                                <i class="fas fa-print me-2"></i>Cetak Link</a></div>`;
+                        } else {
+                            actionButtons += `<div><a href="javascript:;" onclick="getLink('${row.kode}')"
+                                                class="badge bg-warning text-white text-decoration-none mb-1 me-2">
+                                                <i class="fas fa-print me-2"></i>Cetak Link</a></div>`;
+                        }
+                    }
+
+                    if (row.tanggal_akhir) {
+                        // Button edit
+                        actionButtons += `<div><a href="javascript:;" onclick="editDataSurvei('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}', '${moment(row.tanggal_akhir).format('DD MMMM YYYY')}', '${table.page.info().start + table.context[0]._iDisplayStart + row.rowIndex + 1}')" class="badge bg-success text-white text-decoration-none mb-1 me-2"><i class="fas fa-pen-to-square me-2"></i>Edit</a></div>`;
+
+                        // Button hapus
+                        actionButtons += `<div><a href="javascript:;" class="badge bg-danger text-white text-decoration-none mb-1 me-2"
+                            onclick="hapusDataSurvei('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}', '${moment(row.tanggal_akhir).format('DD MMMM YYYY')}')">
+                            <i class="fas fa-trash-alt me-2"></i>Hapus</a></div>`;
+                    } else {
+                        // Button edit
+                        actionButtons += `<div><a href="javascript:;" onclick="editDataSurvei('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}', '${table.page.info().start + table.context[0]._iDisplayStart + row.rowIndex + 1}')" class="badge bg-success text-white text-decoration-none mb-1 me-2"><i class="fas fa-pen-to-square me-2"></i>Edit</a></div>`;
+
+                        // Button hapus
+                        actionButtons += `<div><a href="javascript:;" class="badge bg-danger text-white text-decoration-none mb-1 me-2"
+                                            onclick="hapusDataSurvei('${row.id}', '${moment(row.tanggal_awal).format('DD MMMM YYYY')}')">
+                                            <i class="fas fa-trash-alt me-2"></i>Hapus</a></div>`;
+                    }
+
+                    return `<div class="list-button gx-3 text-uppercase">${actionButtons}</div>`;
+                }
+            }
+        ],
+        createdRow: function (row, data, dataIndex) {
+            $(row).attr('data-id', data.id); // Menambahkan atribut data-id ke setiap baris
+        },
+        columnDefs:[
+            {
+                targets: 0,
+                render: function (data, type, row, meta) {
+                    var page = table.page.info().page;
+                    var length = table.page.info().length;
+                    var index = (page * length) + meta.row + 1;
+                    return index;
+                }
+            }
+        ],
+        initComplete: function (settings, json) {
+            console.log('Hasil fetch data : ', json);
+        },
+
+    });
+
+    
+
+    const api = axios.create({
+        baseURL: `${window.location.origin}`,
+        headers: getHeaders(),
+    });
+
+    let targetEditedSurveiID = 0;
+    let targetEditedSurveiTanggal = 0;
+
+    // Kirim hasil pengisian survei ke Admin/SuperAdmin
+    async function kirimHasil(pk, tanggal) {
+        const apiUrl = `/survei/api/v1/data_survei/${pk}/`
+
+        const confirmResult = await Swal.fire({
+            title: 'Apakah anda yakin?',
+            html: `Apakah anda yakin akan mengirim hasil survei <b>${tanggal}</b>`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, Kirim Hasil',
+            cancelButtonText: 'Batalkan',
+        });
+
+        if (!confirmResult.isConfirmed) {
+            return false;
+        }
+
+        Swal.fire({
+            title: 'Tunggu sebentar',
+            icon: 'info',
+            html: `Sedang mengirim hasil survei <b>${tanggal}</b>`,
+            showConfirmButton: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        await sleep(1000);
+
+        try {
+            const response = await api.put(apiUrl, { status_pengiriman: true });
+            console.log('Response dari aksi Mengirim Hasil Survei PUT : ', response);
+
+            if (response.status !== 200) {
+                return false;
+            }
+
+            Swal.fire({
+                title: 'Berhasil',
+                icon: 'success',
+                html: `Hasil survei <b>${tanggal}</b> berhasil dikirim`,
+                showConfirmButton: true,
+                timer: 2000,
+            });
+
+            table.ajax.reload();
+            reloadTable();
+        } catch (error) {
+            console.error('Error ketika mengirim hasil survei : ', error)
+            showSwalError();
+        }
+    }
+
+    // Fetch data responden
+    async function getDaftarResponden(pk, tanggal) {
+        console.log(`Survei ID : ${pk}`);
+        let tanggalSurvei = tanggal;
+
+        const apiUrl = `/survei/api/v1/data_responden_survei/?survei=${pk}`;
+
+        try {
+            const response = await api.get(apiUrl);
+
+            console.log('Response : ', response);
+
+            if (!response.data) {
+                console.error('Error fetching data: Response data is undefined or empty.');
+                return false;
+            }
+
+            const data = response.data;
+
+            const modal = $('#detailDaftarRespondenModal');
+
+            modal.find('#headline-responden-modal').html(`${tanggalSurvei}`);
+
+            const table = $('#__table_responden');
+            const tbody = table.find('tbody');
+
+            tbody.empty();
+
+            data.forEach((item, index) => {
+                const momentCreatedAt = moment(item.created_at);
+
+                const row = $('<tr></tr>');
+
+                row.append(`<td class="text-center">${index + 1}</td>`);
+                row.append(`<td class="text-center">${item.id}</td>`);
+                row.append(`<td>${item.jenis_kelamin == 'L' ? 'Laki-Laki' : 'Perempuan'}</td>`);
+                row.append(`<td>${item.rentang_usia} tahun</td>`);
+                row.append(`<td>${item.pendidikan}</td>`);
+                row.append(
+                    `<td class="text-center">${momentCreatedAt.format('HH:mm:ss')} - <br> ${momentCreatedAt.format('DD MMMM YYYY')}</td>`
+                );
+                row.append(`
+                    <td>
+                        <div class="list-button mt-2">
+                            <a href="javascript:;" onclick="getDetailHasilPengisianResponden(${item.id}, '${tanggalSurvei}')" class="badge bg-primary text-white text-decoration-none mb-1">
+                                <i class="fas fa-eye me-2"></i>LIHAT HASIL PENGISIAN</a>
+                            <a href="javascript:;" onclick="hapusDataResponden(${item.id}, '${tanggalSurvei}')" class="badge bg-danger text-white text-decoration-none delete-data mb-1">
+                                <i class="fas fa-trash-alt me-2"></i>HAPUS</a>
+                        </div>
+                    </td>
+                `);
+
+                tbody.append(row);
+            });
+
+            // Tampilkan modal
+            $(modal).modal('show');
+        } catch (error) {
+            console.error('Error msg: ', error);
+            return false;
+        }
+    }
+
+    // Ambil data hasil pengisian dari satu responden
+    async function getDetailHasilPengisianResponden(pk, tanggalSurvei) {
+        const apiUrl = `/survei/api/v1/data_pengisian_survei/?responden=${pk}`;
+
+        try {
+            const response = await api.get(apiUrl);
+
+            console.log(response);
+
+            if (response.status !== 200) {
+                console.log('Response : ', response);
+                console.error('Error fetching data: Response data is undefined or empty.');
+                return false;
+            }
+
+            const data = response.data.results[0];
+
+            console.log(`Data hasil pengisian dari responden id ke-${pk} : `, data);
+
+            let arrayNilaiJawaban = data.array_nilai_jawaban;
+            let sigmaNilai = data.sigma_nilai;
+
+            const data_jawaban_responden = arrayNilaiJawaban.split(',');
+
+            const modal = $('#detailJawabanHasilRespondenModal');
+
+            modal.find('#headline-hasil-responden-no-modal').html(`${pk}`);
+
+            const table_jawaban_responden = modal.find('#__table_jawaban_responden');
+            const tbody_jawaban_responden = table_jawaban_responden.find('tbody');
+
+            const table_jawaban_responden_hasil = modal.find('#__table_jawaban_responden_results');
+            const tbody_jawaban_responden_hasil = table_jawaban_responden_hasil.find('tbody');
+
+            tbody_jawaban_responden.empty();
+
+            tbody_jawaban_responden_hasil.find('#survei-jawaban_responden_results').html(`Survei SKM Tes Urine -  ${tanggalSurvei}`)
+
+            let sigmaClass = '';
+            let sigmaKeterangan = '';
+
+            if (sigmaNilai >= 1 && sigmaNilai <= 10) {
+                sigmaClass = 'text-danger';
+                sigmaKeterangan = 'Buruk';
+            } else if (sigmaNilai >= 11 && sigmaNilai <= 20) {
+                sigmaClass = 'text-warning';
+                sigmaKeterangan = 'Cukup';
+            } else if (sigmaNilai >= 21 && sigmaNilai <= 30) {
+                sigmaClass = 'text-primary';
+                sigmaKeterangan = 'Baik';
+            } else if (sigmaNilai >= 31 && sigmaNilai <= 40) {
+                sigmaClass = 'text-success';
+                sigmaKeterangan = 'Sangat Baik';
+            }
+
+            tbody_jawaban_responden_hasil.find('#sigma-jawaban_responden_results').html(`<span class="${sigmaClass}">${sigmaNilai} - (${sigmaKeterangan})</span>`);
+
+            data_jawaban_responden.forEach((item, index) => {
+                const row = $('<tr class="align-td-middle"></tr>');
+                let pilihanClass = '';
+                let pilihan = 'Z';
+
+                switch(item) {
+                    case '1':
+                        pilihan = 'A';
+                        pilihanClass = 'text-danger';
+                        break;
+                    case '2':
+                        pilihan = 'B';
+                        pilihanClass = 'text-warning';
+                        break;
+                    case '3':
+                        pilihan = 'C';
+                        pilihanClass = 'text-primary';
+                        break;
+                        case '4':
+                        pilihan = 'D';
+                        pilihanClass = 'text-success';
+                        break;
+                }
+
+
+                row.append(`<td class="text-center">${index + 1}</td>`);
+                row.append(`<td><span class="text-muted">Pertanyaan ke-${index + 1}</span> <br> ${DAFTAR_PERTANYAAN[index]}</td>`);
+                row.append(`<td class="text-center ${pilihanClass}">${pilihan}</td>`);
+                row.append(`<td class="text-center ${pilihanClass}">${item}</td>`);
+
+                tbody_jawaban_responden.append(row);
+            });
+
+            hideAllModal();
+
+            $(modal).modal('show');
+
+            $(modal).on('hide.bs.modal', function(e) {
+                $('#detailDaftarRespondenModal').modal('show');
+             });
+
+        } catch (error) {
+            console.error('Error ketika mendapatkan data detail pengisian dari responden ID ke-' + pk, error);
+        }
+    }
+
+    async function hapusDataResponden(pk, tanggal_survei) {
+        const apiUrl = `/survei/api/v1/data_responden_survei/${pk}/`;
+
+        const confirmResult = await Swal.fire({
+            title: 'Apakah anda yakin?',
+            html: `Apakah anda yakin untuk <b>menghapus</b> data responden ID ke - <b>${pk}</b>` + ' ?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus data',
+            cancelButtonText: 'Batalkan',
+        });
+
+        if (!confirmResult.isConfirmed) {
+            return false;
+        }
+
+        Swal.fire({
+            title: 'Tunggu sebentar',
+            icon: 'info',
+            html: `Sedang <b>menghapus</b> data responden ID ke <b>${pk}</b>`,
+            showConfirmButton: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        await sleep(1000);
+
+        try {
+            const response = await api.delete(apiUrl, pk);
+
+            console.log('Response setelah aksi DELETE data responden: ', response);
+
+            if (response.status !== 204) {
+                console.error('Terjadi Kesalahan : Response status is not 204');
+
+                Swal.fire({
+                    title: "Terjadi Kesalahan",
+                    html: `Terjadi Kesalahan <b>tidak diketahui</b>, kontak developer untuk mengatasi masalah ini.`,
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+
+                return false;
+            }
+
+            Swal.fire({
+                title: 'Berhasil',
+                icon: 'success',
+                html: `Data responden ID ke <b>${pk}</b> berhasil di <b>hapus</b>`,
+                showConfirmButton: true,
+                timer: 2500,
+            });
+
+            // hideAllModal();
+            table.ajax.reload();
+            reloadTable();
+        } catch (error) {
+            console.error('Error ketika menghapus data responden ID ke-' + pk, error);
+            showSwalError();
+        }
+    }
+
+    // Hapus data keseluruhan survei
+    async function hapusDataSurvei(pk, tanggal_awal, tanggal_akhir) {
+        const apiUrl = `/survei/api/v1/data_survei/${pk}/`;
+
+        let text = `${tanggal_awal}`;
+
+        if (tanggal_akhir) {
+            text += ` sampai ${tanggal_akhir}`;
+        }
+
+        const confirmResult = await Swal.fire({
+            title: 'Apakah anda yakin?',
+            html: `Apakah anda yakin untuk menghapus data survei <b>${text}</b>` + ' ?',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: 'Ya, hapus data',
+            cancelButtonText: 'Batalkan',
+        });
+
+        if (!confirmResult.isConfirmed) {
+            return false;
+        }
+
+        Swal.fire({
+            title: 'Tunggu sebentar',
+            icon: 'info',
+            html: `Sedang menghapus data survei <b>${text}</b>`,
+            showConfirmButton: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        try {
+            const response = await api.delete(apiUrl, pk);
+            console.log('Response setelah aksi DELETE Data Survei : ', response);
+
+            if (response.status !== 204) {
+                console.error('Terjadi Kesalahan : Response status is not 204')
+                return false;
+            }
+
+            Swal.fire({
+                title: 'Berhasil',
+                icon: 'success',
+                html: `Survei pada tanggal <b>${text}</b> telah berhasil dihapus`,
+                showConfirmButton: true,
+                timer: 2000,
+            });
+            table.ajax.reload();
+            reloadTable();
+        } catch (error) {
+            console.error(`Error ketika menghapus data survei ID ke-${pk}`, error);
+        }
+    }
+
+
+    // Edit data survei
+    async function editDataSurvei(pk, tanggal_awal, tanggal_akhir) {
+        const apiUrl = `/survei/api/v1/data_survei/${pk}/`;
+
+        console.log('NaN : ', tanggal_akhir == 'NaN');
+
+        // Kalo tanggal akhirnya kosong
+        if (tanggal_akhir == 'NaN') {
+            document.querySelector('#headline-edit-data-modal-tanggal').innerHTML = `${tanggal_awal}`;
+        } else {
+            // Kalo tanggal akhirnya ga kosong
+            if (tanggal_akhir == tanggal_awal) {
+                document.querySelector('#headline-edit-data-modal-tanggal').innerHTML = `${tanggal_awal}`;
+            } else {
+                document.querySelector('#headline-edit-data-modal-tanggal').innerHTML = `${tanggal_awal} sampai ${tanggal_akhir}`;
+            }
+        }
+
+        try {
+            const response = await api.get(apiUrl);
+
+            if (!response.data) {
+                console.error('Error ketika mendapatkan data survei.');
+                return false;
+            }
+
+            let data = response.data;
+
+            console.log('Response Edit Data Survei : ', data)
+
+            targetEditedSurveiID = data.id;
+            targetEditedSurveiTanggal = data.tanggal_awal;
+
+            const modal = $('#editDataSurveiModal');
+            const form = modal.find('#formEdit');
+
+            let tanggal_awal_survei = form.find('#tanggal_awal_survei');
+            let tanggal_akhir_survei = form.find('#tanggal_akhir_survei');
+            let waktu_berlaku_awal = form.find('#waktu_berlaku_awal');
+            let waktu_berlaku_akhir = form.find('#waktu_berlaku_akhir');
+            let batas_responden = form.find('#batas_responden');
+            let satker = form.find('#edit_satker');
+
+            tanggal_awal_survei.val(data.tanggal_awal);
+            tanggal_akhir_survei.val(data.tanggal_akhir);
+            waktu_berlaku_awal.val(data.jam_awal);
+            waktu_berlaku_akhir.val(data.jam_akhir);
+            batas_responden.val(data.batas_responden);
+            satker.val(data.satker).trigger('change');
+
+            $(modal).modal('show');
+        } catch (error) {
+            console.error('Error ketika mengsetting data form edit Survei: ', error);
+
+            showSwalError();
+        }
+    }
+
+    // Update data survei
+    async function updateDataSurvei(e) {
+        e.preventDefault();
+
+        const apiUrl = `/survei/api/v1/data_survei/${targetEditedSurveiID}/`;
+        const confirmResult = await Swal.fire({
+            title: 'Apakah anda yakin?',
+            html: `Akan mengubah data Survei <b>${targetEditedSurveiTanggal}</b>? <br>
+            Dengan mengubah data survei akan mengubah data <b>jadwal</b> dan kriteria <b>survei</b>.`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonText: "Ya, simpan perubahan",
+            cancelButtonText: 'Batalkan',
+        });
+
+        if (!confirmResult.isConfirmed) {
+            return false;
+        }
+
+        Swal.fire({
+            title: 'Tunggu sebentar',
+            icon: 'info',
+            html: `Sedang <b>memperbarui</b> data survei anda ...`,
+            showConfirmButton: true,
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        await sleep(1000);
+
+        try {
+            const form = document.querySelector('#formEdit');
+
+            let tanggal_awal_survei = form.querySelector('#tanggal_awal_survei').value;
+            let tanggal_akhir_survei = form.querySelector('#tanggal_akhir_survei').value;
+            let waktu_berlaku_awal = form.querySelector('#waktu_berlaku_awal').value;
+            let waktu_berlaku_akhir = form.querySelector('#waktu_berlaku_akhir').value;
+            let batas_responden_survei = form.querySelector('#batas_responden').value;
+            let satker = form.querySelector('#edit_satker').value;
+
+            if (tanggal_awal_survei == '') {
+                showSwalErrorWithText('Wajib Mengisi Tanggal Berlaku Survei');
+                return false;
+
+            } else if (tanggal_akhir_survei != '') {
+                // Kalo tanggal akhir sama dengan tanggal awal, set saja sebagai string kosong
+                if (tanggal_akhir_survei == tanggal_awal_survei) {
+                    tanggal_akhir_survei = ''; // nanti pas di post dibikin null
+                }
+
+                // Cek jika tanggal_akhir kurang dari tanggal_mulai dan sebaliknya
+                const hasil_pengecekan_tanggal = cekJarakTanggal(tanggal_awal_survei, tanggal_akhir_survei);
+
+                if (!hasil_pengecekan_tanggal) {
+                    console.error('Range tanggal tidak valid');
+                    return false;
+                } else {
+                    console.log('Range tanggal valid');
+                }
+
+            } else if (waktu_berlaku_awal == '') {
+                showSwalErrorWithText('Wajib Mengisi Waktu Berlaku Awal');
+                return false;
+
+            } else if (waktu_berlaku_akhir == '') {
+                showSwalErrorWithText('Wajib Mengisi Waktu Berlaku Akhir');
+                return false;
+            } else if (batas_responden_survei == '') {
+                showSwalErrorWithText('Wajib Mengisi Batas Jumlah Responden Survei');
+                return false;
+            }
+
+            if (waktu_berlaku_awal && waktu_berlaku_akhir) {
+                // Lakukan pengecekan jika waktu awal lebih dari waktu akhir
+                const hasil_pengecekan_waktu = cekJarakWaktu(waktu_berlaku_awal, waktu_berlaku_akhir);
+
+                if (!hasil_pengecekan_waktu) {
+                    // throw 'Range tidak valid';
+                    // showSwalErrorWithText('Wajib Mengisi Batas Jumlah Responden Survei');
+
+                    console.error('Range waktu tidak valid');
+                    return false;
+                } else {
+                    console.log('Range waktu valid');
+                }
+            }
+
+            // Cek durasi tanggal
+            const durasi_tanggal = cekDurasiTanggal(tanggal_awal_survei, tanggal_akhir_survei);
+            const durasi_waktu = cekDurasiWaktu(waktu_berlaku_awal, waktu_berlaku_akhir);
+
+            console.log(`Durasi tanggal : ${durasi_tanggal} hari`);
+            console.log(`Durasi waktu : ${durasi_waktu}`);
+
+            const data = {
+                'id': targetEditedSurveiID,
+                'tanggal_awal': tanggal_awal_survei,
+                'tanggal_akhir': tanggal_akhir_survei == '' ? null : tanggal_akhir_survei,
+                'jam_awal': waktu_berlaku_awal,
+                'jam_akhir': waktu_berlaku_akhir,
+                'batas_responden': batas_responden_survei,
+                'satker': satker,
+            };
+
+            const response = await api.put(apiUrl, data);
+
+            // console.log('Response setelah aksi PUT pada UpdateDataSurvei : ', response);
+
+            if (response.status !== 200) {
+                console.error('Terjadi Kesalahan ketika aksi PUT pada UpdateDataSurvei: ', response);
+
+                showSwalError();
+
+                return false;
+            }
+
+            let text = `${tanggal_awal_survei}`;
+
+            if (tanggal_akhir_survei != '') {
+                text += ` sampai ${tanggal_akhir_survei}`;
+            }
+
+            Swal.fire({
+                title: "Berhasil",
+                html: `Data survei dengan tanggal <br><b>${text}</b><br> telah berhasil <b>diperbarui</b>.`,
+                icon: "success",
+                confirmButtonText: "OK",
+                timer: 2000,
+            });
+
+            
+            const modal = $('#editDataSurveiModal');
+            modal.modal('hide');
+            table.ajax.reload();
+            // hideAllModal();
+            reloadTable();
+        } catch (error) {
+            console.error('Error ketika aksi PUT pada UpdateDataSurvei : ', error);
+
+            showSwalError();
+        }
+    }
+
+    // Tambah data survei
+    async function createDataSurvei(e) {
+        e.preventDefault();
+
+        const apiUrl = '/survei/api/v1/data_survei/';
+
+        try {
+            const form = document.querySelector('#formTambah');
+
+            let satker = form.querySelector('#create_satker').value;
+            let tanggal_awal_survei = form.querySelector('#tanggal_awal_survei').value;
+            let tanggal_akhir_survei = form.querySelector('#tanggal_akhir_survei').value;
+            let waktu_berlaku_awal = form.querySelector('#waktu_berlaku_awal').value;
+            let waktu_berlaku_akhir = form.querySelector('#waktu_berlaku_akhir').value;
+            let batas_responden_survei = form.querySelector('#batas_responden').value;
+
+            if (tanggal_awal_survei == '') {
+                showSwalErrorWithText('Wajib Mengisi Tanggal Berlaku Survei');
+                return false;
+
+            } else if (tanggal_akhir_survei != '') {
+                // Kalo tanggal akhir sama dengan tanggal awal, set saja sebagai string kosong
+                if (tanggal_akhir_survei == tanggal_awal_survei) {
+                    tanggal_akhir_survei = ''; // nanti pas di post dibikin null
+                }
+
+                // Cek jika tanggal_akhir kurang dari tanggal_mulai dan sebaliknya
+                const hasil_pengecekan_tanggal = cekJarakTanggal(tanggal_awal_survei, tanggal_akhir_survei);
+
+                if (!hasil_pengecekan_tanggal) {
+                    console.error('Range tanggal tidak valid');
+                    return false;
+                } else {
+                    console.log('Range tanggal valid');
+                }
+
+            } else if (waktu_berlaku_awal == '') {
+                showSwalErrorWithText('Wajib Mengisi Waktu Berlaku Awal');
+                return false;
+
+            } else if (waktu_berlaku_akhir == '') {
+                showSwalErrorWithText('Wajib Mengisi Waktu Berlaku Akhir');
+                return false;
+            } else if (batas_responden_survei == '') {
+                showSwalErrorWithText('Wajib Mengisi Batas Jumlah Responden Survei');
+                return false;
+            }
+
+            if (waktu_berlaku_awal && waktu_berlaku_akhir) {
+                // Lakukan pengecekan jika waktu awal lebih dari waktu akhir
+                const hasil_pengecekan_waktu = cekJarakWaktu(waktu_berlaku_awal, waktu_berlaku_akhir);
+
+                if (!hasil_pengecekan_waktu) {
+                    // throw 'Range tidak valid';
+                    // showSwalErrorWithText('Wajib Mengisi Batas Jumlah Responden Survei');
+
+                    console.error('Range waktu tidak valid');
+                    return false;
+                } else {
+                    console.log('Range waktu valid');
+                }
+            }
+
+            // Cek durasi tanggal
+            const durasi_tanggal = cekDurasiTanggal(tanggal_awal_survei, tanggal_akhir_survei);
+            const durasi_waktu = cekDurasiWaktu(waktu_berlaku_awal, waktu_berlaku_akhir);
+
+            console.log(`Durasi tanggal : ${durasi_tanggal} hari`);
+            console.log(`Durasi waktu : ${durasi_waktu} jam`);
+
+            const data = {
+                tanggal_awal: tanggal_awal_survei,
+                tanggal_akhir: tanggal_akhir_survei == '' ? null : tanggal_akhir_survei,
+                jam_awal: waktu_berlaku_awal,
+                jam_akhir: waktu_berlaku_akhir,
+                batas_responden: batas_responden_survei,
+                tipe: TIPE_SURVEI,
+                satker: satker,
+            }
+
+            const response = await api.post(apiUrl, data);
+
+            if (response.status !== 201) {
+
+                console.error('Terjadi Kesalahan ketika aksi POST pada CreateDataSurvei: ', response);
+
+                Swal.fire({
+                    title: "Terjadi Kesalahan",
+                    html: `Terjadi Kesalahan <b>tidak diketahui</b>, kontak developer untuk mengatasi masalah ini.`,
+                    icon: "error",
+                    confirmButtonText: "OK",
+                });
+
+                return false;
+            }
+
+            console.log('Response sukses saat menambahkan Data Survei : ', response.data);
+
+            let text = `${tanggal_awal_survei}`;
+
+            if (tanggal_akhir_survei != '') {
+                text += ` sampai ${tanggal_akhir_survei}`;
+            }
+
+            Swal.fire({
+                title: "Berhasil",
+                html: `Data survei baru dengan tanggal <br> <b>${text}</b> <br>telah berhasil <b>dibuat</b>.`,
+                icon: "success",
+                confirmButtonText: "OK",
+                timer: 2000,
+            });
+
+            let modal = $('#tambahDataSurveiModal');
+            modal.modal('hide');
+
+            // hideAllModal();
+
+            form.querySelector('#tanggal_awal_survei').value = '';
+            form.querySelector('#tanggal_akhir_survei').value = '';
+            form.querySelector('#waktu_berlaku_awal').value = '';
+            form.querySelector('#waktu_berlaku_akhir').value = '';
+            form.querySelector('#batas_responden').value = '';
+
+            table.ajax.reload();
+            reloadTable();
+        } catch (error) {
+            console.error('Error Ketika Aksi POST pada CreateDataSurvei : ', error);
+            showSwalError();
+        }
+    }
+
+    /*
+        HELPERS
+    */
+    function cekJarakTanggal(tanggalAwal, tanggalAkhir) {
+        const mulaiTanggal = moment(tanggalAwal);
+        const akhirTanggal = moment(tanggalAkhir);
+
+        if (mulaiTanggal.isAfter(akhirTanggal)) {
+            Swal.fire({
+                title: "Terjadi Kesalahan",
+                html: `Tanggal awal <b>tidak boleh lebih besar</b> dari tanggal akhir survei`,
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+            return false;
+        }
+        return true;
+    }
+
+    function cekJarakWaktu(waktuAwal, waktuAkhir) {
+        const mulaiWaktu = moment(waktuAwal, 'HH:mm');
+        const akhirWaktu = moment(waktuAkhir, 'HH:mm');
+
+        if (mulaiWaktu.isAfter(akhirWaktu)) {
+            console.log(`Mulai waktu ${mulaiWaktu} lebih besar dari ${akhirWaktu}`);
+
+            Swal.fire({
+                title: "Terjadi Kesalahan",
+                html: `Waktu awal <b>tidak boleh lebih besar</b> dari waktu akhir survei`,
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+
+            return false;
+        } else if (mulaiWaktu.isSame(akhirWaktu)) {
+            console.log(`Mulai waktu ${mulaiWaktu} sama dengan ${akhirWaktu}`);
+
+            Swal.fire({
+                title: "Terjadi Kesalahan",
+                html: `Waktu awal <b>tidak boleh sama</b> dengan waktu akhir survei`,
+                icon: "error",
+                confirmButtonText: "OK",
+            });
+
+            return false;
+        }
+
+        return true;
+    }
+
+    function cekDurasiTanggal(tanggalAwal, tanggalAkhir) {
+        const mulaiTanggal = moment(tanggalAwal);
+        const akhirTanggal = moment(tanggalAkhir);
+        const durasi = moment.duration(akhirTanggal.diff(mulaiTanggal));
+        const banyakHari = durasi.asDays().toFixed(0);
+
+        // console.log(`Perbedaaan antara tanggal awal ${mulaiTanggal} dan ${akhirTanggal} adalah ${banyakHari}`);
+
+        return banyakHari;
+    }
+
+    function cekDurasiWaktu(waktuAwal, waktuAkhir) {
+        const mulaiWaktu = moment(waktuAwal, 'HH:mm');
+        const akhirWaktu = moment(waktuAkhir, 'HH:mm');
+        const durasi = moment.duration(akhirWaktu.diff(mulaiWaktu));
+
+        // Mendapatkan durasi dalam format jam dan menit
+        const durasiJam = Math.floor(durasi.asHours());
+        const durasiMenit = durasi.minutes();
+
+        // Menampilkan durasi
+        // console.log(`Durasi antara ${mulaiWaktu.format('HH:mm')} dan ${akhirWaktu.format('HH:mm')} adalah ${durasiJam} jam ${durasiMenit} menit`);
+
+        // return durasi;
+        return `${durasiJam ? durasiJam + ' jam' : '' } ${durasiMenit ? durasiMenit + ' menit' : ''}`
+    }
+
+    function showSwalError() {
+        Swal.close();
+
+        Swal.fire({
+            title: "Terjadi Kesalahan",
+            html: `Terjadi Kesalahan <b>tidak diketahui</b>, kontak developer untuk mengatasi masalah ini.`,
+            icon: "error",
+            confirmButtonText: "OK",
+            showConfirmButton: true,
+        });
+    }
+
+    function showSwalErrorWithText(text) {
+        Swal.close();
+
+        Swal.fire({
+            title: "Terjadi Kesalahan",
+            html: `${text}`,
+            icon: "error",
+            confirmButtonText: "OK",
+        });
+    }
+
+    // Ambil link dari survei
+    function getLink(kode) {
+        toastr.clear();
+        const surveyUrl = `${window.location.origin}/pengisian-survei?kode=${kode}`;
+
+        Swal.fire({
+            title: `Kode survei : ${kode}`,
+            html: `
+                Silahkan salin kode anda : <br><br>
+                <b>${surveyUrl}</b>
+            `,
+            icon: "success",
+            confirmButtonText: "Salin link",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const clipboard = new ClipboardJS('.swal2-confirm', {
+                    text: function (trigger) {
+                        if (trigger.innerHTML.includes('Salin link')) {
+                            mauGenerateLink = false;
+                            return surveyUrl;
+                        }
+                    }
+                });
+
+                clipboard.on('success', function (e) {
+                    toastr.success('Link berhasil disalin ke clipboard', 'Berhasil', { preventDuplicates: true });
+                });
+
+                /*
+                    clipboard.on('error', function (e) {
+                        toastr.error('Gagal menyalin link ke clipboard', 'Error');
+
+                        mauGenerateLink = false;
+                    });
+                */
+            }
+        });
+    }
+
+    // Listeners
+    $('#tambahDataSurveiModal').on('hide.bs.modal', function(e) {
+       const form = document.querySelector('#formTambah');
+
+       form.querySelector('#tanggal_awal_survei').value = '';
+       form.querySelector('#tanggal_akhir_survei').value = '';
+       form.querySelector('#waktu_berlaku_awal').value = '';
+       form.querySelector('#waktu_berlaku_akhir').value = '';
+       form.querySelector('#batas_responden').value = '';
+    });
+</script>
+
+<script>
+    $(document).ready(function() {
+        // fungsi append tahun
+        var currentYear = new Date().getFullYear();
+        var select = $('.pilih_tahun');
+
+        for (var year = 2021; year <= currentYear; year++) {
+            select.append($('<option>', {
+                value: year,
+                text: year
+            }));
+        }
+
+        $('#button_download_triwulan').click(function(e) {
+            e.preventDefault(); // Prevent form submission
+
+            var triwulan = $('#download_triwulan').val();
+            var tahun = $('#download_triwulan_tahun').val();
+            var satker = $('#download_triwulan_satker').val();
+            var currentYear = new Date().getFullYear();
+            var url;
+
+            console
+
+            if (triwulan && !tahun && !satker) {
+                url = '/survei/hasil_triwulan/' + triwulan + '/' + currentYear + '/0/';
+            } else if (!triwulan && tahun && !satker) {
+                url = '/survei/hasil_triwulan/T0/' + tahun + '/0/';
+            } else if (triwulan && tahun && satker) {
+                url = '/survei/hasil_triwulan/' + triwulan + '/' + tahun + '/' + satker + '/';
+            } else if (!triwulan && !tahun && satker) {
+                // url = '/survei/hasil_triwulan/T0/' + currentYear + '/' + satker + '/';
+                Swal.fire({
+                    title: "Terjadi Kesalahan !",
+                    text: "Harap isi tanggal dan tahun",
+                    icon: "error"
+                });
+            } else if (triwulan && !tahun && satker) {
+                url = '/survei/hasil_triwulan/' + triwulan + '/' + currentYear + '/' + satker + '/';
+            } else if (!triwulan && tahun && satker) {
+                url = '/survei/hasil_triwulan/T0/' + tahun + '/' + satker + '/';
+            } else if (triwulan && tahun && !satker){
+                url = '/survei/hasil_triwulan/' + triwulan + '/' + tahun + '/0/';
+            } else {
+                Swal.fire({
+                    title: "Terjadi Kesalahan !",
+                    text: "Harap isi tanggal dan tahun",
+                    icon: "error"
+                });
+            }
+
+            if (url) {
+                window.location.href = url;
+            }
+        });
+
+        $('#button_download_satker').click(function(e) {
+            e.preventDefault(); // Prevent form submission
+
+        });
+    });
+
+</script>
+{% endblock js_tambahan %}

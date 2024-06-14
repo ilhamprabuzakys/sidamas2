@@ -1,0 +1,104 @@
+<div class="modal fade" id="detailPesertaMonev" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitleId">Detail Daftar Peserta</h5>
+                <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#detailMonevModal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="action-button">
+                    <div class="d-flex justify-content-end mb-3 gap-2">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#TambahPeserta"><i
+                                class="fas fa-plus me-2"></i>Tambah Peserta</button>
+                    </div>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr class="bg-soft-green">
+                                <th class="text-center" rowspan="1" colspan="3">Peserta</th>
+                                <th class="" rowspan="2">
+                                    AKSI<i class="fas fa-edit ms-2"></i>
+                                </th>
+                            </tr>
+                            <tr class="bg-soft-danger">
+                                <th>No.</th>
+                                <th>Nama dan Jabatan</th>
+                                <th>Jenis Kelamin</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Ahmad Bazar</td>
+                                <td>
+                                    <span class="text-primary">Pria</span>
+                                </td>
+                                <td>
+                                    <div class="list-button mt-2">
+                                        <a href="javascript:;"
+                                            class="badge bg-success text-white text-decoration-none mb-1"><i
+                                                class="fas fa-pen-to-square me-2"></i>EDIT</a>
+                                        <a href="javascript:;"
+                                            class="badge bg-danger text-white text-decoration-none delete-data mb-1"><i
+                                                class="fas fa-trash-alt me-2"></i>HAPUS</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#detailMonevModal">
+                    <i class="fas fa-xmark me-2"></i>
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="TambahPeserta" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-md modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitleId">Tambah Daftar Peserta</h5>
+                <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#detailPesertaMonev"
+                    aria-label="Close">
+                </button>
+            </div>
+            <div class="modal-body">
+                <section id="formTambahPeserta">
+                    <div class="mb-3">
+                        <label for="nama_peserta" class="col-form-label required">Nama dan Jabatan:</label>
+                        <input type="text" class="form-control" name="nama_peserta" id="nama_peserta" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="gender_peserta" class="col-form-label required">Jenis Kelamin:</label>
+                        <div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                    id="gender_peserta-L" />
+                                <label class="form-check-label" for="gender_peserta-L">Pria</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="flexRadioDefault"
+                                    id="gender_peserta-P" checked />
+                                <label class="form-check-label" for="gender_peserta-P">Wanita</label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-toggle="modal"
+                    data-bs-target="#detailPesertaMonev"><i class="fas fa-xmark me-2"></i>Tutup</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

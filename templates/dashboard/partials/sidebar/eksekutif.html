@@ -1,0 +1,7 @@
+<li class="menu-item {% if request.resolver_match.url_name == 'dashboard' %} active {% endif %}">
+    <a href="{% url 'dashboard_index' %}" class="menu-link">
+       <i class="menu-icon tf-icons ti ti-home"></i>
+       <div data-i18n="Beranda">Beranda</div>
+    </a>
+ </li>
+ 

@@ -1,0 +1,73 @@
+<table class="table table-bordered table-sm" id="__table">
+    <thead class="bg-soft-primary">
+        <tr class="text-center">
+            <th>No</th>
+            <th>ID Profile</th> <!-- Profile ID -->
+            <th>ID User</th> <!-- User ID -->
+            <th>Foto</th>
+            <th>Pengguna</th>
+            <th>Direktorat</th>
+            <th>Satker</th>
+            <th>Status</th>
+            <th>Aksi <i class="fas fa-edit ms-2"></i></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for profile in list_profile_users %}
+        <tr class="align-td-middle">
+            <td>{{ forloop.counter }}</td>
+            <td>{{ profile.id }}</td>
+            <td>{{ profile.user.id }}</td>
+            <td><img src="/media/{{ profile.avatar }}" alt="Users" width="50" height="50"></td>
+            <td>{{ profile.user }}</td>
+            <td class="text-center">{{ profile.get_role }}</td>
+            <td>{{ profile.satker }}</td>
+            <td class="text-center">
+                <span class="badge {% if profile.is_verified %} bg-success {% else %} bg-danger {% endif %}">
+                    {% if profile.is_verified %} Terverifikasi {% else %} Belum Verifikasi {% endif %}
+                </span>
+            </td>
+            <td class="__action_button">
+                <!-- <div class="" style="display: flex;">
+                    <div>
+                        <a href="javascript:;"
+                            class="badge bg-success text-white text-decoration-none mb-1 button_verifikasi"><i
+                            class="fa-solid fa-check me-2"></i> Verifikasi Sebagai Pegawai</a>
+                        <a href="javascript:;"
+                                class="badge bg-warning text-white text-decoration-none mb-1 button_edit">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit </a>
+                        <a href="javascript:;"
+                            class="badge bg-primary text-white text-decoration-none mb-1 button_verifikasi button_verifikasi_admin"><i
+                                class="fa-solid fa-check me-2"></i> Verifikasi Sebagai Admin</a>
+                        <a href="javascript:;"
+                            class="badge bg-danger text-white text-decoration-none mb-1 button_delete">
+                            <i class="fa-solid fa-trash"></i> Delete</a>
+                    </div>
+                </div> -->
+                <div class="row">
+                    <div class="col-12">
+                        <a href="javascript:;"
+                            class="badge bg-success text-white text-decoration-none mb-1 button_verifikasi"><i
+                            class="fa-solid fa-check me-2"></i> Verifikasi Sebagai Pegawai</a>
+                    </div>
+                    <div class="col-12">
+                        <a href="javascript:;"
+                            class="badge bg-primary text-white text-decoration-none mb-1 button_verifikasi button_verifikasi_admin"><i
+                                class="fa-solid fa-check me-2"></i> Verifikasi Sebagai Admin</a>
+                    </div>
+                    <div class="col-12">
+                        <a href="javascript:;"
+                                class="badge bg-warning text-white text-decoration-none mb-1 button_edit">
+                                <i class="fa-solid fa-pen-to-square"></i> Edit </a>
+                    </div>
+                    <div class="col-12">
+                        <a href="javascript:;"
+                            class="badge bg-danger text-white text-decoration-none mb-1 button_delete">
+                            <i class="fa-solid fa-trash"></i> Delete</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

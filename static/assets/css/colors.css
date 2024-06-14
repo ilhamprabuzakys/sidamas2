@@ -1,0 +1,76 @@
+/* ===Utilities=== */
+/* ==CUSTOM BACKGROUND COLOR */
+.bg-soft-red,
+.bg-soft-danger {
+    background-color: #fff2f2 !important;
+}
+
+.bg-soft-yellow,
+.bg-soft-warning {
+    background-color: #feffdd !important;
+}
+
+.bg-soft-gray {
+    background-color: #f5f5f5 !important;
+}
+
+.bg-soft-success,
+.bg-soft-green {
+    background-color: #effff2 !important;
+}
+
+.bg-soft-blue,
+.bg-soft-primary {
+    background-color: #eff3ff !important;
+}
+
+.bg-already-sended {
+    background-color: #b2b2b2;
+}
+
+.bg-dark-success,
+.bg-dark-green {
+    background-color: #00A0A9 !important;
+}
+
+.bg-already-sended:hover,
+.bg-already-sended:active,
+.bg-already-sended:focus {
+    background-color: #9c9c9c;
+}
+
+.bg-dark-danger {
+    background-color: #ffdfdf !important;
+}
+
+.bg-dark-warning {
+    background-color: #fdffb2 !important;
+}
+
+.bg-dark-gray {
+    background-color: #f5f5f5 !important;
+}
+
+.bg-dark-success {
+    background-color: #bbffc7 !important;
+}
+
+.bg-dark-primary {
+    background-color: #d0dcff !important;
+}
+
+.border-bottom-danger {
+    border-bottom: 2px solid #ff4b4b !important;
+}
+
+.border-bottom-warning {
+    border-bottom: 2px solid #ffe14b !important;
+}
+
+.border-bottom-primary {
+    border-bottom: 2px solid #4b4bff !important;
+}
+
+.border-bottom-success {
+    border-bottom: 2px solid #4bff51 !important;
+}

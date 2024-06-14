@@ -1,0 +1,769 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Jadwal Kegiatan Tahunan
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+  <div class="row">
+    <h3 class="heading mb-2">Jadwal Kegiatan Tahunan</h3>
+    <span class="mb-0">
+      <span class="text-muted fw-light">Kegiatan /</span>
+      <span class="ms-1 fw-medium">Jadwal Kegiatan Tahunan</span>
+    </span>
+  </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+          <div id="headline" class="mb-3">
+            <h3 class="text-center">
+              Jadwal Kegiatan Tahunan<br />
+              <span id="currentYear"></span>
+            </h3>
+            <hr />
+          </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <button class="btn btn-success" onclick="handleExport()"><i
+                            class="fas fa-file-export me-2"></i>Ekspor Data</button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i
+                            class="fas fa-plus me-2"></i>Tambah Data</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+              {% include 'psm/jadwal_kegiatan_tahunan/part/table.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/dashboard/js/bawaan/forms-extras.js' %}"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+<script>
+  let table;
+  var id_edit_global;
+  const TIPE_kegiatan = {{ user.profile.satker.level }}
+  const { createApp, ref, onMounted, computed } = Vue;
+
+  createApp({
+    setup() {
+      let rakernisData = ref(null);
+      let satkerLevel = parseInt('{{ user.profile.satker.level }}');
+      let perPage = ref(10);
+      let currentPage = ref(1);
+      let searchField = ref(null);
+      let filteredPage = ref(null);
+      const filter = ref({ search: '', date: '', kegiatan: '' });
+
+      const totalPage = computed(() => {
+        return filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0;
+      });
+
+      const pagedData = computed(() => {
+        if (filteredPage.value) {
+          const startIndex = (currentPage.value - 1) * perPage.value;
+          const endIndex = currentPage.value * perPage.value;
+          return filteredPage.value.slice(startIndex, endIndex);
+        }
+        else return [];
+      });
+
+      function searchData(e) {
+        currentPage.value = 1;
+
+        filteredPage.value = rakernisData.value.filter((data) => {
+            console.log(data);
+            uraian_kegiatan = String(data.uraian_kegiatan.toUpperCase());
+            metode_kegiatan = String(data.metode_kegiatan.toUpperCase());
+            tempat_pelaksanaan = String(data.tempat_pelaksanaan.toUpperCase());
+            waktu_pelaksanaan = String(data.waktu_pelaksanaan.toUpperCase());
+            jumlah_peserta = String(data.jumlah_peserta);
+            keterangan = String(data.keterangan);
+
+            bool2 = uraian_kegiatan.indexOf(searchField.value.toUpperCase()) > -1;
+            bool3 = metode_kegiatan.indexOf(searchField.value.toUpperCase()) > -1;
+            bool4 = tempat_pelaksanaan.indexOf(searchField.value.toUpperCase()) > -1;
+            bool5 = waktu_pelaksanaan.indexOf(searchField.value.toUpperCase()) > -1;
+            bool6 = jumlah_peserta.indexOf(searchField.value.toUpperCase()) > -1;
+            bool7 = keterangan.indexOf(searchField.value.toUpperCase()) > -1;
+
+            return bool2 || bool3 || bool4 || bool5 || bool6 || bool7;
+        });
+      };
+
+      const goToNextPage = (current, total) => {
+        if (currentPage.value < total) {
+          currentPage.value++;
+        }
+      }
+
+      const goToPreviousPage = (current, total) => {
+        if (currentPage.value > 0 ) {
+          currentPage.value--;
+        }
+      }
+
+      const handleFilterDate = async () => {
+          if (filter.value.date == '') {
+              filteredPage.value = rakernisData.value;
+              return;
+          }
+
+          const dateParts = filter.value.date.split('-');
+            const datePartStart = dateParts[0].trim();
+            const datePartEnd = dateParts[1].trim();
+
+            const startDate = moment(datePartStart, 'YYYY-MM-DD');
+            const endDate = moment(datePartEnd, 'YYYY-MM-DD');
+
+            filteredPage.value = rakernisData.value.filter(item => {
+                const itemDate = moment(item.start_date, 'YYYY-MM-DD');
+                console.log(itemDate);
+                // console.log(itemDate.isBetween(moment(startDate), moment(endDate), null, '[]'));
+                return itemDate.isBetween(startDate, endDate, null, '[]');
+
+            });
+      }
+
+      function hideableButton(status, satkerLevel, type) {
+        if (type == 'kirim') {
+          return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        } else if (type == 'edit') {
+          return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        }
+      }
+
+      // const apiURL = (satkerLevel == 1 ? '/kegiatan/api/v1/psm/jadwal_kegiatan_tahunan/get_data_bnnk/?format=datatables' : '/kegiatan/api/v1/psm/jadwal_kegiatan_tahunan/?format=datatables')
+      const apiURL = '/kegiatan/api/v1/psm/jadwal/?format=datatables'
+
+      function loadData() {
+        tableContent = [];
+        axios.get(apiURL).then(function (response) {
+          data = response.data.data;
+
+          for ([key, value] of Object.entries(data)) {
+              baris = { 'class':'table-primary','hide_satker':false,'index': value.no_unit,'uraian_kegiatan': value.akun_kegiatan,
+                'metode_kegiatan':'','tempat_pelaksanaan':'','waktu_pelaksanaan':'','jumlah_peserta':'','pj':'', 'keterangan':''
+                ,'aksi':'','status':'','level':'', 'type':'parent', 'id':value.id};
+              tableContent.push(baris);
+
+              for ([key2, value2] of Object.entries(value.kegiatan)) {
+                baris = { 'class':'table','hide_satker':true,'index': value2.uraian_no,'uraian_kegiatan': value2.uraian_name,
+                'metode_kegiatan':value2.metode_kegiatan,'tempat_pelaksanaan':value2.tempat_pelaksana,'waktu_pelaksanaan':value2.waktu_kegiatan,'jumlah_peserta':value2.jumlah_peserta,'pj':value2.pj, 'keterangan':value2.keterangan
+                ,'aksi':'','status':value2.status,'level':value2.satker.level, 'type':'first__child', 'id':value2.id, 'start_date':value2.tanggal_awal, 'end_date':value2.tanggal_akhir, 'kirim': hideableButton(value2.status, satkerLevel, 'kirim'), 'edit': hideableButton(value2.status, satkerLevel, 'edit'),};
+                tableContent.push(baris);
+              }
+          }
+
+          // for ([key, value] of Object.entries(data)) {
+          //     // untuk satker tingkat BNNP
+          //     if (value.data && value.data.length > 0) {
+          //       // untuk detail dari satker BNNP
+          //       for ([key2, value2] of Object.entries(value.data)) {
+          //         baris = { 'class':'table','hide_satker':true,'index': value2.kode_no_unit + ' - ' + value2.uraian_no,'satker': '',
+          //         'nama_kegiatan': value2.nama_kegiatan,'metode_kegiatan': value2.metode_kegiatan,'tempat_pelaksanaan': value2.tempat_pelaksana,'waktu_pelaksanaan': value2.waktu_kegiatan,'jumlah_peserta':value2.jumlah_peserta, 'pagu_anggaran':value2.anggaran
+          //         ,'aksi':'','status':value2.status,'level':value2.satker.level, 'type':'first__child', 'id':value2.id, 'start_date':value2.tanggal_awal, 'end_date':value2.tanggal_akhir, 'kirim': hideableButton(value2.status, satkerLevel, 'kirim'), 'edit': hideableButton(value2.status, satkerLevel, 'edit'),};
+          //         tableContent.push(baris);
+          //       }
+
+          //       // untuk mengecek
+          //       if (value.detail !== undefined && value.detail.length>0) {
+          //         // untuk satker bnnknya
+          //         for ([key3,value3] of Object.entries(value.detail)) {
+          //           baris = { 'class':'table-primary','hide_satker':false,'index': (parseInt(key)+1) + '.' + (parseInt(key2)+1) + '.' + (parseInt(key3)+1),'satker': value3.satker.nama_satker +'(' + value3.data.length + ' kegiatan)',
+          //           'nama_kegiatan':'','metode_kegiatan':'','tempat_pelaksanaan':'','waktu_pelaksanaan':'','jumlah_peserta':'', 'pagu_anggaran':''
+          //           ,'aksi':'','status':'','level':'', 'type':'parent', 'id':value3.id};
+          //           tableContent.push(baris);
+
+          //         // untuk detail data satker bnnknya
+          //           for ([key4, value4] of Object.entries(value3.data)) {
+          //             baris = { 'class':'table','hide_satker':true,'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1) + '.' + (parseInt(key3) + 1) + '.' + (parseInt(key4) + 1),'satker': '',
+          //             'nama_kegiatan': value4.nama_kegiatan,'metode_kegiatan': value4.metode_kegiatan,'tempat_pelaksanaan': value4.tempat_pelaksana,'waktu_pelaksanaan': value4.waktu_kegiatan,'jumlah_peserta':value4.jumlah_peserta, 'pagu_anggaran':value4.anggaran
+          //             ,'aksi':'','status':value4.status,'level':value4.satker.level, 'type':'second__child', 'id':value4.id, 'start_date':value4.tanggal_awal, 'end_date':value4.tanggal_akhir, 'kirim': hideableButton(value4.status, satkerLevel, 'kirim'), 'edit': hideableButton(value4.status, satkerLevel, 'edit'),};
+          //             tableContent.push(baris);
+          //           }
+          //         }
+          //       }
+          //     }
+          //   }
+
+          rakernisData.value = tableContent;
+          filteredPage.value = rakernisData.value;
+        });
+      };
+
+      // for ([key, value] of Object.entries(data)) {
+      //     baris = { 'class':'table-primary','hide_satker':false,'index': value.no_unit,'uraian_kegiatan': value.akun_kegiatan,
+      //       'metode_kegiatan':'','tempat_pelaksanaan':'','waktu_pelaksanaan':'','jumlah_peserta':'','pj':'', 'keterangan':''
+      //       ,'aksi':'','status':'','level':'', 'type':'parent', 'id':value.id};
+      //     tableContent.push(baris);
+
+      //     for ([key2, value2] of Object.entries(value.kegiatan)) {
+      //       baris = { 'class':'table','hide_satker':true,'index': value2.ordering_asc,'uraian_kegiatan': value2.nama_kegiatan,
+      //       'metode_kegiatan':value2.metode_kegiatan,'tempat_pelaksanaan':value2.tempat_pelaksana,'waktu_pelaksanaan':value2.waktu_kegiatan,'jumlah_peserta':value2.jumlah_peserta,'pj':value2.pj, 'keterangan':value2.keterangan
+      //       ,'aksi':'','status':value2.status,'level':value2.satker.level, 'type':'first__child', 'id':value2.id, 'start_date':value2.tanggal_awal, 'end_date':value2.tanggal_akhir, 'kirim': hideableButton(value2.status, satkerLevel, 'kirim'), 'edit': hideableButton(value2.status, satkerLevel, 'edit'),};
+      //       tableContent.push(baris);
+      //     }
+      // }
+
+      // fungsi fill data untuk modal edit
+      async function handleEditModal(id) {
+        try {
+          const response = await axios.get(`/kegiatan/api/v1/psm/jadwal_kegiatan_tahunan_crud/${id}/get_detail_data_detail`);
+          const data = response.data[0];
+
+          id_edit_global = data.id
+
+          $('#edit__kode_kegiatan').val(data.kode).trigger('change'); 
+          $('#edit__uraian_kegiatan').val(data.uraian).trigger('change'); 
+          $('#edit__metode').val(data.metode_kegiatan);
+          $('#edit__tempat').val(data.tempat_pelaksana);
+          $('#edit__jumlah_peserta').val(data.jumlah_peserta);
+          $('#edit__waktu').val(data.waktu_kegiatan);
+          $('#edit__keterangan').val(data.keterangan);
+
+          $('#editData').modal('show');
+
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      async function handleDelete(data){
+        let id = data;
+
+        const confirmationText = `Untuk menghapus data tersebut? <br> Data yang dihapus tidak dapat <b>dipulihkan</b> kembali`;
+
+        const confirmResult = await showSwalConfirm(confirmationText, 'Ya, hapus data');
+
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.delete(
+            '/kegiatan/api/v1/psm/jadwal_kegiatan_tahunan_crud/'+id+'/'
+          ).then(function (response) {
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data kegiatan berhasil <b>dihapus</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+              showConfirmButton: false,
+              timer: 1000
+            }).then((result) => {
+              if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                location.reload()
+              }
+            });
+          });
+        } catch (error) {
+          console.log('Terjadi kesalahan : ', error);
+          showSwalGenericError();
+        }
+      }
+
+      async function handleDownload(data){
+        var currentURLOrigin = window.location.origin;
+        const combinedData = `${currentURLOrigin}${data}`;
+        window.location.href = combinedData;
+      }
+
+      // fungsi ubah status post data
+      async function handleSend(data){
+        Swal.fire({
+            title: "Peringatan !",
+            text: "Kirim kegiatan ?",
+            icon: "warning",
+            showDenyButton: true,
+            confirmButtonText: "Kirim !",
+            denyButtonText: "Batal"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                axios.post('/kegiatan/api/v1/psm/jadwal_kegiatan_tahunan/kirim_kegiatan/', { id_: data })
+                    .then(function (response) {
+                        Swal.fire({
+                            icon: "success",
+                            title: "Kirim data berhasil !",
+                            text: "Data Terkirim !",
+                            showConfirmButton: false,
+                            timer: 1000
+                        }).then((result) => {
+                            if (result.dismiss === Swal.DismissReason.timer) {
+                                location.reload();
+                            }
+                        });
+                    })
+                    .catch(function (error) {
+                        Swal.fire({
+                            icon: "error",
+                            title: "Terjadi kesalahan !",
+                            text: "API bermasalah !",
+                        });
+                });
+
+            } else if (result.isDenied) {
+            }
+        });
+      }
+
+      onMounted(async () => {
+        loadData();
+
+        await sleep(300);
+        filter.value.date = '';
+        var a = $("#filter_date_").val('');
+
+        $('#filter_date_').on('change', async (event) => {
+            if (a == '') {
+
+            }else{
+              filter.value.date = event.target.value;
+              await sleep(500);
+              await handleFilterDate();
+            }
+        });
+
+        $(".input-group-text").click(function(){
+            $("#filter_date_").val('');
+        });
+
+      });
+
+      return {
+        rakernisData,
+        satkerLevel,
+        totalPage,
+        perPage,
+        currentPage,
+        pagedData,
+        searchField,
+        filter,
+        loadData,
+        handleEditModal,
+        handleDelete,
+        handleSend,
+        handleDownload,
+        goToNextPage,
+        goToPreviousPage,
+        searchData,
+        handleFilterDate
+      }
+    },
+    delimiters: ['${', '}']
+  }).mount('#app');
+</script>
+
+<!-- helper -->
+<script>
+  $(document).ready(function() {
+      $('#create__anggaran').on('input', function() {
+          formatCurrency($(this));
+      });
+
+      $('#edit__anggaran').on('input', function() {
+          formatCurrency($(this));
+      });
+
+      $('#create__kode_kegiatan').change(function() {
+            var kegiatan_akun_id = $(this).val();
+
+            axios.post('/users/api/v1/uraian_kegiatan/filters/', { id: kegiatan_akun_id })
+                .then(function (response) {
+                    $('#create__uraian_kegiatan').empty();
+
+                    response.data.forEach(function(item) {
+                        $('#create__uraian_kegiatan').append($('<option>', {
+                            value: item.id, // Use Uraian Kegiatan ID
+                            text: item.no + " - " + item.uraian_kegiatan // Use Uraian Kegiatan name or label
+                        }));
+                    });
+                })
+                .catch(function (error) {
+                  Swal.fire({
+                      icon: "error",
+                      title: "Terjadi kesalahan !",
+                      text: "API bermasalah !",
+                  });
+            });
+        });
+
+        $('#edit__kode_kegiatan').change(function() {
+            var kegiatan_akun_id = $(this).val();
+
+            axios.post('/users/api/v1/uraian_kegiatan/filters/', { id: kegiatan_akun_id })
+                .then(function (response) {
+                    $('#edit__uraian_kegiatan').empty();
+
+                    response.data.forEach(function(item) {
+                        $('#edit__uraian_kegiatan').append($('<option>', {
+                            value: item.id, // Use Uraian Kegiatan ID
+                            text: item.no + " - " + item.uraian_kegiatan // Use Uraian Kegiatan name or label
+                        }));
+                    });
+                })
+                .catch(function (error) {
+                  Swal.fire({
+                      icon: "error",
+                      title: "Terjadi kesalahan !",
+                      text: "API bermasalah !",
+                  });
+            });
+        });
+  });
+
+  function formatCurrency(input) {
+      var value = input.val().replace(/\D/g, '');
+      var number = parseFloat(value);
+
+      var formattedValue = 'Rp ' + number.toLocaleString('id-ID', {
+          maximumFractionDigits: 2
+      });
+
+      input.val(formattedValue);
+  }
+
+  function handlePost(e) {
+    e.preventDefault();
+      Swal.fire({
+        title: "Simpan data ?",
+        icon: "warning",
+        showDenyButton: true,
+        confirmButtonText: "Simpan",
+        denyButtonText: `Batal`
+      }).then((result) => {
+        if (result.isConfirmed) {
+          savedata();
+        } else if (result.isDenied) {
+        }
+      });
+  };
+
+  async function savedata() {
+      showSwalLoading();
+      var url = "/kegiatan/api/v1/psm/jadwal_kegiatan_tahunan_crud/";
+      var formData = new FormData();
+
+      formData.append('satker', $('#create__satker').val());
+      formData.append('kode', $('#create__kode_kegiatan').val());
+      formData.append('uraian', $('#create__uraian_kegiatan').val());
+      formData.append('metode_kegiatan', $('#create__metode').val());
+      formData.append('tempat_pelaksana', $('#create__tempat').val());
+      formData.append('waktu_kegiatan', $('#create__waktu').val());
+      formData.append('jumlah_peserta', $('#create__jumlah_peserta').val());
+      formData.append('keterangan', $('#create__keterangan').val());
+
+      try {
+      const response = await axios.post(
+          url, formData, {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }).then(function (response) {
+          Swal.fire({
+            title: 'Berhasil!',
+            html: `Data kegiatan telah <b>berhasil</b> ditambahkan!`,
+            icon: 'success',
+            confirmButtonText: 'OK',
+            timer: 1500,
+            timerProgressBar: true,
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+          }).then((result) => {
+            if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+              location.reload()
+            }
+          });
+        });
+      } catch (error) {
+        showSwalGenericError();
+        console.error("Terjadi kesalahan :", error);
+      } finally {
+        vm.loadData();
+      }
+
+    };
+
+  $('#editButton').click(function() {
+    var url = "/kegiatan/api/v1/psm/jadwal_kegiatan_tahunan_crud/"+id_edit_global+"/"
+
+    var formData = new FormData();
+
+    formData.append('kode', $('#edit__kode_kegiatan').val());
+    formData.append('uraian', $('#edit__uraian_kegiatan').val());
+    formData.append('metode_kegiatan', $('#edit__metode').val());
+    formData.append('tempat_pelaksana', $('#edit__tempat').val());
+    formData.append('waktu_kegiatan', $('#edit__waktu').val());
+    formData.append('jumlah_peserta', $('#edit__jumlah_peserta').val());
+    formData.append('keterangan', $('#edit__keterangan').val());
+    
+    showConfirmationDialog(formData, url);
+  });
+
+  async function handleExport(){
+    // axios.post('/kegiatan/api/v1/psm/monev_supervisi/export_data/')
+    //     .then(function (response) {
+
+    //         const data = response.data;
+
+    //         window.location.href = data.file_path;
+    //     })
+    //     .catch(function (error) {
+    //         Swal.fire({
+    //             icon: "error",
+    //             title: "Terjadi kesalahan !",
+    //             text: "API bermasalah !",
+    //         });
+    // });
+    var tbl = document.getElementById('__table');
+    var wb = XLSX.utils.table_to_book(tbl);
+    XLSX.writeFile(wb, "SheetJSTable.xlsx");
+  }
+
+  async function handleDate(event, target) {
+    const currentDate = moment().format('YYYY-MM-DD');
+    const valueDate = $(event.target).val();
+    if (valueDate === currentDate) {
+      $('#create__tanggal_akhir').val(new Date().toISOString().split('T')[0]);
+    } else {
+    }
+  }
+
+  function countMaleParticipants(data) {
+      let count = 0;
+      data.forEach(function(row) {
+          if (row.jenis_kelamin === "Laki-Laki") {
+              count++;
+          }
+      });
+      return count;
+  }
+
+  function countFemaleParticipants(data) {
+      let count = 0;
+      data.forEach(function(row) {
+          if (row.jenis_kelamin === "Perempuan") {
+              count++;
+          }
+      });
+      return count;
+  }
+
+  function formatNama(data) {
+    let formattedData = [];
+    data.forEach(function(row) {
+        let formattedString = row.nama_peserta;
+        formattedData.push(formattedString);
+    });
+    // Join the elements of the array with ", "
+    let result = formattedData.join(", ");
+    return result;
+}
+
+  function countHasilTest(data) {
+    let countPositif = 0;
+    let countNegatif = 0;
+
+    data.forEach(function(row) {
+        if (row.hasil_test === "Positif") {
+            countPositif++;
+        } else if (row.hasil_test === "Negatif") {
+            countNegatif++;
+        }
+    });
+
+    return {
+        positif: countPositif,
+        negatif: countNegatif
+    };
+  }
+
+  function populateFormRepeater(data) {
+      data.forEach(function(item) {
+          var $repeaterItem = $('<div data-repeater-item-lama></div>');
+
+          $repeaterItem.append('<div class="row">' +
+              '<div class="mb-3 col-lg-9 col-sm-9 mb-0">' +
+              '<label class="form-label" for="form-repeater-edit-lama-1-1">Nama </label>' +
+              '<input type="text" class="form-control" id="form-repeater-edit-lama-1-1" placeholder="Nama Peserta" value="' + item.nama_peserta + '"/>' +
+              '</div>' +
+              '<div class="mb-3 col-lg-3 col-sm-3 d-flex align-items-center mb-0">' +
+              '<button class="btn btn-label-danger mt-4 hapus_lama" data-repeater-delete type="button" value="Delete">' +
+              '<i class="ti ti-x ti-xs me-1"></i>' +
+              '<span class="align-middle">Hapus</span>' +
+              '</button>' +
+              '</div>' +
+              '</div>' +
+              '<hr class="mx-n4">');
+
+          $('[data-repeater-list="peserta-group-lama"]').append($repeaterItem);
+      });
+  }
+
+  function removeEmptyObjects(array) {
+      return array.filter(function(obj) {
+          return obj.nama !== "" || obj.alamat !== "" || obj.gender !== null || obj.status !== null;
+      });
+  }
+
+  function checkDataCompleteness(dataArray) {
+      var isDataComplete = true;
+      var allNull = true;
+      var someNull = false;
+
+      $.each(dataArray, function(index, obj) {
+          if (!Object.values(obj).some(value => value !== null && value !== '')) {
+              allNull = true;
+          } else {
+              allNull = false;
+              if (Object.values(obj).some(value => value === null || value === '')) {
+                  someNull = true;
+                  return false; // Break the loop early if any null value is found
+              }
+          }
+      });
+
+    if (allNull) {
+      return 0;
+    } else if (someNull) {
+        return 1;
+    } else {
+        return 2;
+    }
+  }
+
+  function showConfirmationDialog(formData, url) {
+      Swal.fire({
+          title: "Update data ?",
+          icon: "warning",
+          showDenyButton: true,
+          confirmButtonText: "Simpan",
+          denyButtonText: `Batal`
+      }).then((result) => {
+          if (result.isConfirmed) {
+              sendData(formData, url);
+          }
+      });
+  }
+
+  async function sendData(formData, url) {
+    try {
+      const response = await axios.patch(
+        url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(function (response) {
+        $("#editModal").modal("hide");
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> diperbarui!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 1500,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then((result) => {
+          if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+            location.reload()
+          }
+        });
+      });
+
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    }
+  }
+
+  function showErrorDialog(text) {
+      Swal.fire({
+          title: "Terjadi Kesalahan !",
+          text: text,
+          icon: "error"
+      });
+  }
+
+  function addCell(tr, content, colSpan = 2) {
+    let td = document.createElement('th');
+
+    td.colSpan = colSpan;
+    td.textContent = content;
+
+    tr.appendChild(td);
+  }
+
+  function hideableButton(status, satkerLevel, type) {
+    if (type == 'kirim') {
+      return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+    } else if (type == 'edit') {
+      return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+    }
+  }
+
+  $('#filter_date_').daterangepicker({
+      showDropdowns: true,
+      ranges: {
+          'Hari ini': [moment(), moment()],
+          'Kemarin': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+          'Minggu ini': [moment().subtract(6, 'days'), moment()],
+          // '30 hari yang lalu': [moment().subtract(29, 'days'), moment()],
+          'Bulan ini': [moment().startOf('month'), moment().endOf('month')],
+          // 'Bulan lalu': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+          'Triwulan 1 (Januari - Maret)': [moment().startOf('year').startOf('quarter'), moment().startOf('year').startOf('quarter').add(2, 'months').endOf('month')],
+          'Triwulan 2 (April - Juni)': [moment().startOf('year').startOf('quarter').add(3, 'months'), moment().startOf('year').startOf('quarter').add(5, 'months').endOf('month')],
+          'Triwulan 3 (Juli - September)': [moment().startOf('year').startOf('quarter').add(6, 'months'), moment().startOf('year').startOf('quarter').add(8, 'months').endOf('month')],
+          'Triwulan 4 (Oktober - Desember)': [moment().startOf('year').startOf('quarter').add(9, 'months'), moment().startOf('year').endOf('year')],
+      },
+      locale: {
+          customRangeLabel: "Rentang Lainnya",
+          cancelLabel: 'Batalkan',
+          applyLabel: 'Terapkan'
+      }
+  });
+
+  function getInstitution(param) {
+      switch(param) {
+          case 1:
+              return "Polri";
+          case 2:
+              return "Kejaksaan";
+          case 3:
+              return "Pengadilan";
+          case 4:
+              return "Keluarga";
+          case 5:
+              return "Masyarakat";
+          case 6:
+              return "Lembaga Pendidikan";
+          case 7:
+              return "Lembaga Swasta";
+          case 8:
+              return "Pemda";
+          case 9:
+              return "BNN";
+          case 10:
+              return "TNI";
+          default:
+              return "Invalid param";
+      }
+  }
+
+</script>
+
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include 'psm/jadwal_kegiatan_tahunan/modals/create.html' %}
+{% include 'psm/jadwal_kegiatan_tahunan/modals/edit.html' %}
+{% endblock %}

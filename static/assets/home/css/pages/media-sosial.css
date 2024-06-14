@@ -1,0 +1,18 @@
+/*
+    HOME:MEDIA SOSIAL
+*/
+
+.sosial-container {
+   border: 1px solid #ececec;
+}
+
+.sosial-container .sk-ww-instagram-reels,
+.sosial-container .sk-ww-twitter-feed,
+.sosial-container .sk-ww-youtube-channel-videos,
+.sosial-container .sk-tiktok-feed {
+   width: auto !important;
+}
+
+#instagram, #twitter, #tiktok {
+   margin-bottom: 40px;
+}

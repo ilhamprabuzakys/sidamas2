@@ -1,0 +1,119 @@
+{% extends 'home/home_base.html' %}
+{% load static %}
+{% block title %} Beranda Kegiatan {% endblock title %}
+{% block css_tambahan %}
+  <link rel="stylesheet" href="{% static 'assets/home/css/pages/beranda-kegiatan.css' %}" />
+{% endblock %}
+{% block content %}
+  <section id="beranda-kegiatan" class="px-5">
+    <h4 class="headline">Statistik Kepuasan Responden</h4>
+    <hr />
+    <div class="card">
+      <div class="card-body">
+        <div class="row">
+          <div class="col-lg-8">
+            <canvas id="chartKepuasan" width="400" height="300"></canvas>
+          </div>
+          <div class="col-lg-4">
+            <h3>Keterangan</h3>
+            <hr class="thicc" />
+            <span>Data survei ditampilkan untuk 5 survei terbaru.</span>
+            <div class="filter-survei text-end">
+              <span class="text-end">
+                Urutkan berdasarkan :
+                <a href="javascript:;" class="badge bg-primary text-white me-2">Terbaru</a>
+                <a href="javascript:;" class="badge bg-unchecked text-white">Terpopuler</a>
+              </span>
+
+              <ul class="list-group mt-3">
+                <li class="list-group-item bg-primary bg-opacity-10">
+                  <div class="row">
+                    <div class="col-10 text-start">
+                      <h6 class="d-block mb-0">Survei Tes Urine Di Kota Bandung</h6>
+                      <span class="text-muted">27 Oktober 2023 s/d 14 Desember</span>
+                    </div>
+                    <div class="col-2 d-flex align-items-center justify-content-end">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="survey" id="survey1" />
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="list-group-item bg-danger bg-opacity-10">
+                  <div class="row">
+                    <div class="col-10 text-start">
+                      <h6 class="d-block mb-0">Survei Tes Urine Di Kota Cianjur</h6>
+                      <span class="text-muted">20 Januari 2023 s/d 22 Februari</span>
+                    </div>
+                    <div class="col-2 d-flex align-items-center justify-content-end">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="survey" id="survey2" />
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="list-group-item bg-success bg-opacity-10">
+                  <div class="row">
+                    <div class="col-10 text-start">
+                      <h6 class="d-block mb-0">Survei Tes Urine Di Kota Cimahi</h6>
+                      <span class="text-muted">12 Maret 2023 s/d 14 Mei</span>
+                    </div>
+                    <div class="col-2 d-flex align-items-center justify-content-end">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="survey" id="survey3" />
+                      </div>
+                    </div>
+                  </div>
+                </li>
+                <li class="list-group-item bg-warning bg-opacity-10">
+                  <div class="row">
+                    <div class="col-10 text-start">
+                      <h6 class="d-block mb-0">Survei Tes Urine Di Kota Bogor</h6>
+                      <span class="text-muted">03 July 2023 s/d 14 November</span>
+                    </div>
+                    <div class="col-2 d-flex align-items-center justify-content-end">
+                      <div class="form-check">
+                        <input class="form-check-input" type="radio" name="survey" id="survey4" />
+                      </div>
+                    </div>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+{% block js_tambahan %}
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+
+  <script>
+    window.addEventListener("load", (event) => {
+      let chartContainer = document.getElementById('chartKepuasan')
+      let chart = new Chart(chartContainer, {
+        type: 'bar',
+        data: {
+          labels: ['Tidak Puas', 'Kurang Puas', 'Puas', 'Sangat Puas'],
+          datasets: [
+            {
+              label: 'Kepuasan Responden', // tootip
+              data: [12, 9, 17, 22], //
+              backgroundColor: [
+                'rgba(255, 99, 132, 0.2)', // 第一個 bar 顏色
+                'rgba(54, 162, 235, 0.2)',
+                'rgba(255, 206, 86, 0.2)',
+                'rgba(75, 192, 192, 0.2)',
+                'rgba(153, 102, 255, 0.2)',
+                'rgba(255, 159, 64, 0.2)'
+              ],
+              borderColor: ['rgba(255,99,132,1)', 'rgba(54, 162, 235, 1)', 'rgba(255, 206, 86, 1)', 'rgba(75, 192, 192, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 159, 64, 1)'],
+              borderWidth: 1
+            }
+          ]
+        }
+      });
+    });
+  </script>
+{% endblock %}

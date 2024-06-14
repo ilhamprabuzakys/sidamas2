@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+{% block extrahead %}
+    <script src="{% static 'survey/js/jquery.min.js' %}"></script>
+    <script src="{% static 'survey/js/knockout.min.js' %}"></script>
+
+    <link rel="stylesheet" href="{% static 'survey/bootstrap/bootstrap.min.css' %}" crossorigin="anonymous">
+    <link rel="stylesheet" href="{% static 'survey/css/solid.min.css' %}" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'survey/css/sidebar.css' %}" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'survey/css/select2.min.css' %}" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'survey/css/ko.grid.css' %}" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="stylesheet" href="{% static 'survey/surveyjs/survey-creator.min.css' %}" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link href="{% static 'survey/surveyjs/survey.min.css' %}" type="text/css" rel="stylesheet"/>     
+
+    <script src="{% static 'survey/js/moment.min.js' %}"></script>
+    <script src="{% static 'survey/js/ko.grid.js' %}"></script>
+    <script src="{% static 'survey/surveyjs/survey.ko.min.js' %}"></script>
+    <script src="{% static 'survey/bootstrap/bootstrap.bundle.min.js' %}"></script>
+    <script src="{% static 'survey/js/select2.min.js' %}"></script>
+    <script src="{% static 'survey/surveyjs/surveyjs-widgets.min.js' %}"></script>
+    <script src="{% static 'survey/surveyjs/sweetalert.min.js' %}"></script>
+    <script src="{% static 'survey/js/sb-admin-2.min.js' %}"></script>
+    <script src='http://ajax.googleapis.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js'></script>
+    <script src="{% static 'survey/surveyjs/survey-creator.min.js' %}"></script>
+
+    <style>
+        body #creatorElement {
+            /* SurveyJS Creator V1 */
+            --primary-color: #00A0A9;
+            --secondary-color: #1ab394;
+            --primary-text-color: #4a4a4a;
+            --secondary-text-color: #a7a7a7;
+            --inverted-text-color: #ffffff;
+            --primary-hover-color: #6fe06f;
+            --selection-border-color: #1ab394;
+            --primary-icon-color: #3d4d5d;
+            --primary-bg-color: #f8f8f8;
+            --secondary-bg-color: #f4f4f4;
+            --primary-border-color: #e7eaec;
+            --secondary-border-color: #ddd;
+            --error-color: #ed5565;
+        }
+
+        svd-splitter {
+            display: none !important;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <div id="surveyContainer" style="width:100%;padding:10px;">
+        <div id="creatorElement"></div>
+    </div>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    $(document).ready(function () {
+    
+        Survey.matrixDropdownColumnTypes.signaturepad = {
+            properties: [
+                "height", "width", "allowClear"
+            ],
+        };
+        Survey.matrixDropdownColumnTypes.dropdown = {
+            properties: [
+                "renderAs"
+            ],
+        };
+    
+        SurveyCreator
+            .SurveyQuestionEditorDefinition
+            .definition["matrixdropdowncolumn@signaturepad"] = {
+                properties: [
+                    { name: "height", tab: "layout" }, { name: "width", tab: "layout" }, { name: "allowClear", tab: "general" }
+                ],
+                tabs: [
+                    {
+                        name: "visibleIf",
+                        index: 12
+                    }, {
+                        name: "enableIf",
+                        index: 20
+                    }
+                ]
+            };
+        SurveyCreator.SurveyQuestionEditorDefinition.definition["dropdown"].
+            properties.push({name: "renderAs",tab:"general"});
+    
+        var questionDef = SurveyCreator.SurveyQuestionEditorDefinition.definition.question;
+    
+        questionDef
+            .tabs
+            .push({name: "title", index: 1});
+        SurveyCreator
+            .defaultStrings
+            .pe
+            .tabs["title"] = "Title";
+        var ind = questionDef
+            .properties
+        .indexOf("title");
+        if (ind > -1) 
+            questionDef
+                .properties
+                .splice(ind, 1);
+    
+    
+        var creator = new SurveyCreator.SurveyCreator("creatorElement");
+        SurveyCreator.editorLocalization.currentLocale = "id";
+        SurveyCreator.localization.currentLocale = "id";
+        creator.haveCommercialLicense = true;
+        creator.showToolbox = "right";
+        creator.showPropertyGrid = "right";
+        creator.rightContainerActiveItem("toolbox");
+        creator.saveSurveyFunc = function (saveNo, callback) {
+            var url_string = window.location.href;
+            var data = {};
+            var url = new URL(url_string);
+            var id = url.searchParams.get("id");
+            if (id) {
+                data = {idform:id, eform:creator.text}
+            } else {
+                data = {idform:-1, eform:creator.text}
+            }
+
+            console.log(data);
+
+            $.ajax({
+                    method: 'POST',
+                    // url:   '/eform/insert',
+                    contentType : 'application/json',
+                    xhrFields: {withCredentials: true},
+                    dataType : 'json',
+                    data: JSON.stringify({data:btoa(JSON.stringify(data))}),
+                    success: function(result) {
+                        if (result.errors) {
+                            Swal.fire("Error", result.errors[0].message,"error");
+                        }
+                        if (result.data) {
+                            if (result.data.insert_survey) {
+                                var retval = result.data.insert_survey.returning[0].id;
+                                var refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id='; 
+                                window.history.pushState({ path: refresh + retval}, '', refresh + retval);					
+                                Swal.fire("Sukses", 'Berhasil insert',"success");
+                            }
+                            if (result.data.update_survey) {
+                                if (result.data.update_survey.returning[0]) 
+                                    Swal.fire("Sukses", 'Berhasil update',"success");
+                                else
+                                    Swal.fire("Error", 'Update tidak berhasil karena form bukan milik Anda',"error");
+                            }
+                        }
+                    },
+                    error: function(error) {
+                        console.log(error);
+                    }
+                })    
+        }
+    });
+    </script>
+
+{% endblock %}

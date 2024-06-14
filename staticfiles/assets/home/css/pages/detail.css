@@ -1,0 +1,123 @@
+#judul-berita h3 {
+   color: #5e5e5e;
+}
+
+/* Isi Berita */
+#isi-berita .head-image img {
+   width: -webkit-fill-available;
+   height: 500px;
+   object-fit: cover;
+}
+
+.daftar-tag {
+   margin-top: 15px;
+}
+
+.daftar-tag p {
+   text-align: center;
+   color: #7e7e7e;
+}
+
+#isi-berita .body p,
+#isi-berita .body ul,
+#isi-berita .body li {
+   color: #818181
+}
+
+
+/* Share Berita */
+.share-berita {
+   margin-top: 30px;
+}
+
+.share-berita button {
+   margin-bottom: 5px;
+}
+
+.share-berita .share-berita__list_button button {
+    margin-right: 8px;
+}
+
+.share-berita h4 {
+   color: #5e5e5e;
+
+}
+
+/* Navigasi Berita */
+.navigasi-berita {
+   margin-top: 30px;
+}
+
+.navigasi-berita .navigasi-item {
+   width: 100%;
+   height: 200px;
+   position: relative;
+   overflow: hidden;
+   /* Menyembunyikan overflow agar efek gelap terlihat */
+   cursor: pointer;
+}
+
+.navigasi-berita .navigasi-item::before {
+   content: "";
+   position: absolute;
+   top: 0;
+   left: 0;
+   width: 100%;
+   height: 100%;
+   background: rgba(0, 0, 0, 0.3);
+   /* Warna gelap dengan opacity 0.5 */
+   z-index: 1;
+   /* Meletakkan di atas gambar */
+   transition: background 0.3s ease;
+   /* Efek transisi ketika berubah warna */
+}
+
+.navigasi-berita .navigasi-item:hover::before {
+   background: rgba(0, 0, 0, 0.5);
+   /* Warna gelap ketika dihover dengan opacity 0.7 */
+}
+
+.navigasi-berita .navigasi-item h4 {
+   position: absolute;
+   top: 40%;
+   left: 30%;
+   color: white;
+   z-index: 2;
+   /* Meletakkan di atas elemen lain */
+}
+
+.navigasi-berita .navigasi-item .left-arrow {
+   position: absolute;
+   top: 40%;
+   left: 10%;
+   color: white;
+   z-index: 2;
+   width: 40px;
+   height: 30px;
+   /* Meletakkan di atas elemen lain */
+}
+
+.navigasi-berita .navigasi-item .right-arrow {
+   position: absolute;
+   top: 40%;
+   right: 10%;
+   color: white;
+   z-index: 2;
+   width: 40px;
+   height: 30px;
+   /* Meletakkan di atas elemen lain */
+}
+
+.navigasi-berita .navigasi-item img {
+   width: 100%;
+   height: -webkit-fill-available;
+   object-fit: cover;
+   cursor: pointer;
+   transition: filter 0.3s ease;
+   /* Efek transisi ketika berubah filter */
+}
+
+.navigasi-berita .navigasi-item:hover img {
+   filter: brightness(70%);
+   /* Mengurangi kecerahan gambar ketika dihover */
+}

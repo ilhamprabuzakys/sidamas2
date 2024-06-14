@@ -1,0 +1,132 @@
+<form id="createForm" @submit.prevent="handlePost()">
+    <div class="modal fade" id="createModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Data <b> {title}</b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Satuan Kerja Pelaksana -->
+                    <div class="mb-3">
+                        <label for="create__satker" class="col-form-label required">Satuan Kerja:</label>
+                        <select class="form-control select2" id="create__satker" disabled>
+                            <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                        </select>
+                    </div>
+                    <!--/ Satuan Kerja Pelaksana -->
+
+                    <div class="mb-3">
+                        <label for="nama_stakeholder" class="col-form-label required">Nama stakeholder:</label>
+                        <input type="text" id="nama_stakeholder" class="form-control" v-model="post.stakeholder" />
+                    </div>
+
+                    <label for="dukungan" class="col-form-label text-muted">Dukungan yang diberikan:</label>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div>
+                                <label for="dukungan_jenis" class="col-form-label required">Jenis:</label>
+                                <select class="form-control" name="dukungan_jenis" id="dukungan_jenis" onchange="toggleInput()" v-model="post.jenis">
+                                    <option value="" selected disabled>--Pilih Jenis Dukungan--</option>
+                                    <option value="Dukungan Sarana Produksi" id="DSP">Dukungan Sarana Produksi</option>
+                                    <option value="Dukungan SDM" id="DSSDM">Dukungan SDM</option>
+                                    <option value="Dukungan Lainnya" id="Lainnya">Dukungan Lainnya</option>
+                                </select>
+
+                                <div id="input_lainnya" style="display: none;">
+                                    <label for="dukungan_lainnya" class="col-form-label required">Spesifikasi Dukungan Lainnya:</label>
+                                    <input type="text" class="form-control" name="dukungan_lainnya" id="dukungan_lainnya">
+                                </div>
+                                <!-- <div id="dukungan_jenis_sebutkan" class="d-none mt-3">
+                                    <label for="input_dukungan_jenis_sebutkan" class="col-form-label required">Sebutkan</label>
+                                    <input type="text" id="input_dukungan_jenis_sebutkan" class="form-control w-50 d-inline"
+                                        placeholder="Sebutkan" />
+                                </div> -->
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <label for="dukungan_bentuk" class="col-form-label required">Bentuk:</label>
+                                <input type="text" id="dukungan_bentuk" class="form-control" value="" v-model="post.bentuk"/>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <label for="dukungan_jumlah" class="col-form-label required">Jumlah:</label>
+                                <input type="text" id="dukungan_jumlah" class="form-control" value="" v-model="post.jumlah"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="kawasan_yang_di_intervensi" class="col-form-label required">Kawasanan yang
+                            diintervensi:</label>
+
+                        <div class="row" id="create__kawasan">
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="create__provinsi" v-model="post.provinsi">
+                                    <option value="" selected>--Pilih provinsi--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__kabupaten" v-model="post.kabupaten">
+                                    <option value="" selected>--Pilih kota/kabupaten--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__kecamatan" v-model="post.kecamatan">
+                                    <option value="" selected>--Pilih kecamatan--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__desa" v-model="post.desa">
+                                    <option value="" selected>--Pilih desa/kelurahan--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="mb-3">
+                            <label for="jumlah_sasaran" class="col-form-label required">Jumlah Sasaran:</label>
+                            <input type="text" id="jumlah_sasaran" class="form-control" v-model="post.jumlah_sasaran" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="pengaruh_manfaat" class="col-form-label required">Pengaruh/Manfaat:</label>
+                            <textarea class="form-control" name="pengaruh_manfaat" id="pengaruh_manfaat" v-model="post.pengaruh"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="kesimpulan" class="col-form-label required">Kesimpulan:</label>
+                            <textarea class="form-control" v-model="post.kesimpulan" id="kesimpulan"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+                            <textarea class="form-control" v-model="post.tindak_lanjut" id="tindak_lanjut"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="create__dokumentasi" class="col-form-label required">Dokumentasi File:</label>
+                            <input type="file" class="form-control" id="create__dokumentasi" @change="post.dokumentasi = $event.target.files[0]" required
+                                accept=".csv, .xlsx, .pdf, docx." />
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

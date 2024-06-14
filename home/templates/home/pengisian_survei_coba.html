@@ -1,0 +1,1128 @@
+{% extends 'home/home_base.html' %}
+{% load static %}
+{% block title %} Pengisian Survei {% endblock title %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/home/css/pages/survei.css' %}" />
+<!-- <link rel="stylesheet" href="{% static 'assets/home/css/pages/survei__backup.css' %}" /> -->
+{% endblock %}
+
+{% block container %} container-xl container-fluid {% endblock %}
+
+{% block content %}
+<section id="survei-app">
+    <!-- Blok Masukan Kode -->
+    <section id="masukan-container" ref="masukanContainer">
+        <div class="container">
+            <div class="row justify-content-center align-items-center">
+                <div class="col-lg-6 col-md-8 col-sm-12"> <!-- Perubahan pada col-sm-12 agar responsif di layar hp -->
+                    <div class="text-center mb-5">
+                        <h2>Masukan kode survei anda untuk <br><strong>Membuka</strong> survei!</h2>
+                    </div>
+                    <form @submit.prevent="bukaSurvei()" method="post">
+                        <div class="form">
+                            <div class="mb-3">
+                                <label for="input-code" class="form-label">Kode Survei</label>
+                                <input type="text" class="form-control" name="kode" v-model="kode" id="input-code"
+                                    aria-describedby="helpId" placeholder="">
+                            </div>
+                            <div class="row mt-4">
+                                <div class="col-12 d-flex justify-content-center">
+                                    <button :disabled="kode === ''" type="submit" id="button-masuk"
+                                        class="btn btn-mulai">
+                                        <i class="fas fa-lock-open me-3"></i>Buka Survei
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+    <!-- End of Blok Masukan Kode -->
+
+    <!-- Blok Mulai -->
+    <section id="mulai-container" class="d-none fade-in-out no-highlight" ref="mulaiContainer">
+        <div class="row justify-content-center">
+            <div class="col-lg-4 col-md-6 col-12 d-flex justify-content-center">
+                <img src="{% static 'assets/home/images/survei/mulai-tr.png' %}" alt="" class="img-mulai img-fluid">
+            </div>
+            <div class="col-lg-4 col-md-6 col-12 ms-sm-6 d-flex justify-content-center align-items-center">
+                <div>
+                    <div class="survei-headline">
+                        <h2 class="text-mulai" id="survei_title">
+                            <!-- <span id="survei-title">Survei <span ref="tipe">SKM Tes Urine</span><br></span> -->
+                        </h2>
+                    </div>
+                    <div class="text-description">
+                        <div class="container mt-3">
+                            <div class="col-md-12">
+                                <ul class="mt-3 mb-4">
+                                    <li><span class="option">Tanggal</span> : <span class="isi" ref="tanggal"></span>
+                                    </li>
+                                    <li><span class="option">Waktu</span> : <span class="isi" ref="waktu"></span></li>
+                                    <li><span class="option">Kode</span> : <span class="isi" ref="kode"></span></li>
+                                    <li><span class="option">Status</span> : <span class="isi"
+                                            ref="status">Berlangsung</span></li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-12 col-sm-6 col-md-12">
+                                <span class="h5">Klik tombol <strong>Mulai</strong> untuk memulai survei Anda!</span>
+                                <span class="h5" v-cloak v-if="status_survei == 'berakhir'">
+                                    Mohon maaf survei telah <b>berakhir</b>, nantikan survei selanjutnya dari kami!
+                                </span>
+                                <span class="h5" v-cloak v-if="status_survei == 'belum_dibuka'">
+                                    Mohon maaf survei <b>belum dibuka</b>, kembali lagi ke sini setelah memasuki waktu
+                                    yang ditentukan!
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="row col-12 justify-content-center mb-5">
+            <button type="button" id="button-mulai" class="btn btn-mulai" @click="mulaiSurvei()"
+                v-if="status_survei == 'berlangsung'">
+                <i class="fas fa-play me-3"></i> Mulai
+            </button>
+
+            <button type="button" id="button-mulai" class="btn btn-secondary" @click="kembaliSurvei()"
+                v-if="status_survei != 'berlangsung'">
+                <i class="fas fa-arrow-left me-3"></i> Kembali
+            </button>
+        </div>
+    </section>
+    <!-- End of Blok Mulai -->
+
+    <!-- Block Nama -->
+    <section id="nama-container" class="mt-5 px-5 d-none fade-in-out no-highlight" ref="namaContainer">
+        <div id="pertanyaan">
+            <v-survei.pertanyaan>Nama Lengkap</v-survei.pertanyaan>
+        </div>
+
+        <div id="nama-daftar-pilihan" class="mt-5 fade-in-out">
+            <div class="row justify-content-center">
+                <input type="text" class="form-control" name="nama" id="nama_id" aria-describedby="helpId" placeholder="isi nama lengkap anda">
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col">
+                <v-survei.button-lanjutkan id="button-jk" @click="lanjutkanNama()">Lanjutkan
+                </v-survei.button-lanjutkan>
+            </div>
+        </div>
+    </section>
+    <!-- End Block Nama -->
+
+    <!-- Blok Jenis Kelamin -->
+    <section id="jenis_kelamin-container" class="mt-5 px-5 d-none fade-in-out no-highlight" ref="jenisKelaminContainer">
+        <div id="pertanyaan">
+            <v-survei.pertanyaan>Apa jenis kelamin anda?</v-survei.pertanyaan>
+        </div>
+
+        <div id="jenis_kelamin-daftar-pilihan" class="mt-5 fade-in-out">
+            <div class="container-fluid" style="display: flex;flex-direction: row;flex-wrap: nowrap;align-content: center;justify-content: space-around;align-items: center;">
+                <div class="pilihan ">
+                    <v-survei.pilihan-jenis-kelamin gender="L" button-id="button-jk">
+                    </v-survei.pilihan-jenis-kelamin>
+                </div>
+                <div class="pilihan ">
+                    <v-survei.pilihan-jenis-kelamin gender="P" button-id="button-jk">
+                    </v-survei.pilihan-jenis-kelamin>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col">
+                <v-survei.button-lanjutkan id="button-jk" @click="lanjutkanJenisKelamin()">Lanjutkan
+                </v-survei.button-lanjutkan>
+            </div>
+        </div>
+    </section>
+    <!-- End of Blok Jenis Kelamin -->
+
+    <!-- Blok Rentang Usia -->
+    <section id="usia-container" class="mt-5 px-5 d-none fade-in-out no-highlight" ref="usiaContainer">
+        <div id="pertanyaan">
+            <v-survei.pertanyaan>Berapa usia anda?</v-survei.pertanyaan>
+        </div>
+
+        <div id="usia-daftar-pilihan" class="radio-pilihan mt-5 fade-in-out">
+            <div class="container-fluid" style="display: flex; flex-flow: row; place-content: center space-around; align-items: center; flex-direction: row; flex-wrap: wrap;">
+                <div class="pilihan ">
+                    <v-survei.pilihan-rentang-usia value="12-25" button-id="button-usia">
+                    </v-survei.pilihan-rentang-usia>
+                </div>
+                <div class="pilihan ">
+                    <v-survei.pilihan-rentang-usia value="26-45" button-id="button-usia">
+                    </v-survei.pilihan-rentang-usia>
+                </div>
+                <div class="pilihan ">
+                    <v-survei.pilihan-rentang-usia value="46-65" button-id="button-usia">
+                    </v-survei.pilihan-rentang-usia>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col">
+                <v-survei.button-lanjutkan id="button-usia" @click="lanjutkanRentangUsia()">Lanjutkan
+                </v-survei.button-lanjutkan>
+            </div>
+        </div>
+    </section>
+    <!-- End of Blok Jenis Kelamin -->
+
+    <!-- Blok Pendidikan Terakhir -->
+    <section id="pendidikan_terakhir-container" class="mt-5 px-5 d-none fade-in-out no-highlight"
+        ref="pendidikanTerakhirContainer">
+        <div id="pertanyaan">
+            <v-survei.pertanyaan>Apa pendidikan terakhir anda?</v-survei.pertanyaan>
+        </div>
+
+        <div id="pendidikan_terakhir-daftar-pilihan" class="radio-pilihan mt-5 fade-in-out">
+            <div class="container-fluid pilihan_pendidikan" style="display: flex;flex-flow: wrap;place-content: center space-around;align-items: center;flex-direction: row;align-content: center;flex-wrap: wrap;justify-content: space-between;">
+                <div class="pilihan">
+                    <v-survei.pilihan-pendidikan value="SMP/MTs" button-id="button-pt">SMP/MTs
+                    </v-survei.pilihan-pendidikan>
+                </div>
+                <div class="pilihan">
+                    <v-survei.pilihan-pendidikan value="SMA/SMK/MA" button-id="button-pt">SMA/SMK/MA
+                    </v-survei.pilihan-pendidikan>
+                </div>
+                <div class="pilihan">
+                    <v-survei.pilihan-pendidikan value="Diploma (D1-D4)" button-id="button-pt">Diploma (D1-D4)
+                    </v-survei.pilihan-pendidikan>
+                </div>
+                <div class="pilihan">
+                    <v-survei.pilihan-pendidikan value="Sarjana (S1)" button-id="button-pt">Sarjana (S1)
+                    </v-survei.pilihan-pendidikan>
+                </div>
+                <div class="pilihan">
+                    <v-survei.pilihan-pendidikan value="Magister (S2)" button-id="button-pt">Magister (S2)
+                    </v-survei.pilihan-pendidikan>
+                </div>
+                <div class="pilihan">
+                    <v-survei.pilihan-pendidikan value="Doktor (S3)" button-id="button-pt">Doktor (S3)
+                    </v-survei.pilihan-pendidikan>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col">
+                <v-survei.button-lanjutkan id="button-pt" @click="lanjutkanPendidikanTerakhir()">Lanjutkan
+                </v-survei.button-lanjutkan>
+            </div>
+        </div>
+    </section>
+    <!-- End of Blok Rentang Usia -->
+
+    <!-- Blok Pertanyaan Survei -->
+    <section id="survei-container" class="mt-5 px-5 d-none fade-in-out no-highlight" ref="surveiContainer">
+        <div id="pertanyaan">
+            <v-survei.pertanyaan size="sm">Bagaimana pendapat anda mengenai pelayanan?</v-survei.pertanyaan>
+        </div>
+
+        <div id="daftar-pilihan" class="mt-lg-3 mt-4 fade-in-out" ref="daftarPilihanContainer">
+            <div class="row row-cols-2 row-cols-md-4 g-4">
+                <div class="col">
+                    <div class="pilihan">
+                        <v-survei.pilihan-survei bobot="1" @click="jawab(1)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-1.png' %}">
+                        </v-survei.pilihan-survei>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="pilihan">
+                        <v-survei.pilihan-survei bobot="2" @click="jawab(2)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-2.png' %}">
+                        </v-survei.pilihan-survei>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="pilihan">
+                        <v-survei.pilihan-survei bobot="3" @click="jawab(3)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-3.png' %}">
+                        </v-survei.pilihan-survei>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="pilihan">
+                        <v-survei.pilihan-survei bobot="4" @click="jawab(4)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-4.png' %}">
+                        </v-survei.pilihan-survei>
+                    </div>
+                </div>
+            </div>
+
+            {% comment %} <div class="row d-flex flex-lg-row flex-sm-column mb-3">
+                <div class="pilihan col-lg-3 col-md-3 col-sm-3 mb-2">
+                    <v-survei.pilihan-survei bobot="1" @click="jawab(1)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-1.png' %}">
+                    </v-survei.pilihan-survei>
+                </div>
+                <div class="pilihan col-lg-3 col-md-3 col-sm-3 mb-2">
+                    <v-survei.pilihan-survei bobot="2" @click="jawab(2)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-2.png' %}">
+                    </v-survei.pilihan-survei>
+                </div>
+                <div class="pilihan col-lg-3 col-md-3 col-sm-3 mb-2">
+                    <v-survei.pilihan-survei bobot="3" @click="jawab(3)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-3.png' %}">
+                    </v-survei.pilihan-survei>
+                </div>
+                <div class="pilihan col-lg-3 col-md-3 col-sm-3 mb-2">
+                    <v-survei.pilihan-survei bobot="4" @click="jawab(4)"
+                        src="{% static 'assets/home/images/survei/pilihan/level-4.png' %}">
+                    </v-survei.pilihan-survei>
+                </div>
+            </div> {% endcomment %}
+        </div>
+
+        <div class="container" style="">
+
+            <div class="row">
+                <div class="col-md-3 col-sm-6 col-6" style="padding: 10px;">
+                    <div class="card" style="height: 100%;">
+                        <div class="card-body" style="display:flex;flex-wrap: wrap;flex-direction: column;justify-content: space-between;align-items: center;">
+                          <h5 class="card-title text-center" style="font-size: 80%;">Setuju</h5>
+                          <img src="https://upload-os-bbs.hoyolab.com/upload/2022/09/13/13638533/9c2eacccd702a140be617809b5d447aa_2250250414153389254.png" alt="getTitle" style="width: 80%;" class="card-img-top img-fluid">
+                        </div>
+                      </div>
+                </div>
+                <div class="col-md-3 col-sm-6 col-6" style="padding: 10px;">
+                    <div class="card" style="height: 100%;">
+                        <div class="card-body" style="display:flex;flex-wrap: wrap;flex-direction: column;justify-content: space-between;align-items: center;">
+                            <h5 class="card-title text-center" style="font-size: 80%;">Tidak Setuju</h5>
+                            <img src="https://upload-os-bbs.hoyolab.com/upload/2022/09/13/13638533/9c2eacccd702a140be617809b5d447aa_2250250414153389254.png" alt="getTitle" style="width: 80%;" class="card-img-top img-fluid">
+          
+                        </div>
+                    </div>
+                </div>
+    
+                <div class="col-md-3 col-sm-6 col-6" style="padding: 10px;">
+                    <div class="card" style="height: 100%;">
+                        <div class="card-body" style="display:flex;flex-wrap: wrap;flex-direction: column;justify-content: space-between;align-items: center;">
+                            <h5 class="card-title text-center" style="font-size: 80%;">Sangat Tidak Setuju</h5>
+                            <img src="https://upload-os-bbs.hoyolab.com/upload/2022/09/13/13638533/9c2eacccd702a140be617809b5d447aa_2250250414153389254.png" alt="getTitle" style="width: 80%;" class="card-img-top img-fluid">
+          
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6 col-6" style="padding: 10px;">
+                    <div class="card" style="height: 100%;">
+                        <div class="card-body" style="display:flex;flex-wrap: wrap;flex-direction: column;justify-content: space-between;align-items: center;">
+                            <h5 class="card-title text-center" style="font-size: 80%;">Sangat Setuju</h5>
+                            <img src="https://upload-os-bbs.hoyolab.com/upload/2022/09/13/13638533/9c2eacccd702a140be617809b5d447aa_2250250414153389254.png" alt="getTitle" style="width: 80%;" class="card-img-top img-fluid">
+          
+                        </div>
+                    </div>
+                </div>
+            </div>
+    </div>
+    </section>
+    <!-- End of Blok Pertanyaan Survei -->
+
+    <!-- Blok Selesai -->
+    <section id="selesai-container" class="d-none no-highlight" ref="selesaiContainer">
+        <div class="row justify-content-center">
+            <div class="col-12 d-flex justify-content-center">
+                <img src="{% static 'assets/home/images/survei/check.png' %}" alt="Selesai Survei"
+                    style="width: 120px;">
+            </div>
+            <div class="col-12 mt-3 d-flex justify-content-center">
+                <h3>Terimakasih sudah mengisi survei ini.</h3>
+            </div>
+        </div>
+        <div class="row mt-4">
+            <div class="col-12 mt-4 d-flex justify-content-center">
+                <v-survei.button-keluar @click="keluar()">Keluar</v-survei.button-keluar>
+            </div>
+        </div>
+    </section>
+    <!-- End of Blok Selesai -->
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    const {
+        reactive
+    } = Vue;
+
+    const app = Vue.createApp({
+        name: 'Pengisian Survei',
+        delimiters: ['[[', ']]'],
+        components: {
+            "v-survei.button-lanjutkan": loadComponent('components/survei/ButtonLanjutkan.vue'),
+            "v-survei.button-keluar": loadComponent('components/survei/ButtonKeluar.vue'),
+            "v-survei.pertanyaan": loadComponent('components/survei/Pertanyaan.vue'),
+            "v-survei.pilihan-jenis-kelamin": loadComponent('components/survei/pilihan/PilihanJenisKelamin.vue'),
+            "v-survei.pilihan-rentang-usia": loadComponent('components/survei/pilihan/PilihanRentangUsia.vue'),
+            "v-survei.pilihan-pendidikan": loadComponent('components/survei/pilihan/PilihanPendidikan.vue'),
+            "v-survei.pilihan-survei": loadComponent('components/survei/pilihan/PilihanSurvei.vue'),
+        },
+        data() {
+            return {
+                api: axios.create({
+                    baseURL: `${window.location.origin}/survei/api/v1/`,
+                    headers: getHeaders(),
+                }),
+                url_responden: "data_responden_survei/",
+                url_isi_survei: "data_pengisian_survei/",
+                jawabanSurvei: [],
+                onGoing: false,
+                jawabanJenisKelamin: "",
+                jawabanRentangUsia: "",
+                jawabanPendidikanTerakhir: "",
+                posisiPertanyaan: 0,
+                sedangMenjawab: false,
+                kode: '',
+
+                // Local data
+                tanggal_saat_ini: null,
+                jam_saat_ini: null,
+                status_survei: 'berlangsung',
+
+                // Tampung data
+                tanggal_awal_survei: null,
+                tanggal_akhir_survei: null,
+                jam_awal_survei: null,
+                jam_akhir_survei: null,
+                batas_responden_survei: null,
+                jumlah_responden_survei: null,
+                tipe_survei: null,
+                daftarPertanyaan: [],
+
+                id_survei: null,
+                id_responden: null,
+            };
+        },
+        mounted() {
+            //this.disableDragImage();
+
+            const URL_PARAMS = new URLSearchParams(window.location.search);
+
+            if (URL_PARAMS.has('kode')) {
+                this.kode = URL_PARAMS.get('kode');
+            }
+        },
+        methods: {
+            bukaSurvei() {
+                this.kode = this.kode.trim();
+                //let tanggalSaatIni = moment('26-01-2024', 'DD-MM-YYYY').format('YYYY/MM/DD');
+                this.tanggal_saat_ini = moment().format('YYYY-MM-DD');
+                this.jam_saat_ini = moment().format('HH:mm:ss');
+
+                console.log('Tanggal saat ini : ', this.tanggal_saat_ini);
+                console.log('Jam saat ini : ', this.jam_saat_ini);
+
+                console.log(`Kode yang anda masukan : ${this.kode}`);
+
+                if (this.kode == "") {
+                    Swal.fire({
+                        title: "Terjadi Kesalahan",
+                        html: `Tolong masukkan <b>kode survei</b> anda untuk membuka survei.`,
+                        icon: "warning",
+                        confirmButtonText: "OK",
+                    });
+
+                    return false;
+                };
+
+                Swal.fire({
+                    title: "Mengecek data",
+                    icon: "info",
+                    html: `Sedang mengecek <b>kode</b> yang anda masukan anda`,
+                    allowOutsideClick: false,
+                    didOpen: async () => {
+                        Swal.showLoading();
+                        setTimeout(async () => {
+                            // Mendapatkan data survei
+                            let checkCode = await this.fetchDataSurvei();
+
+                            console.log(`Status kode : ${checkCode}`)
+
+                            if (!checkCode) {
+                                return false;
+                            }
+
+                            let surveiAvailable = this.checkSurveiAvailability();
+
+                            console.log(`Status Ketersediaan : ${surveiAvailable}`);
+
+                            if (!surveiAvailable) {
+                                return false;
+                            }
+
+                            /*
+                                let daftarPertanyaanAvailable = await this.fetchDataTipeSurvei();
+    
+                                console.log(`Status Ketersediaan Pertanyaan : ${daftarPertanyaanAvailable}`);
+    
+                                if (!daftarPertanyaanAvailable) {
+                                    console.error('Terjadi kesalahan pertanyaan tidak dapat dimuat')
+                                    return false;
+                                }
+                            */
+                            if (Array.isArray(checkCode)) {
+                                // window.location.href = "https://www.google.com";
+                                // Show the SweetAlert
+                                    Swal.fire({
+                                        title: 'Berhasil',
+                                        icon: "success",
+                                        html: 'Mengarahkan ke Survei Kewirausahaan',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        didOpen: () => {
+                                            Swal.showLoading()
+                                        }
+                                        }).then(() => {
+                                            window.location.href = window.location.origin + "/persiapan-survei-kewirausahaan/?kode=" + this.kode;
+                                    });
+                            }else{
+                                Swal.fire({
+                                    title: "Berhasil",
+                                    html: `Data Survei ditemukan, akan membuka survei dengan kode <b>${this.kode}</b>.`,
+                                    icon: "success",
+                                    confirmButtonText: "OK",
+                                });
+
+                                this.$refs.masukanContainer.classList.add(
+                                    "d-none");
+                                this.$refs.mulaiContainer.classList.remove(
+                                    "d-none");
+                            }
+
+                        }, 1000);
+                    },
+                });
+            },
+            kembaliSurvei() {
+                this.$refs.masukanContainer.classList.remove(
+                    "d-none");
+                this.$refs.mulaiContainer.classList.add("d-none");
+            },
+            async fetchDataSurvei() {
+                const apiUrl = `data_survei/?kode=${this.kode}`;
+
+                try {
+                    const response = await this.api.get(apiUrl);
+
+                    console.log(response);
+
+                    if (response.data && response.data.results[0]) {
+
+                        let data = response.data.results[0];
+
+                        console.log('Data :', data);
+
+                        this.id_survei = data.id;
+                        this.tipe_survei = data.tipe;
+                        this.tanggal_awal_survei = data.tanggal_awal;
+                        this.tanggal_akhir_survei = data.tanggal_akhir;
+                        this.jam_awal_survei = data.jam_awal;
+                        this.jam_akhir_survei = data.jam_akhir;
+
+                        this.jumlah_responden_survei = data.get_jumlah_responden
+                        this.batas_responden_survei = data.batas_responden
+
+                        // Mengambil daftarPertanyaan dan namaTipe Survei dari satu fetch
+                        this.tipe_survei = data.get_data_tipe[0].nama;
+                        this.daftarPertanyaan = reactive(data.get_data_tipe[0].daftar_pertanyaan);
+
+                        var surveiTitle = $('#survei_title').text(`Survei ${this.tipe_survei}`);
+
+                        // Cek data di sini setelah pemanggilan API selesai
+                        console.log(`Tipe : ${this.tipe_survei}`);
+                        console.log(`Tanggal Awal : ${this.tanggal_awal_survei}`);
+                        console.log(`Tanggal Akhir : ${this.tanggal_akhir_survei}`);
+                        console.log(`Jam Awal : ${this.jam_awal_survei}`);
+                        console.log(`Jam Akhir : ${this.jam_akhir_survei}`);
+                        // Tipe survei dan daftar pertanyaan
+                        console.log(`Nama Tipe : ${this.tipe_survei}`);
+                        console.log(`Daftar Pertanyaan :`, this.daftarPertanyaan);
+
+                        // Set keterangan survei
+                        let tanggal_survei = moment(this.tanggal_awal_survei).format('DD MMMM YYYY')
+                            ;
+
+                        if (data.tanggal_akhir) {
+                            tanggal_survei += ` s/d ${moment(this.tanggal_akhir_survei).format('DD MMMM YYYY')}`;
+                        }
+
+                        this.$refs.tanggal.innerHTML = `${tanggal_survei}`;
+
+                        this.$refs.waktu.innerHTML = `${moment(this.jam_awal_survei, 'HH:mm:ss').format('HH:mm')} - ${moment(this.jam_akhir_survei, 'HH:mm:ss').format('HH:mm')}`;
+                        this.$refs.kode.innerHTML = `${data.kode}`;
+
+                        // pengecekan kewirausahaan
+                        if (this.tipe_survei == "Keberhasilan dan Kewirausahaan") {
+                            return [true, 'kewirausahaan'];
+                        } else {
+                            return true;
+                        }
+
+                    } else {
+                        Swal.fire({
+                            title: "Terjadi Kesalahan",
+                            html: `Survei dengan kode <b>${this.kode}</b> tidak ditemukan.`,
+                            icon: "error",
+                            confirmButtonText: "OK",
+                        });
+                        
+                        console.error('Error fetching data: Response data is undefined or empty.', response.data);
+
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error msg: ', error);
+
+                    return false;
+
+                    Swal.fire({
+                        title: "Terjadi Kesalahan",
+                        html: `Terjadi Kesalahan <b>tidak diketahui</b>, kontak developer untuk mengatasi masalah ini.`,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                }
+            },
+            async fetchDataTipeSurvei() {
+                const apiUrl = `${window.location.origin}/survei/api/v1/tipe_survei/${this.tipe_survei}`;
+
+                try {
+                    const response = await axios.get(apiUrl);
+
+                    if (response.data) {
+                        let data = response.data;
+
+                        this.tipe_nama_survei = data.nama;
+                        this.daftarPertanyaan = reactive(data.daftar_pertanyaan);
+
+                        // Cek data di sini setelah pemanggilan API selesai
+                        console.log(`Nama Tipe : ${this.tipe_nama_survei}`);
+                        console.log(`Daftar Pertanyaan :`, this.daftarPertanyaan);
+
+                        return true;
+                    } else {
+                        Swal.fire({
+                            title: "Terjadi Kesalahan",
+                            html: `Daftar pertanyaan dengan tipe survei <b>${this.tipe_survei}</b> tidak dapat ditemukan.`,
+                            icon: "error",
+                            confirmButtonText: "OK",
+                        });
+                        console.error('Error fetching data: Response data is undefined or empty.');
+                        return false;
+                    }
+                } catch (error) {
+                    console.error('Error msg: ', error);
+
+                    return false;
+
+                    Swal.fire({
+                        title: "Terjadi Kesalahan",
+                        html: `Terjadi Kesalahan <b>tidak diketahui</b>, kontak developer untuk mengatasi masalah ini.`,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+                }
+            },
+            checkSurveiAvailability() {
+                console.log('Tanggal saat ini kurang dari tanggal awal survei ? : ', this.tanggal_saat_ini <= this.tanggal_awal_survei)
+
+                // Cek batas responden survei
+                if (this.jumlah_responden_survei >= this.batas_responden_survei) {
+                    Swal.fire({
+                        title: "Mohon Maaf",
+                        html: `Tidak dapat mengisi survei dikarenakan <br>kuota responden survei <b>sudah penuh</b>.`,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+
+                    this.kode = '';
+                    this.$refs.status.innerHTML = 'Berakhir';
+
+                    return false;
+                }
+
+                const status_tanggal = this.cekStatusTanggal(this.tanggal_awal_survei, this.tanggal_akhir_survei);
+
+                console.log('Status cek tanggal : ', status_tanggal);
+
+                let text = `${this.tanggal_awal_survei}`;
+
+                if (this.tanggal_akhir_survei) {
+                    text += ` sampai ${this.tanggal_akhir_survei}`;
+                }
+
+                if (!status_tanggal) {
+                    Swal.fire({
+                        title: "Mohon Maaf",
+                        html: `Survei hanya berlaku pada Tanggal <b>${text}</b>.`,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+
+                    this.kode = '';
+                    this.$refs.status.innerHTML = 'Berakhir';
+
+
+                    return false;
+                }
+
+                // Cek waktu survei
+                const status_waktu = this.jam_saat_ini >= this.jam_awal_survei && this.jam_saat_ini <= this.jam_akhir_survei;
+
+                if (!status_waktu) {
+                    Swal.fire({
+                        title: "Mohon Maaf",
+                        html: `Survei hanya berlaku pada waktu <br> <b>${this.jam_awal_survei} - ${this.jam_akhir_survei}</b>.`,
+                        icon: "error",
+                        confirmButtonText: "OK",
+                    });
+
+                    this.kode = '';
+
+                    return false;
+                }
+
+                console.log(`Status tanggal : ${status_tanggal}`)
+                console.log(`Status waktu : ${status_waktu}`)
+
+                return status_tanggal && status_waktu;
+            },
+            cekStatusTanggal(tanggalAwal, tanggalAkhir) {
+                const tanggalSaatIni = moment();
+                const parsedTanggalAwal = moment(tanggalAwal);
+                const parsedTanggalAkhir = tanggalAkhir ? moment(tanggalAkhir) : null;
+
+                if (parsedTanggalAkhir) {
+                    if (tanggalSaatIni.isBetween(parsedTanggalAwal, parsedTanggalAkhir, null, '[]')) {
+                        console.log('Masuk ke between');
+                        return true; // Tanggal saat ini berada di antara tanggal_awal_survei dan tanggal_akhir_survei
+                    }
+                } else {
+                    if (tanggalSaatIni.isSame(parsedTanggalAwal, 'day')) {
+                        console.log('Masuk ke sama');
+                        return true; // Tanggal saat ini sama dengan tanggal_awal_survei
+                    }
+                }
+
+
+                if (tanggalSaatIni == parsedTanggalAwal) {
+                    return true;
+                }
+                console.log('Tanggal saat ini sama dengan tgl awal :', tanggalSaatIni.isSame(parsedTanggalAwal, 'day'));
+
+                return false; // Tanggal saat ini tidak berada di antara tanggal_awal_survei dan tanggal_akhir_survei
+            },
+            mulaiSurvei() {
+                this.onGoing = true;
+                this.$refs.mulaiContainer.classList.add("d-none");
+                // this.$refs.jenisKelaminContainer.classList.remove("d-none");
+                this.$refs.namaContainer.classList.remove("d-none")
+
+                this.muatSurvei();
+            },
+            lanjutkanNama() {
+                this.onGoing = true;
+                this.nama = $('#nama_id').val();
+                const CSRF_TOKEN = getCookie('csrftoken');
+
+                if (!this.nama) {
+                    Swal.fire({
+                        title: "Terjadi Kesalahan",
+                        text: "Nama harus diisi !",
+                        icon: "error"
+                    });
+                } else {
+                    Swal.fire({
+                        title: "Tunggu sebentar",
+                        icon: "info",
+                        text: "Pengecekan nama !",
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    });
+
+                    formData = {
+                        nama: this.nama
+                    }
+
+                    axios.post('/survei/api/v1/data_responden_survei/get_nama/',formData, {
+                        headers: {
+                            'X-CSRFToken': CSRF_TOKEN,
+                            'Content-Type': 'application/json',
+                        }
+                    })
+                    .then((response) => {
+                        console.log(response);
+                        isi_data = response.data.data;
+
+                        Swal.close();
+
+                        if (isi_data == true) {
+                            Swal.fire({
+                                title: "Terjadi Kesalahan",
+                                text: "Nama sudah terdaftar !",
+                                icon: "error"
+                            });
+                        } else {
+                            this.$refs.namaContainer.classList.add("d-none");
+                            this.$refs.jenisKelaminContainer.classList.remove("d-none");
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error performing Axios request:', error);
+                    }); 
+                }
+            },
+            lanjutkanJenisKelamin() {
+                /* Mendapatkan nilai dari radio button jenis_kelamin yang dipilih */
+                const selectedJenisKelamin = document.querySelector(
+                    'input[name="jenis_kelamin"]:checked'
+                );
+
+                /* Pengecekan jika user tidak memilih satu pun radio button */
+                if (!selectedJenisKelamin) {
+                    /* Menampilkan pesan error jika user tidak memilih opsi */
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Tolong pilih jenis kelamin anda.",
+                        showConfirmButton: true,
+                        confirmButtonText: "Oke",
+                        timer: 4000,
+                    });
+                } else {
+                    /* Menyimpan nilai yang dipilih ke dalam variabel jawabanJenisKelamin */
+                    this.jawabanJenisKelamin = selectedJenisKelamin.value;
+
+                    this.$refs.jenisKelaminContainer.classList.add("d-none");
+                    this.$refs.usiaContainer.classList.remove("d-none");
+                }
+            },
+            lanjutkanRentangUsia() {
+                /* Mendapatkan nilai dari radio button rentang_usia yang dipilih */
+                const selectedRentangUsia = document.querySelector(
+                    'input[name="rentang_usia"]:checked'
+                );
+
+                /* Pengecekan jika user tidak memilih satu pun radio button */
+                if (!selectedRentangUsia) {
+                    /* Menampilkan pesan error jika user tidak memilih opsi */
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Tolong pilih rentang usia anda.",
+                        showConfirmButton: true,
+                        confirmButtonText: "Oke",
+                        timer: 4000,
+                    });
+                } else {
+                    /* Menyimpan nilai yang dipilih ke dalam variabel jawabanRentangUsia */
+                    this.jawabanRentangUsia = selectedRentangUsia.value;
+
+                    this.$refs.usiaContainer.classList.add("d-none");
+                    this.$refs.pendidikanTerakhirContainer.classList.remove("d-none");
+                }
+            },
+            lanjutkanPendidikanTerakhir() {
+                /* Mendapatkan nilai dari radio button yang dipilih */
+                const selectedPendidikanTerakhir = document.querySelector(
+                    'input[name="pendidikan_terakhir"]:checked'
+                );
+
+                /* Pengecekan jika user tidak memilih satu pun radio button */
+                if (!selectedPendidikanTerakhir) {
+                    /* Menampilkan pesan error jika user tidak memilih opsi */
+                    Swal.fire({
+                        icon: "error",
+                        title: "Error",
+                        text: "Tolong pilih pendidikan terakhir anda.",
+                        showConfirmButton: true,
+                        confirmButtonText: "Oke",
+                        timer: 4000,
+                    });
+                } else {
+                    /* Menyimpan nilai yang dipilih ke dalam variabel jawabanPendidikanTerakhir */
+                    this.jawabanPendidikanTerakhir = selectedPendidikanTerakhir.value;
+
+                    this.$refs.pendidikanTerakhirContainer.classList.add("d-none");
+                    this.$refs.surveiContainer.classList.remove("d-none");
+                }
+            },
+            muatSurvei() {
+                const pertanyaanSekarang = this.daftarPertanyaan[this.posisiPertanyaan];
+
+                this.$refs.surveiContainer.classList.add("fade-out");
+                this.$refs.daftarPilihanContainer.classList.add("fade-out");
+
+                setTimeout(() => {
+
+                    this.$refs.surveiContainer.classList.remove("fade-out");
+                    this.$refs.daftarPilihanContainer.classList.remove("fade-out");
+
+                    // document.getElementById('questionNumber').innerText = `Pertanyaan #${posisiPertanyaan + 1}`;
+                    document.querySelector("#survei-container #questionText").innerText =
+                        pertanyaanSekarang.pertanyaan;
+
+                    const opsi = pertanyaanSekarang.jawaban;
+
+                    document.getElementById("option1").innerText = opsi[0].opsi;
+                    document.getElementById("option2").innerText = opsi[1].opsi;
+                    document.getElementById("option3").innerText = opsi[2].opsi;
+                    document.getElementById("option4").innerText = opsi[3].opsi;
+                }, 500);
+            },
+            jawab(nilaiDipilih) {
+                if (this.sedangMenjawab) return;
+
+                this.sedangMenjawab = true;
+
+                const opsiDipilih = parseInt(nilaiDipilih) - 1;
+
+                const tampunganJawaban = this.daftarPertanyaan[this.posisiPertanyaan];
+                const jawaban = {
+                    no: this.posisiPertanyaan + 1,
+                    jawaban: opsiDipilih + 1,
+                    bobot: tampunganJawaban.jawaban[opsiDipilih].nilai,
+                    pilihan: String.fromCharCode(97 + opsiDipilih),
+                };
+
+                this.jawabanSurvei.push(jawaban);
+
+                this.posisiPertanyaan++;
+
+                if (this.posisiPertanyaan < this.daftarPertanyaan.length) {
+                    this.muatSurvei();
+                    /* Resetting the hover effect on card */
+                    document.querySelectorAll("#daftar-pilihan .card").forEach((card) => {
+                        card.style.transition = "none";
+                        card.style.marginBottom = "0";
+                    });
+                } else {
+                    this.$refs.surveiContainer.classList.add("d-none");
+                    this.$refs.selesaiContainer.classList.remove("d-none");
+
+                    this.hitungDanTampilkanHasil();
+                    this.onGoing = false;
+                }
+
+                // Menetapkan kembali hover effect setelah sedikit waktu
+                setTimeout(() => {
+                    document.querySelectorAll(".card").forEach((card) => {
+                        card.style.transition = ""; // Mengembalikan transisi ke nilai default
+                        card.style.marginBottom =
+                            ""; // Mengembalikan margin-bottom ke nilai default
+                    });
+                    this.sedangMenjawab = false;
+                }, 800); // Dikasih delay
+            },
+            keluar() {
+                this.id_responden = null;
+                //this.id_survei = null;
+                this.jawabanSurvei = [];
+
+                this.$refs.surveiContainer.classList.add("d-none");
+                this.$refs.selesaiContainer.classList.add("d-none");
+
+                this.$refs.mulaiContainer.classList.remove("d-none");
+
+                this.posisiPertanyaan = 0;
+
+                // Reset radio button untuk jenis_kelamin
+                this.resetRadioButtons("jenis_kelamin");
+
+                // Reset radio button untuk rentang_usia
+                this.resetRadioButtons("rentang_usia");
+
+                // Reset radio button untuk pendidikan_terakhir
+                this.resetRadioButtons("pendidikan_terakhir");
+
+                const btnMulai = document.querySelectorAll(
+                    ".btn-mulai:not(#mulai-container .btn-mulai)"
+                );
+
+                btnMulai.forEach((btn) => {
+                    btn.classList.add("disabled");
+                });
+            },
+            kirimDataResponden() {
+                const data = {
+                    nama:this.nama,
+                    rentang_usia: this.jawabanRentangUsia,
+                    pendidikan: this.jawabanPendidikanTerakhir,
+                    jenis_kelamin: this.jawabanJenisKelamin,
+                    survei: this.id_survei
+                };
+
+                console.log('Data responden: ', data);
+
+                this.api.post(this.url_responden, data)
+                    .then((response) => {
+                        console.log(response);
+                        console.log("Data responden berhasil dibuat:", response.data);
+
+                        this.id_responden = response.data.id;
+
+                        console.log('Data responden berhasil dikirim. ID Responden Baru:', this.id_responden);
+
+                        // Setelah mendapatkan ID responden, kirim hasil survei
+                        this.kirimHasil();
+                    })
+                    .catch((error) => {
+                        console.error("Gagal mengirim data:", error);
+                    });
+            },
+            kirimHasil() {
+                const hasilSurvei = this.jawabanSurvei.map((jawaban) => {
+                    return {
+                        no: jawaban.no,
+                        jawaban: jawaban.jawaban,
+                        bobot: jawaban.bobot,
+                        pilihan: jawaban.pilihan,
+                    };
+                });
+
+                const arrayNilaiJawaban = hasilSurvei.map((jawaban) =>
+                    parseInt(jawaban.bobot, 10)
+                );
+                const sigmaNilai = arrayNilaiJawaban.reduce((a, b) => a + b, 0);
+
+                const dataHasilSurvei = {
+                    array_nilai_jawaban: arrayNilaiJawaban.join(","),
+                    data_mentahan: JSON.stringify(hasilSurvei),
+                    sigma_nilai: sigmaNilai,
+                    responden: this.id_responden,
+                    survei: this.id_survei,
+                };
+
+                this.api.post(this.url_isi_survei, dataHasilSurvei)
+                    .then((response) => {
+                        console.log("Data hasil survei berhasil dikirim:", response.data);
+                    })
+                    .catch((error) => {
+                        console.error("Gagal mengirim data hasil survei:", error);
+                    });
+            },
+            lihatHasilJawaban() {
+                const hasilSurvei = this.jawabanSurvei.map((jawaban) => {
+                    return {
+                        no: jawaban.no,
+                        jawaban: jawaban.jawaban,
+                        bobot: jawaban.bobot,
+                        pilihan: jawaban.pilihan,
+                    };
+                });
+
+                // const hasilSurveiJSON = JSON.stringify(hasilSurvei);
+                console.log("Hasil Survei:", hasilSurvei);
+            },
+            hitungDanTampilkanHasil() {
+                this.lihatHasilJawaban();
+                this.kirimDataResponden();
+            },
+            hitungNilai() {
+                const totalNilai = this.jawabanSurvei.reduce(
+                    (acc, jawaban) => acc + parseInt(jawaban.bobot),
+                    0
+                );
+                const rataRata = totalNilai / daftarPertanyaan.length;
+
+                /*
+                  Untuk perhitungan harus berdasarkan lebih dari 2 pengisian
+               */
+                const NRRTertimbang = rataRata * 0.11;
+                const IKM = NRRTertimbang * 25;
+                let MutuPelayanan = "";
+
+                /*
+                    Mutu Pelayanan :
+                    A (Sangat Baik)			: 88,31 - 100,00
+                    B (Baik)			: 76,61 - 88,30
+                    C (Kurang Baik)			: 65,00 - 76,60
+                    D (Tidak Baik)			: 25,00 - 64,99
+               */
+
+                if (IKM >= 88.31) {
+                    MutuPelayanan = "A (Sangat Baik)";
+                } else if (IKM >= 76.61) {
+                    MutuPelayanan = "B (Baik)";
+                } else if (IKM >= 65.0) {
+                    MutuPelayanan = "C (Kurang Baik)";
+                } else {
+                    MutuPelayanan = "D (Tidak Baik)";
+                }
+
+                console.log("Total Nilai:", totalNilai);
+                console.log("Rata-rata:", rataRata);
+                console.log("NRR tertimbang per unsur:", NRRTertimbang);
+                console.log("IKM:", IKM);
+                console.log("Mutu Pelayanan:", MutuPelayanan);
+            },
+            resetRadioButtons(name) {
+                const radioButtons = document.querySelectorAll(
+                    `input[type="radio"][name="${name}"]`
+                );
+
+                radioButtons.forEach((radio) => {
+                    radio.checked = false;
+                });
+            },
+            disableDragImage() {
+                document.querySelectorAll("img").forEach(function (img) {
+                    if (!img) {
+                        return;
+                    }
+                    img.setAttribute("draggable", "false");
+
+                    // Membuat elemen overlay
+                    let overlay = document.createElement("div");
+                    overlay.className = "image-overlay";
+
+                    // Menambahkan overlay ke dalam elemen gambar
+                    img.parentNode.insertBefore(overlay, img);
+
+                    img.addEventListener("contextmenu", function (e) {
+                        e.preventDefault();
+                        console.log("tidak boleh right click!");
+                    });
+
+                    img.addEventListener("touchstart", function (e) {
+                        touchStartTime = new Date().getTime();
+                    });
+
+                    img.addEventListener("touchend", function (e) {
+                        let touchEndTime = new Date().getTime();
+                        let touchDuration = touchEndTime - touchStartTime;
+
+                        // Menentukan durasi tekan lama (misal: 500ms)
+                        let longPressDuration = 500;
+
+                        if (touchDuration >= longPressDuration) {
+                            e.preventDefault(); // Mencegah pop-up detail gambar muncul
+                            console.log("Tekan lama dinonaktifkan");
+                        }
+                    });
+                });
+            }
+        }
+    });
+
+    const emitter = window.mitt();
+
+    app.config.globalProperties.emitter = emitter;
+
+    app.mount('#survei-app')
+</script>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

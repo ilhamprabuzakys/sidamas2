@@ -1,0 +1,134 @@
+<form action="javascript:void(0);" onsubmit="handlePost(event)">
+  <div class="modal fade" id="createModal" aria-labelledby="createModal" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="createModal">Tambah Data</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <div class="row mb-3">
+            <div class="mb-3">
+              <label for="create__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+              <select required class="form-control select2" disabled id="create__satker">
+                <option value="{{user.profile.satker_id}}" selected>{{ user.profile.satker }}</option>
+              </select>
+            </div>
+            <div class="row mb-3 range_date">
+              <div class="col-6">
+                <div class="mb-3">
+                  <label for="create__tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                  <input required type="date" id="create__tanggal_awal" class="form-control" required />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-3">
+                  <label for="create__tanggal_akhir" class="col-form-label">Tanggal Akhir:</label>
+                  <input required type="date" id="create__tanggal_akhir" class="form-control" />
+                </div>
+              </div>
+              <label for="pelaksanaan" class="col-form-label" style="color: #00A0A9;">Jika pelaksanaan hanya berlangsung
+                selama satu hari, tanggal akhir tidak perlu diisi.</label>
+            </div>
+          </div>
+          <!-- Form Repeater : Peserta -->
+          <div class="mb-3">
+            <label for="peserta" class="col-form-label required text-muted">Peserta:</label>
+            <div class="form-repeater create">
+              <div data-repeater-list="peserta-group">
+                <div data-repeater-item>
+                  <div class="row">
+                    <div class="mb-3 col-lg-5 col-sm-10 mb-0">
+                      <label class="form-label" for="form-repeater-1-1">Nama </label>
+                      <input required type="text" id="form-repeater-1-1" class="form-control"
+                        placeholder="Nama Peserta" />
+                    </div>
+                    <div class="mb-3 col-lg-5 col-sm-10 mb-0">
+                      <label class="form-label" for="form-repeater-1-1">Jabatan </label>
+                      <input required type="text" id="form-repeater-1-2" class="form-control" placeholder="Jabatan" />
+                    </div>
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 d-flex align-items-center mb-0">
+                      <button class="btn btn-label-danger mt-4" data-repeater-delete type="button" value="Delete">
+                        <i class="ti ti-x ti-xs me-1"></i>
+                        <span class="align-middle">Hapus</span>
+                      </button>
+                    </div>
+                  </div>
+                  <hr class="mx-n4">
+                </div>
+              </div>
+              <div class="mb-0">
+                <button class="btn btn-primary" data-repeater-create type="button" value="Add">
+                  <i class="ti ti-plus me-1"></i>
+                  <span class="align-middle">Tambah peserta</span>
+                </button>
+              </div>
+            </div>
+          </div>
+          <div class="mb-3">
+            <label for="create__stakeholder" class="col-form-label required">Stakeholder/Pendamping Yang
+              Diundang:</label>
+            <input required type="text" class="form-control" id="create__stakeholder">
+          </div>
+          <div class="mb-3">
+            <label for="create__deskripsi" class="col-form-label required">Deskripsi</label>
+            <textarea required class="form-control" id="create__deskripsi"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="create__kendala" class="col-form-label required">Kendala:</label>
+            <textarea required class="form-control" id="create__kendala"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="create__kesimpulan" class="col-form-label required">Kesimpulan:</label>
+            <textarea required class="form-control" id="create__kesimpulan"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+            <textarea required class="form-control" id="create__tindak_lanjut"></textarea>
+          </div>
+          <div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label for="create__anggaran" class="col-form-label required">Anggaran:</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Rp</span>
+                  <input type="text" id="create__anggaran" class="form-control mask-currency" required />
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="create__penyerapan_anggaran" class="col-form-label required">Penyerapan Anggaran:</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Rp</span>
+                  <input type="text" id="create__penyerapan_anggaran" class="form-control mask-currency" />
+                </div>
+              </div>
+              <div class="mb-3 alert alert-warning" role="alert">
+                Terdapat selisih sebesar Rp <span id="amount">0</span>
+              </div>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="mb-3">
+                <label for="create__drive_url" class="col-form-label required">Tautan Drive</label>
+                <input type="url" class="form-control" id="create__drive_url" required />
+                <div class="text-muted mt-2">Contoh: https://drive.google.com/****</div>
+              </div>
+              <div class="mb-3">
+                <label for="create__dokumentasi" class="col-form-label required">Dokumentasi</label>
+                <input type="file" class="form-control" id="create__dokumentasi" required accept=".xlsx, .pdf, docx." />
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+              class="fas fa-xmark me-2"></i>Tutup</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

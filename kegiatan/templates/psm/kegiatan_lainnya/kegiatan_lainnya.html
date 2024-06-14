@@ -1,0 +1,969 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Kegiatan Lainnya
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+  <div class="row">
+    <h3 class="heading mb-2">Kegiatan Lainnya</h3>
+    <span class="mb-0">
+      <span class="text-muted fw-light">Kegiatan /</span>
+      <span class="ms-1 fw-medium">Kegiatan Lainnya</span>
+    </span>
+  </div>
+</div>
+
+<section id="__data">
+  <div class="card">
+    <div class="card-body">
+      <div id="headline" class="mb-3">
+        <h3 class="text-center">
+          KEGIATAN Lainnya<br />
+          <span id="currentYear"></span>
+        </h3>
+        <hr />
+      </div>
+
+      <div class="action-button">
+        <div class="d-flex justify-content-end mb-3 gap-2">
+          <button class="btn btn-success" onclick="handleExport()"><i class="fas fa-file-export me-2"></i>Ekspor
+            Data</button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i
+              class="fas fa-plus me-2"></i>Tambah Data</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        {% include 'psm/kegiatan_lainnya/part/table.html' %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/dashboard/js/bawaan/forms-extras.js' %}"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+
+<script>
+  let table;
+  var id_edit_global;
+  const TIPE_kegiatan = {{ user.profile.satker.level }}
+  const { createApp, ref, onMounted, computed } = Vue;
+
+  createApp({
+    setup() {
+      let rakernisData = ref(null);
+      let satkerLevel = parseInt('{{ user.profile.satker.level }}');
+      let perPage = ref(10);
+      let currentPage = ref(1);
+      let searchField = ref(null);
+      let filteredPage = ref(null);
+      const filter = ref({ search: '', date: '', kegiatan: '' });
+
+      const totalPage = computed(() => {
+        return filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0;
+      });
+
+      const pagedData = computed(() => {
+        if (filteredPage.value) {
+          const startIndex = (currentPage.value - 1) * perPage.value;
+          const endIndex = currentPage.value * perPage.value;
+          return filteredPage.value.slice(startIndex, endIndex);
+        }
+        else return [];
+      });
+
+      function searchData(e) {
+        currentPage.value = 1;
+
+        filteredPage.value = rakernisData.value.filter((data) => {
+          idx = String(data.satker.toUpperCase());
+          satker = String(data.satker.toUpperCase());
+          kegiatan = String(data.kegiatan.toUpperCase());
+          tempat = String(data.tempat.toUpperCase());
+          waktu = String(data.waktu.toUpperCase());
+          lingkungan = String(data.lingkungan.toUpperCase());
+          jumlah = String(data.jumlah);
+          hasil = String(data.hasil.toUpperCase());
+          kesimpulan = String(data.kesimpulan.toUpperCase());
+          tindak_lanjut = String(data.tindak_lanjut.toUpperCase());
+
+          bool1 = idx.indexOf(searchField.value.toUpperCase()) > -1;
+          bool2 = satker.indexOf(searchField.value.toUpperCase()) > -1;
+          bool3 = kegiatan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool5 = tempat.indexOf(searchField.value.toUpperCase()) > -1;
+          bool6 = waktu.indexOf(searchField.value.toUpperCase()) > -1;
+          bool7 = lingkungan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool8 = jumlah.indexOf(searchField.value.toUpperCase()) > -1;
+          bool9 = hasil.indexOf(searchField.value.toUpperCase()) > -1;
+          bool10 = kesimpulan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool11 = tindak_lanjut.indexOf(searchField.value.toUpperCase()) > -1;
+
+          return bool1 || bool2 || bool3 || bool5 || bool6 || bool7 || bool8 || bool9 || bool11;
+        });
+      };
+
+      const goToNextPage = (current, total) => {
+        if (currentPage.value < total) {
+          currentPage.value++;
+        }
+      }
+
+      const goToPreviousPage = (current, total) => {
+        if (currentPage.value > 0) {
+          currentPage.value--;
+        }
+      }
+
+      const handleFilterDate = async () => {
+        if (filter.value.date == '') {
+          filteredPage.value = rakernisData.value;
+          return;
+        }
+
+        const dateParts = filter.value.date.split('-');
+        const datePartStart = dateParts[0].trim();
+        const datePartEnd = dateParts[1].trim();
+
+        const startDate = moment(datePartStart, 'YYYY-MM-DD');
+        const endDate = moment(datePartEnd, 'YYYY-MM-DD');
+
+        filteredPage.value = rakernisData.value.filter(item => {
+          const itemDate = moment(item.start_date, 'YYYY-MM-DD');
+          console.log(itemDate);
+          // console.log(itemDate.isBetween(moment(startDate), moment(endDate), null, '[]'));
+          return itemDate.isBetween(startDate, endDate, null, '[]');
+
+        });
+      }
+
+      function hideableButton(status, satkerLevel, type) {
+        if (type == 'kirim') {
+          return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        } else if (type == 'edit') {
+          return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        }
+      }
+
+      const apiURL = (satkerLevel == 1 ? '/kegiatan/api/v1/psm/kegiatan_lainnya/get_data_bnnk/?format=datatables' : '/kegiatan/api/v1/psm/kegiatan_lainnya/?format=datatables')
+
+      function loadData() {
+        tableContent = [];
+        axios.get(apiURL).then(function (response) {
+          data = response.data.data;
+
+          for ([key, value] of Object.entries(data)) {
+            // untuk satker tingkat BNNP
+            if (value.data && value.data.length > 0) {
+              baris = {
+                class: "table-primary",
+                hide_satker: false,
+                index: parseInt(key) + 1,
+                satker: value.satker.nama_satker + "(" + value.data.length + " kegiatan)",
+                kegiatan: "",
+                tempat: "",
+                waktu: "",
+                lingkungan: "",
+                jumlah: "",
+                hasil: "",
+                kesimpulan: "",
+                tindak_lanjut: "",
+                dokumentasi: "",
+
+                kegiatan_akun: "",
+                uraian_kegiatan: "",
+                pendapatan: "",
+                drive_url: "",
+                anggaran: "",
+                penyerapan_anggaran: "",
+
+                aksi: "",
+                status: "",
+                level: "",
+                type: "parent",
+                id: value.id,
+              };
+
+              tableContent.push(baris);
+
+              // untuk detail dari satker BNNP
+              for ([key2, value2] of Object.entries(value.data)) {
+                baris = {
+                  class: "table",
+                  hide_satker: true,
+                  index: parseInt(key) + 1 + "." + (parseInt(key2) + 1),
+                  satker: value2.satker.nama_satker,
+                  kegiatan: value2.kegiatan,
+                  tempat: value2.tempat,
+                  waktu: value2.waktu_awal + " s/d " + value2.waktu_akhir,
+                  lingkungan: value2.lingkungan,
+                  jumlah: value2.jumlah_sasaran,
+                  hasil: value2.hasil_dampak,
+                  kesimpulan: value2.kesimpulan,
+                  tindak_lanjut: value2.tindak_lanjut,
+                  dokumentasi: value2.dokumentasi,
+
+                  kegiatan_akun: value2.kegiatan_akun,
+                  uraian_kegiatan: value2.uraian_kegiatan,
+                  pendapatan: value2.pendapatan,
+                  drive_url: value2.drive_url,
+                  anggaran: 'Rp ' + parseInt(value2.anggaran).toLocaleString('id-ID'),
+                  penyerapan_anggaran: 'Rp ' + parseInt(value2.penyerapan_anggaran).toLocaleString('id-ID'),
+
+                  aksi: "",
+                  status: value2.status,
+                  level: value2.satker.level,
+                  type: "first__child",
+                  id: value2.id,
+                  start_date: value2.tanggal_awal,
+                  end_date: value2.tanggal_akhir,
+                  kirim: hideableButton(value2.status, satkerLevel, "kirim"),
+                  edit: hideableButton(value2.status, satkerLevel, "edit"),
+                };
+
+                tableContent.push(baris);
+              }
+
+              // untuk mengecek
+              if (value.detail !== undefined && value.detail.length > 0) {
+                // untuk satker bnnknya
+                for ([key3, value3] of Object.entries(value.detail)) {
+                  baris = {
+                    class: "table-primary",
+                    hide_satker: false,
+                    index:
+                      parseInt(key) + 1 + "." + (parseInt(key2) + 1) + "." + (parseInt(key3) + 1),
+                    satker: value3.satker.nama_satker + "(" + value3.data.length + " kegiatan)",
+                    tanggal: "",
+                    nama_lingkungan: "",
+                    nama_jabatan: "",
+                    pria: "",
+                    wanita: "",
+                    jumlah_peserta: "",
+                    status_indeks: "",
+                    nilai_ikp: "",
+                    status_ikp: "",
+                    deskripsi_hasil: "",
+                    simpulan: "",
+                    tindak_lanjut: "",
+                    dokumentasi: "",
+
+                    kegiatan_akun: "",
+                    uraian_kegiatan: "",
+                    pendapatan: "",
+                    drive_url: "",
+                    anggaran: "",
+                    penyerapan_anggaran: "",
+
+                    aksi: "",
+                    status: "",
+                    level: "",
+                    type: "parent",
+                    id: value3.id,
+                  };
+
+                  tableContent.push(baris);
+
+                  // untuk detail data satker bnnknya
+                  for ([key4, value4] of Object.entries(value3.data)) {
+                    baris = {
+                      class: "table",
+                      hide_satker: true,
+                      index:
+                        parseInt(key) +
+                        1 +
+                        "." +
+                        (parseInt(key2) + 1) +
+                        "." +
+                        (parseInt(key3) + 1) +
+                        "." +
+                        (parseInt(key4) + 1),
+                      satker: value4.satker.nama_satker,
+                      kegiatan: value4.kegiatan,
+                      tempat: value4.tempat,
+                      waktu: value4.waktu_awal + " s/d " + value4.waktu_akhir,
+                      lingkungan: value4.lingkungan,
+                      jumlah: value4.jumlah_sasaran,
+                      hasil: value4.hasil_dampak,
+                      kesimpulan: value4.kesimpulan,
+                      tindak_lanjut: value4.tindak_lanjut,
+                      dokumentasi: value4.dokumentasi,
+
+                      kegiatan_akun: value4.kegiatan_akun,
+                      uraian_kegiatan: value4.uraian_kegiatan,
+                      pendapatan: value4.pendapatan,
+                      drive_url: value4.drive_url,
+                      anggaran: 'Rp ' + parseInt(value4.anggaran).toLocaleString('id-ID'),
+                      penyerapan_anggaran: 'Rp ' + parseInt(value4.penyerapan_anggaran).toLocaleString('id-ID'),
+
+                      aksi: "",
+                      status: value4.status,
+                      level: value4.satker.level,
+                      type: "second__child",
+                      id: value4.id,
+                      start_date: value4.tanggal_awal,
+                      end_date: value4.tanggal_akhir,
+                      kirim: hideableButton(value4.status, satkerLevel, "kirim"),
+                      edit: hideableButton(value4.status, satkerLevel, "edit"),
+                    };
+
+                    tableContent.push(baris);
+                  }
+                }
+              }
+            }
+          }
+
+          rakernisData.value = tableContent;
+          filteredPage.value = rakernisData.value;
+        });
+      };
+
+      // fungsi fill data untuk modal edit
+      async function handleEditModal(id) {
+        try {
+          const response = await axios.get(`/kegiatan/api/v1/psm/kegiatan_lainnya_crud/${id}/get_detail_data_detail`);
+          const data = response.data[0];
+          id_edit_global = data.id
+
+          $('#editData').modal('show');
+
+          $('#edit__satker').val(data.satker_id).trigger('change'); // Assuming 'satker' is a property in data
+          $('#edit__kegiatan').val(data.kegiatan);
+          $('#edit__tempat').val(data.tempat);
+          $('#edit__awal_w').val(data.waktu_awal);
+          $('#edit__akhir_w').val(data.waktu_akhir);
+          $('#edit__lingkungan').val(data.lingkungan);
+          $('#edit__jumlah').val(data.jumlah_sasaran);
+          $('#edit__hasil_dampak').val(data.hasil_dampak);
+          $('#edit__simpulan').val(data.kesimpulan);
+          $('#edit__tindak_lanjut').val(data.tindak_lanjut);
+          $('#edit__anggaran').val(data.anggaran);
+          $('#edit__penyerapan_anggaran').val(data.penyerapan_anggaran);
+          $('#edit__drive_url').val(data.drive_url);
+
+          var anggaran = data.anggaran,
+            penyerapan_anggaran = data.penyerapan_anggaran;
+          var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+          var formattedAmount = selisih.toLocaleString('id-ID');
+          $('span#edit__amount').text(formattedAmount);
+
+          $('#edit__kode').val(data.kegiatan_akun).trigger('change');
+
+          console.log('blm sleep');
+
+          await sleep(2000);
+
+          console.log('udh sleep');
+
+          $('#edit__kode_abjad').val(data.uraian_kegiatan).trigger('change');
+
+          // $('#edit__pendapatan').val(data.pendapatan);
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      async function handleDelete(data) {
+        let id = data;
+
+        const confirmationText = `Untuk menghapus data tersebut? <br> Data yang dihapus tidak dapat <b>dipulihkan</b> kembali`;
+
+        const confirmResult = await showSwalConfirm(confirmationText, 'Ya, hapus data');
+
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.delete(
+            '/kegiatan/api/v1/psm/kegiatan_lainnya_crud/' + id + '/'
+          ).then(function (response) {
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data kegiatan berhasil <b>dihapus</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+              showConfirmButton: false,
+              timer: 1000
+            }).then((result) => {
+              if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                location.reload()
+              }
+            });
+          });
+        } catch (error) {
+          console.log('Terjadi kesalahan : ', error);
+          showSwalGenericError();
+        }
+      }
+
+      async function handleDownload(data) {
+        var currentURLOrigin = window.location.origin;
+        const combinedData = `${currentURLOrigin}${data}`;
+        window.location.href = combinedData;
+      }
+
+      // fungsi ubah status post data
+      async function handleSend(id, satker) {
+        const confirmResult = await showSwalConfirm(`Apakah anda yakin untuk mengirim semua kegiatan dari Satuan Kerja <b>${satker}</b>`, 'Ya, kirim data');
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.post(
+            `/kegiatan/api/v1/psm/kegiatan_lainnya/kirim_kegiatan/`,
+            { id_: id }
+          ).then(function (response) {
+            const sendedToParent = response.data.parent.keterangan;
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data <b>kegiatan</b> untuk <b>${satker}</b> telah berhasil <b>dikirimkan ke BNN Pusat</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+              timer: 1000
+            }).then((result) => {
+              if (result.dismiss === Swal.DismissReason.timer) {
+                location.reload()
+              }
+            });
+          });
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      onMounted(async () => {
+        loadData();
+
+        await sleep(300);
+        filter.value.date = '';
+        var a = $("#filter_date_").val('');
+
+        $('#filter_date_').on('change', async (event) => {
+          if (a == '') {
+
+          } else {
+            filter.value.date = event.target.value;
+            await sleep(500);
+            await handleFilterDate();
+          }
+        });
+
+        $(".input-group-text").click(function () {
+          $("#filter_date_").val('');
+        });
+
+      });
+
+      return {
+        rakernisData,
+        satkerLevel,
+        totalPage,
+        perPage,
+        currentPage,
+        pagedData,
+        searchField,
+        filter,
+        loadData,
+        handleEditModal,
+        handleDelete,
+        handleSend,
+        handleDownload,
+        goToNextPage,
+        goToPreviousPage,
+        searchData,
+        handleFilterDate
+      }
+    },
+    delimiters: ['${', '}']
+  }).mount('#app');
+</script>
+
+<script>
+
+  const lainnyaOption = `<option value="lainnya">Lainnya</option>`;
+
+  const resetDropdown = (type) => {
+    $(`#${type}__kode_abjad`).empty();
+    $(`#${type}__kode_abjad`).append($(`<option>`, {
+      value: '',
+      text: '--Pilih abjad--',
+      disabled: false,
+    }));
+
+
+    $(`#${type}__kode_abjad`).prop(`disabled`, true);
+  }
+
+  $(function () {
+    $('#create__kode').on('change', async function () {
+
+      resetDropdown('create');
+
+      const id = this.value;
+
+      console.log('ID:', id);
+
+      try {
+        const response = await axios.get(`/users/api/v1/uraian_kegiatan/?kegiatan_akun=${id}`)
+        const data = response.data;
+        const dropdown = $('#create__kode_abjad');
+
+        data.forEach(value => {
+          const text = `${value.no} - ${value.uraian_kegiatan} (${value.pj ?? '-'})`;
+          dropdown.append($('<option>', {
+            value: value.id,
+            text: text
+          }));
+
+        });
+        dropdown.removeAttr('disabled');
+        dropdown.append(lainnyaOption);
+      } catch (error) {
+        console.error(error)
+      }
+    });
+
+    $('#edit__kode').on('change', async function () {
+
+      resetDropdown('edit');
+
+      const id = this.value;
+
+      console.log('ID:', id);
+
+      try {
+        const response = await axios.get(`/users/api/v1/uraian_kegiatan/?kegiatan_akun=${id}`)
+        const data = response.data;
+        const dropdown = $('#edit__kode_abjad');
+
+        data.forEach(value => {
+          const text = `${value.no} - ${value.uraian_kegiatan} (${value.pj ?? '-'})`;
+          dropdown.append($('<option>', {
+            value: value.id,
+            text: text
+          }));
+
+        });
+        dropdown.removeAttr('disabled');
+        dropdown.append(lainnyaOption);
+      } catch (error) {
+        console.error(error)
+      }
+    });
+  });
+</script>
+
+<!-- helper -->
+<script>
+  $(document).ready(function () {
+    $('#create__anggaran, #create__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = ($('#create__anggaran').val()) ? $('#create__anggaran').val() : 0,
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = ($('#create__penyerapan_anggaran').val()) ? $('#create__penyerapan_anggaran').val() : 0,
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#amount').text(formattedAmount);
+    });
+
+    $('#edit__anggaran, #edit__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = $('#edit__anggaran').val(),
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#edit__amount').text(formattedAmount);
+    });
+  })
+
+  function handlePost(e) {
+    e.preventDefault();
+    Swal.fire({
+      title: "Simpan data ?",
+      icon: "warning",
+      showDenyButton: true,
+      confirmButtonText: "Simpan",
+      denyButtonText: `Batal`
+    }).then((result) => {
+      if (result.isConfirmed) {
+        savedata();
+      } else if (result.isDenied) {
+      }
+    });
+  };
+
+  async function savedata() {
+    showSwalLoading();
+
+    var url = "/kegiatan/api/v1/psm/kegiatan_lainnya_crud/";
+
+    var formData = new FormData();
+
+    var anggaran = $('#create__anggaran').val();
+    anggaran = anggaran.replace(/\./g, '').replace(',', '.');
+    var penyerapan_anggaran = $('#create__penyerapan_anggaran').val();
+    penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#create__drive_url").val();
+
+    formData.append('satker', $('#create__satker').val());
+    formData.append('kegiatan', $('#create__kegiatan').val());
+    formData.append('tempat', $('#create__tempat').val());
+    formData.append('waktu_awal', $('#create__awal_w').val());
+    formData.append('waktu_akhir', $('#create__akhir_w').val());
+    formData.append('lingkungan', $('#create__lingkungan').val());
+    formData.append('jumlah_sasaran', $('#create__jumlah').val());
+    formData.append('hasil_dampak', $('#create__hasil_dampak').val());
+    formData.append('kesimpulan', $('#create__simpulan').val());
+    formData.append('tindak_lanjut', $('#create__tindak_lanjut').val());
+    formData.append("anggaran", parseInt(anggaran));
+    formData.append("penyerapan_anggaran", parseInt(penyerapan_anggaran));
+    formData.append("drive_url", drive_url);
+    formData.append('dokumentasi', $('#create__dokumentasi')[0].files[0]);
+    formData.append('kegiatan_akun', parseInt($("#create__kode").val()));
+    formData.append('uraian_kegiatan', parseInt($("#create__kode_abjad").val()));
+    // formData.append('pendapatan', pendapatan);
+
+    try {
+      const response = await axios.post(
+        url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(function (response) {
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> ditambahkan!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 1500,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then((result) => {
+          if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+            location.reload()
+          }
+        });
+      });
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    } finally {
+      vm.loadData();
+    }
+  };
+
+  $('#editButton').click(function () {
+    var url = "/kegiatan/api/v1/psm/kegiatan_lainnya_crud/" + id_edit_global + "/"
+
+    var formData = new FormData();
+
+    var anggaran = $('#edit__anggaran').val(),
+      penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+      anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+      penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#edit__drive_url").val();
+
+
+    formData.append('kegiatan', $('#edit__kegiatan').val());
+    formData.append('tempat', $('#edit__tempat').val());
+    formData.append('waktu_awal', $('#edit__awal_w').val());
+    formData.append('waktu_akhir', $('#edit__akhir_w').val());
+    formData.append('lingkungan', $('#edit__lingkungan').val());
+    formData.append('jumlah_sasaran', $('#edit__jumlah').val());
+    formData.append('hasil_dampak', $('#edit__hasil_dampak').val());
+    formData.append('kesimpulan', $('#edit__simpulan').val());
+    formData.append('tindak_lanjut', $('#edit__tindak_lanjut').val());
+    formData.append("anggaran", parseInt(anggaran));
+    formData.append("penyerapan_anggaran", parseInt(penyerapan_anggaran));
+    formData.append("drive_url", drive_url);
+    formData.append('kegiatan_akun', parseInt($("#edit__kode").val()));
+    formData.append('uraian_kegiatan', parseInt($("#edit__kode_abjad").val()));
+    // formData.append('pendapatan', $('#edit__pendapatan').val());
+    // Check if file is selected
+    var dokumentasiFile = $('#edit__dokumentasi')[0].files[0];
+    if (dokumentasiFile) {
+      formData.append('dokumentasi', dokumentasiFile);
+    }
+    showConfirmationDialog(formData, url);
+  });
+
+  async function handleExport() {
+    showSwalLoading();
+    await sleep(1000);
+    try {
+      const response = await axios.post('/kegiatan/api/v1/psm/kegiatan_lainnya/export_data/');
+
+      const data = response.data;
+      window.location.href = data.file_path;
+      const confirmation = await Swal.fire({
+        title: "Berhasil",
+        html: `Data <b>Kegiatan Lainnya</b> telah <b>berhasil</b> diexport! <br>Klik tombol unduh ulang apabila <b>gagal</b>!`,
+        icon: "success",
+        confirmButtonText: "Unduh ulang.",
+        showCancelButton: true,
+        cancelButtonText: 'Batalkan',
+        showCloseButton: true,
+        allowOutsideClick: false,
+      });
+      if (confirmation.isConfirmed) {
+        const response = await axios.post('/kegiatan/api/v1/psm/kegiatan_lainnya/export_data/');
+        const data = response.data;
+        window.location.href = data.file_path;
+      }
+    } catch (error) {
+      showSwalGenericError();
+      console.error('Terjadi kesalahan :', error);
+    }
+  }
+
+  async function handleDate(event, target) {
+    const currentDate = moment().format('YYYY-MM-DD');
+    const valueDate = $(event.target).val();
+    if (valueDate === currentDate) {
+      $('#create__tanggal_akhir').val(new Date().toISOString().split('T')[0]);
+    } else {
+    }
+  }
+
+  function countMaleParticipants(data) {
+    let count = 0;
+    data.forEach(function (row) {
+      if (row.jenis_kelamin === "Laki-Laki") {
+        count++;
+      }
+    });
+    return count;
+  }
+
+  function countFemaleParticipants(data) {
+    let count = 0;
+    data.forEach(function (row) {
+      if (row.jenis_kelamin === "Perempuan") {
+        count++;
+      }
+    });
+    return count;
+  }
+
+  function formatNama(data) {
+    let formattedData = [];
+    data.forEach(function (row) {
+      let formattedString = row.nama_peserta;
+      formattedData.push(formattedString);
+    });
+    // Join the elements of the array with ", "
+    let result = formattedData.join(", ");
+    return result;
+  }
+
+  function countHasilTest(data) {
+    let countPositif = 0;
+    let countNegatif = 0;
+
+    data.forEach(function (row) {
+      if (row.hasil_test === "Positif") {
+        countPositif++;
+      } else if (row.hasil_test === "Negatif") {
+        countNegatif++;
+      }
+    });
+
+    return {
+      positif: countPositif,
+      negatif: countNegatif
+    };
+  }
+
+  function populateFormRepeater(data) {
+    data.forEach(function (item) {
+      var $repeaterItem = $('<div data-repeater-item-lama></div>');
+
+      $repeaterItem.append('<div class="row">' +
+        '<div class="mb-3 col-lg-9 col-sm-9 mb-0">' +
+        '<label class="form-label" for="form-repeater-edit-lama-1-1">Nama </label>' +
+        '<input type="text" class="form-control" id="form-repeater-edit-lama-1-1" placeholder="Nama Peserta" value="' + item.nama_peserta + '"/>' +
+        '</div>' +
+        '<div class="mb-3 col-lg-3 col-sm-3 d-flex align-items-center mb-0">' +
+        '<button class="btn btn-label-danger mt-4 hapus_lama" data-repeater-delete type="button" value="Delete">' +
+        '<i class="ti ti-x ti-xs me-1"></i>' +
+        '<span class="align-middle">Hapus</span>' +
+        '</button>' +
+        '</div>' +
+        '</div>' +
+        '<hr class="mx-n4">');
+
+      $('[data-repeater-list="peserta-group-lama"]').append($repeaterItem);
+    });
+  }
+
+  function removeEmptyObjects(array) {
+    return array.filter(function (obj) {
+      return obj.nama !== "" || obj.alamat !== "" || obj.gender !== null || obj.status !== null;
+    });
+  }
+
+  function checkDataCompleteness(dataArray) {
+    var isDataComplete = true;
+    var allNull = true;
+    var someNull = false;
+
+    $.each(dataArray, function (index, obj) {
+      if (!Object.values(obj).some(value => value !== null && value !== '')) {
+        allNull = true;
+      } else {
+        allNull = false;
+        if (Object.values(obj).some(value => value === null || value === '')) {
+          someNull = true;
+          return false; // Break the loop early if any null value is found
+        }
+      }
+    });
+
+    if (allNull) {
+      return 0;
+    } else if (someNull) {
+      return 1;
+    } else {
+      return 2;
+    }
+  }
+
+  function showConfirmationDialog(formData, url) {
+    Swal.fire({
+      title: "Update data ?",
+      icon: "warning",
+      showDenyButton: true,
+      confirmButtonText: "Simpan",
+      denyButtonText: `Batal`
+    }).then((result) => {
+      if (result.isConfirmed) {
+        sendData(formData, url);
+      }
+    });
+  }
+
+  async function sendData(formData, url) {
+    showSwalLoading();
+
+    try {
+      const response = await axios.patch(
+        url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(function (response) {
+        $("#editModal").modal("hide");
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> diperbarui!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 1500,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then((result) => {
+          if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+            location.reload()
+          }
+        });
+      });
+
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    }
+  }
+
+  function showErrorDialog(text) {
+    Swal.fire({
+      title: "Terjadi Kesalahan !",
+      text: text,
+      icon: "error"
+    });
+  }
+
+  function addCell(tr, content, colSpan = 2) {
+    let td = document.createElement('th');
+
+    td.colSpan = colSpan;
+    td.textContent = content;
+
+    tr.appendChild(td);
+  }
+
+  function hideableButton(status, satkerLevel, type) {
+    if (type == 'kirim') {
+      return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+    } else if (type == 'edit') {
+      return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+    }
+  }
+
+  $('#filter_date_').daterangepicker({
+    showDropdowns: true,
+    ranges: {
+      'Hari ini': [moment(), moment()],
+      'Kemarin': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+      'Minggu ini': [moment().subtract(6, 'days'), moment()],
+      // '30 hari yang lalu': [moment().subtract(29, 'days'), moment()],
+      'Bulan ini': [moment().startOf('month'), moment().endOf('month')],
+      // 'Bulan lalu': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+      'Triwulan 1 (Januari - Maret)': [moment().startOf('year').startOf('quarter'), moment().startOf('year').startOf('quarter').add(2, 'months').endOf('month')],
+      'Triwulan 2 (April - Juni)': [moment().startOf('year').startOf('quarter').add(3, 'months'), moment().startOf('year').startOf('quarter').add(5, 'months').endOf('month')],
+      'Triwulan 3 (Juli - September)': [moment().startOf('year').startOf('quarter').add(6, 'months'), moment().startOf('year').startOf('quarter').add(8, 'months').endOf('month')],
+      'Triwulan 4 (Oktober - Desember)': [moment().startOf('year').startOf('quarter').add(9, 'months'), moment().startOf('year').endOf('year')],
+    },
+    locale: {
+      customRangeLabel: "Rentang Lainnya",
+      cancelLabel: 'Batalkan',
+      applyLabel: 'Terapkan'
+    }
+  });
+
+  function getInstitution(param) {
+    switch (param) {
+      case 1:
+        return "Polri";
+      case 2:
+        return "Kejaksaan";
+      case 3:
+        return "Pengadilan";
+      case 4:
+        return "Keluarga";
+      case 5:
+        return "Masyarakat";
+      case 6:
+        return "Lembaga Pendidikan";
+      case 7:
+        return "Lembaga Swasta";
+      case 8:
+        return "Pemda";
+      case 9:
+        return "BNN";
+      case 10:
+        return "TNI";
+      default:
+        return "Invalid param";
+    }
+  }
+</script>
+
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include 'psm/kegiatan_lainnya/modals/create.html' %}
+{% include 'psm/kegiatan_lainnya/modals/edit.html' %}
+{% endblock %}

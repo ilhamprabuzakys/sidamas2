@@ -1,0 +1,394 @@
+{% extends 'home/home_base.html' %}
+{% load static %}
+{% block title %} Pengisian Survei {% endblock title %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/home/css/pages/survei__backup.css' %}" />
+<script src="https://unpkg.com/jquery/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/survey-jquery@1.9.131/survey.jquery.min.js"></script>
+<script src="https://unpkg.com/survey-jquery@1.9.131/themes/index.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/survey-jquery@1.9.131/defaultV2.min.css" />
+{% endblock %}
+
+{% block container %} container-xl container-fluid {% endblock %}
+
+{% block content %}
+
+<style>
+    /* .sd-root-modern.sd-root-modern--full-container {
+        width: 100%;
+        height: auto;
+        overflow: auto;
+        position: relative
+    } */
+
+    .sd-body.sd-body--static {
+        max-width: 100%;
+        margin-left: 0px;
+        margin-right: 0px;
+        padding-top: calc(6*(var(--sjs-base-unit, var(--base-unit, 8px))));
+        padding-bottom: calc(10*(var(--sjs-base-unit, var(--base-unit, 8px))));
+    }
+</style>
+
+
+
+<section id="survei-app">
+    <div id="surveyElement" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    let id = "{{ id }}";
+    let user_id = "{{ user_id }}";
+    let survey_source = {{survey_source | safe}};
+    let survey_awal = "{{ survey.tanggal_awal }}";
+    let survey_akhir = "{{ survey.tanggal_akhir }}";
+    let survey_status = "{{ survey.status }}";
+    let survey_limit = parseInt("{{ survey.batasan }}");
+    let survey_respondents = parseInt("{{ survey.respondents }}");
+    let is_finished = false
+
+    let start_date;
+    let end_date;
+
+    if (!is_finished && !isWithinDateRange(start_date, end_date) && survey_status != 2) {
+        window.addEventListener("beforeunload", beforeUnloadHandler);
+    }
+
+    if (survey_awal) {
+        var parsedDate = moment(survey_awal, "MMMM D, YYYY");
+        var formattedDate = parsedDate.format("YYYY-MM-DD");
+        start_date = formattedDate;
+    }
+
+    if (survey_akhir) {
+        var parsedDate = moment(survey_akhir, "MMMM D, YYYY");
+        var formattedDate = parsedDate.format("YYYY-MM-DD");
+        end_date = formattedDate;
+    }
+
+    if (survey_status != 2) {
+        is_finished = true;
+        swal.fire({
+            title: "Terjadi Kesalahan !",
+            text: "Survei belum terpublish !",
+            icon : "error",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            showConfirmButton: false
+        })
+    }
+    else{
+        if (!isWithinDateRange(start_date, end_date)) {
+            is_finished = true;
+            swal.fire({
+                title: "Terjadi Kesalahan !",
+                text: "Tanggal survei tidak valid !",
+                icon : "error",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showConfirmButton: false
+            })
+        } else {
+            console.log(survey_respondents);
+            console.log(survey_limit);
+
+            if (survey_respondents >= survey_limit) {
+                swal.fire({
+                    title: "Terjadi Kesalahan !",
+                    text: "Responden sudah penuh !",
+                    icon : "error",
+                    allowOutsideClick: false,
+                    allowEscapeKey: false,
+                    showConfirmButton: false
+                })
+            } else {
+                tampilkan_survei();
+            }
+        }
+    }
+
+    function tampilkan_survei(){
+        const json = survey_source;
+
+        const themeJson = {
+            "backgroundImageFit": "cover",
+            "backgroundImageAttachment": "scroll",
+            "backgroundOpacity": 1,
+            "header": {
+                "height": 160,
+                "inheritWidthFrom": "container",
+                "textAreaWidth": 512,
+                "overlapEnabled": false,
+                "backgroundImageOpacity": 1,
+                "backgroundImageFit": "cover",
+                "logoPositionX": "right",
+                "logoPositionY": "top",
+                "titlePositionX": "left",
+                "titlePositionY": "bottom",
+                "descriptionPositionX": "left",
+                "descriptionPositionY": "bottom"
+            },
+            "themeName": "plain",
+            "colorPalette": "light",
+            "isPanelless": false,
+            "cssVariables": {
+                "--sjs-general-backcolor": "rgba(255, 255, 255, 1)",
+                "--sjs-general-backcolor-dark": "rgba(248, 248, 248, 1)",
+                "--sjs-general-backcolor-dim": "rgba(255, 255, 255, 1)",
+                "--sjs-general-backcolor-dim-light": "rgba(255, 255, 255, 1)",
+                "--sjs-general-backcolor-dim-dark": "rgba(243, 243, 243, 1)",
+                "--sjs-general-forecolor": "rgba(0, 0, 0, 0.91)",
+                "--sjs-general-forecolor-light": "rgba(0, 0, 0, 0.45)",
+                "--sjs-general-dim-forecolor": "rgba(0, 0, 0, 0.91)",
+                "--sjs-general-dim-forecolor-light": "rgba(0, 0, 0, 0.45)",
+                "--sjs-primary-backcolor": "#25b8eb",
+                "--sjs-primary-backcolor-light": "rgba(37, 184, 235, 0.1)",
+                "--sjs-primary-backcolor-dark": "rgba(34, 168, 215, 1)",
+                "--sjs-primary-forecolor": "rgba(255, 255, 255, 1)",
+                "--sjs-primary-forecolor-light": "rgba(255, 255, 255, 0.25)",
+                "--sjs-base-unit": "8px",
+                "--sjs-corner-radius": "4px",
+                "--sjs-secondary-backcolor": "rgba(255, 152, 20, 1)",
+                "--sjs-secondary-backcolor-light": "rgba(255, 152, 20, 0.1)",
+                "--sjs-secondary-backcolor-semi-light": "rgba(255, 152, 20, 0.25)",
+                "--sjs-secondary-forecolor": "rgba(255, 255, 255, 1)",
+                "--sjs-secondary-forecolor-light": "rgba(255, 255, 255, 0.25)",
+                "--sjs-shadow-small": "0px 0px 0px 1px rgba(0, 0, 0, 0.15)",
+                "--sjs-shadow-small-reset": "0px 0px 0px 0px rgba(0, 0, 0, 0.15)",
+                "--sjs-shadow-medium": "0px 0px 0px 1px rgba(0, 0, 0, 0.1)",
+                "--sjs-shadow-large": "0px 8px 16px 0px rgba(0, 0, 0, 0.05)",
+                "--sjs-shadow-inner": "0px 0px 0px 1px rgba(0, 0, 0, 0.15)",
+                "--sjs-shadow-inner-reset": "0px 0px 0px 0px rgba(0, 0, 0, 0.15)",
+                "--sjs-border-light": "rgba(0, 0, 0, 0.15)",
+                "--sjs-border-default": "rgba(0, 0, 0, 0.15)",
+                "--sjs-border-inside": "rgba(0, 0, 0, 0.16)",
+                "--sjs-special-red": "rgba(229, 10, 62, 1)",
+                "--sjs-special-red-light": "rgba(229, 10, 62, 0.1)",
+                "--sjs-special-red-forecolor": "rgba(255, 255, 255, 1)",
+                "--sjs-special-green": "rgba(25, 179, 148, 1)",
+                "--sjs-special-green-light": "rgba(25, 179, 148, 0.1)",
+                "--sjs-special-green-forecolor": "rgba(255, 255, 255, 1)",
+                "--sjs-special-blue": "rgba(67, 127, 217, 1)",
+                "--sjs-special-blue-light": "rgba(67, 127, 217, 0.1)",
+                "--sjs-special-blue-forecolor": "rgba(255, 255, 255, 1)",
+                "--sjs-special-yellow": "rgba(255, 152, 20, 1)",
+                "--sjs-special-yellow-light": "rgba(255, 152, 20, 0.1)",
+                "--sjs-special-yellow-forecolor": "rgba(255, 255, 255, 1)",
+                "--sjs-article-font-xx-large-textDecoration": "none",
+                "--sjs-article-font-xx-large-fontWeight": "700",
+                "--sjs-article-font-xx-large-fontStyle": "normal",
+                "--sjs-article-font-xx-large-fontStretch": "normal",
+                "--sjs-article-font-xx-large-letterSpacing": "0",
+                "--sjs-article-font-xx-large-lineHeight": "64px",
+                "--sjs-article-font-xx-large-paragraphIndent": "0px",
+                "--sjs-article-font-xx-large-textCase": "none",
+                "--sjs-article-font-x-large-textDecoration": "none",
+                "--sjs-article-font-x-large-fontWeight": "700",
+                "--sjs-article-font-x-large-fontStyle": "normal",
+                "--sjs-article-font-x-large-fontStretch": "normal",
+                "--sjs-article-font-x-large-letterSpacing": "0",
+                "--sjs-article-font-x-large-lineHeight": "56px",
+                "--sjs-article-font-x-large-paragraphIndent": "0px",
+                "--sjs-article-font-x-large-textCase": "none",
+                "--sjs-article-font-large-textDecoration": "none",
+                "--sjs-article-font-large-fontWeight": "700",
+                "--sjs-article-font-large-fontStyle": "normal",
+                "--sjs-article-font-large-fontStretch": "normal",
+                "--sjs-article-font-large-letterSpacing": "0",
+                "--sjs-article-font-large-lineHeight": "40px",
+                "--sjs-article-font-large-paragraphIndent": "0px",
+                "--sjs-article-font-large-textCase": "none",
+                "--sjs-article-font-medium-textDecoration": "none",
+                "--sjs-article-font-medium-fontWeight": "700",
+                "--sjs-article-font-medium-fontStyle": "normal",
+                "--sjs-article-font-medium-fontStretch": "normal",
+                "--sjs-article-font-medium-letterSpacing": "0",
+                "--sjs-article-font-medium-lineHeight": "32px",
+                "--sjs-article-font-medium-paragraphIndent": "0px",
+                "--sjs-article-font-medium-textCase": "none",
+                "--sjs-article-font-default-textDecoration": "none",
+                "--sjs-article-font-default-fontWeight": "400",
+                "--sjs-article-font-default-fontStyle": "normal",
+                "--sjs-article-font-default-fontStretch": "normal",
+                "--sjs-article-font-default-letterSpacing": "0",
+                "--sjs-article-font-default-lineHeight": "28px",
+                "--sjs-article-font-default-paragraphIndent": "0px",
+                "--sjs-article-font-default-textCase": "none"
+            },
+            "headerView": "advanced"
+        }
+
+        const survey = new Survey.Model(json);
+        survey.applyTheme(themeJson);
+        survey.onComplete.add((sender, options) => {
+            let response = JSON.stringify(sender.data, null, 3)
+            console.log(response);
+            Swal.fire({
+                title: "Tunggu sebentar",
+                icon: "info",
+                html: "Sedang Mengirim Data !",
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+            kirim_jawaban(response);
+        });
+
+        $("#surveyElement").Survey({ model: survey });
+    }
+
+    // mengirim responden
+    /* function kirim_responden(obj){
+        kirim_jawaban(obj);
+    } */
+
+    // mengirim jawaban
+    function kirim_jawaban(obj){
+        const CSRF_TOKEN = getCookie('csrftoken');
+        // let data_json = convertData(obj.secondObject);
+
+        const formData = {
+            survey: id,
+            user: user_id,
+            hasil: obj,
+        };
+
+        axios.post('/survey/api/v1/survey_result/', formData,{
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN,
+                'Content-Type': 'application/json',
+            }
+        })
+        .then((response) => {
+            Swal.close();
+            is_finished = true;
+            window.removeEventListener("beforeunload", beforeUnloadHandler);
+            Swal.fire({
+                icon: "success",
+                title: "Respon Terkirim !",
+                text: "Berhasil menyimpan respon !",
+                showConfirmButton: false,
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                timer: 2000
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.timer) {
+                    window.location.href = window.location.origin;
+                }
+            });
+        })
+        .catch((error) => {
+            Swal.close();
+            console.error('Error performing Axios request:', error);
+            wal.fire({
+                icon: "error",
+                title: "Terjadi kesalahan !",
+                text: "Kesalahan pada pertukaran data !",
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then((result) => {
+                if (result.dismiss === Swal.DismissReason.timer) {
+                    window.location.href = window.location.origin;
+                }
+            });
+        });
+    }
+
+    // helper
+    function convertToJson(inputObject) {
+        var outputArray = [];
+
+        for (var key in inputObject) {
+            if (key.endsWith("-Comment")) {
+                continue;
+            }
+
+            var questionNumber = key.replace("pertanyaan", "");
+            var commentKey = "pertanyaan" + questionNumber + "-Comment";
+
+            var outputObj = {};
+            outputObj["pertanyaan" + questionNumber] = parseInt(inputObject[key]);
+            outputObj["komentar"] = inputObject[commentKey];
+
+            outputArray.push(outputObj);
+        }
+
+        return outputArray;
+    }
+
+    function convertData(inputData) {
+        var result = [];
+        for (var i = 1; i <= 10; i++) {
+            var questionKey = "pertanyaan" + i;
+            var commentKey = questionKey + "-Comment";
+            var answer = parseInt(inputData[questionKey]);
+            if (isNaN(answer)) {
+                answer = 0; // Set answer to 0 if it's NaN
+            }
+            var comment = inputData[commentKey];
+            var option = "";
+            switch (answer) {
+                case 1:
+                    option = "a";
+                    break;
+                case 2:
+                    option = "b";
+                    break;
+                case 3:
+                    option = "c";
+                    break;
+                case 4:
+                    option = "d";
+                    break;
+                default:
+                    option = "";
+            }
+            result.push({
+                "no": i,
+                "jawaban": answer,
+                "bobot": String(answer),
+                "pilihan": option,
+                "komentar": comment
+            });
+        }
+        return result;
+    }
+
+    function splitObject(inputObject) {
+        const firstObjectKeys = ["nama", "alamat", "pekerjaan", "handphone", "email"];
+        const secondObjectKeys = Object.keys(inputObject).filter(key => !firstObjectKeys.includes(key));
+
+        const firstObject = {};
+        const secondObject = {};
+
+        firstObjectKeys.forEach(key => {
+            firstObject[key] = inputObject[key];
+        });
+
+        secondObjectKeys.forEach(key => {
+            secondObject[key] = inputObject[key];
+        });
+
+        return { firstObject, secondObject };
+    }
+
+    function beforeUnloadHandler(e) {
+        (e || window.event).returnValue = "still there?";
+    }
+
+    function isWithinDateRange(startDateStr, endDateStr) {
+        var startDate = new Date(startDateStr);
+        var endDate = new Date(endDateStr);
+        var currentDate = new Date();
+
+        return (currentDate >= startDate && currentDate <= endDate);
+    }
+</script>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

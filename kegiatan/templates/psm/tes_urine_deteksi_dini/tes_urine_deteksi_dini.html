@@ -1,0 +1,1136 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Tes Urine Deteksi Dini
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+  <div class="row">
+    <h3 class="heading mb-2">Tes Urine Deteksi Dini</h3>
+    <span class="mb-0">
+      <span class="text-muted fw-light">Kegiatan /</span>
+      <span class="ms-1 fw-medium">Tes Urine Deteksi Dini</span>
+    </span>
+  </div>
+</div>
+
+<section id="__data">
+  <div class="card">
+    <div class="card-body">
+      <div id="headline" class="mb-3">
+        <h3 class="text-center">
+          KEGIATAN TES URINE DETEKSI DINI PEMBERDAYAAN MASYARAKAT<br />
+          <span id="currentYear"></span>
+        </h3>
+        <hr />
+      </div>
+
+      <div class="action-button">
+        <div class="d-flex justify-content-end mb-3 gap-2">
+          <button class="btn btn-success" onclick="handleExport()"><i class="fas fa-file-export me-2"></i>Ekspor
+            Data</button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i
+              class="fas fa-plus me-2"></i>Tambah Data</button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        {% include 'psm/tes_urine_deteksi_dini/part/table.html' %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/dashboard/js/bawaan/forms-extras.js' %}"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+  let table;
+  var id_edit_global;
+  const TIPE_kegiatan = {{ user.profile.satker.level }}
+  const { createApp, ref, onMounted, computed } = Vue;
+  var myChart;
+
+  createApp({
+    setup() {
+      let rakernisData = ref(null);
+      let satkerLevel = parseInt('{{ user.profile.satker.level }}');
+      let perPage = ref(10);
+      let currentPage = ref(1);
+      let searchField = ref(null);
+      let filteredPage = ref(null);
+      const filter = ref({ search: '', date: '', kegiatan: '' });
+
+      const totalPage = computed(() => {
+        return filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0;
+      });
+
+      const pagedData = computed(() => {
+        if (filteredPage.value) {
+          const startIndex = (currentPage.value - 1) * perPage.value;
+          const endIndex = currentPage.value * perPage.value;
+          return filteredPage.value.slice(startIndex, endIndex);
+        }
+        else return [];
+      });
+
+      function searchData(e) {
+        currentPage.value = 1;
+
+        filteredPage.value = rakernisData.value.filter((data) => {
+          idx = String(data.satker.toUpperCase());
+          nama_lingkungan = String(data.nama_lingkungan.toUpperCase());
+          daftar_nama_peserta = String(data.daftar_nama_peserta.toUpperCase());
+          tindak_lanjut = String(data.tindak_lanjut.toUpperCase());
+
+          bool1 = idx.indexOf(searchField.value.toUpperCase()) > -1;
+          bool2 = nama_lingkungan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool3 = daftar_nama_peserta.indexOf(searchField.value.toUpperCase()) > -1;
+          bool4 = tindak_lanjut.indexOf(searchField.value.toUpperCase()) > -1;
+
+          return bool1 || bool2 || bool3 || bool4;
+        });
+      };
+
+      const goToNextPage = (current, total) => {
+        if (currentPage.value < total) {
+          currentPage.value++;
+        }
+      }
+
+      const goToPreviousPage = (current, total) => {
+        if (currentPage.value > 0) {
+          currentPage.value--;
+        }
+      }
+
+      const handleFilterDate = async () => {
+        if (filter.value.date == '') {
+          filteredPage.value = rakernisData.value;
+          return;
+        }
+
+        const dateParts = filter.value.date.split('-');
+        const datePartStart = dateParts[0].trim();
+        const datePartEnd = dateParts[1].trim();
+
+        const startDate = moment(datePartStart, 'YYYY-MM-DD');
+        const endDate = moment(datePartEnd, 'YYYY-MM-DD');
+
+        filteredPage.value = rakernisData.value.filter(item => {
+          const itemDate = moment(item.start_date, 'YYYY-MM-DD');
+          console.log(itemDate);
+          // console.log(itemDate.isBetween(moment(startDate), moment(endDate), null, '[]'));
+          return itemDate.isBetween(startDate, endDate, null, '[]');
+
+        });
+      }
+
+      function hideableButton(status, satkerLevel, type) {
+        if (type == 'kirim') {
+          return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        } else if (type == 'edit') {
+          return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        }
+      }
+
+      const apiURL = (satkerLevel == 1 ? '/kegiatan/api/v1/psm/tes_urine/get_data_bnnk/?format=datatables' : '/kegiatan/api/v1/psm/tes_urine/?format=datatables')
+
+      function loadData() {
+        tableContent = [];
+        axios.get(apiURL).then(function (response) {
+          data = response.data.data;
+
+          for ([key, value] of Object.entries(data)) {
+            // untuk satker tingkat BNNP
+            if (value.data && value.data.length > 0) {
+              baris = {
+                'class': 'table-primary', 'hide_satker': false, 'index': parseInt(key) + 1, 'satker': value.satker.nama_satker + '(' + value.data.length + ' kegiatan)',
+                'tanggal': '', 'nama_lingkungan': '', 'pria': '', 'wanita': '', 'jumlah_peserta': '', 'daftar_nama_peserta': '', 'hasil_test_urine': '', 'tindak_lanjut': '', 'dokumentasi': ''
+                , 'aksi': '', 'status': '', 'level': '', 'type': 'parent', 'id': value.id
+              };
+              tableContent.push(baris);
+
+              // untuk detail dari satker BNNP
+              for ([key2, value2] of Object.entries(value.data)) {
+                let formattedData = countHasilTest(value2.pegawai);
+                baris = {
+                  'class': 'table', 'hide_satker': true, 'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1), 'satker': value2.satker.nama_satker,
+                  'tanggal': value2.tanggal_awal + '-' + value2.tanggal_akhir, 'nama_lingkungan': value2.nama_lingkungan, 'pria': countMaleParticipants(value2.pegawai), 'wanita': countFemaleParticipants(value2.pegawai), 'jumlah_peserta': value2.pegawai.length, 'daftar_nama_peserta': formatNamaAlamat(value2.pegawai), 'hasil_test_urine': 'Positi - ' + formattedData.positif + ' Negatif - ' + formattedData.negatif + '', 'tindak_lanjut': value2.tindak_lanjut, 'dokumentasi': value2.dokumentasi
+                  , 'aksi': '', 'status': value2.status, 'level': value2.satker.level, 'type': 'first__child', 'id': value2.id, 'start_date': value2.tanggal_awal, 'end_date': value2.tanggal_akhir, 'kirim': hideableButton(value2.status, satkerLevel, 'kirim'), 'edit': hideableButton(value2.status, satkerLevel, 'edit'),
+                  'drive_url': value2.drive_url,
+                  'anggaran': 'Rp ' + parseInt(value2.anggaran).toLocaleString('id-ID'),
+                  'penyerapan_anggaran': 'Rp ' + parseInt(value2.penyerapan_anggaran).toLocaleString('id-ID'),
+
+                };
+                tableContent.push(baris);
+              }
+
+              // untuk mengecek
+              if (value.detail !== undefined && value.detail.length > 0) {
+                // untuk satker bnnknya
+                for ([key3, value3] of Object.entries(value.detail)) {
+                  baris = {
+                    'class': 'table-primary', 'hide_satker': false, 'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1) + '.' + (parseInt(key3) + 1), 'satker': value3.satker.nama_satker + '(' + value3.data.length + ' kegiatan)',
+                    'tanggal': '', 'nama_lingkungan': '', 'pria': '', 'wanita': '', 'jumlah_peserta': '', 'daftar_nama_peserta': '', 'hasil_test_urine': '', 'tindak_lanjut': '', 'dokumentasi': ''
+                    , 'aksi': '', 'status': '', 'level': '', 'type': 'parent', 'id': value3.id
+                  };
+                  tableContent.push(baris);
+
+                  // untuk detail data satker bnnknya
+                  for ([key4, value4] of Object.entries(value3.data)) {
+                    let formattedData = countHasilTest(value4.pegawai);
+                    baris = {
+                      'class': 'table', 'hide_satker': true, 'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1) + '.' + (parseInt(key3) + 1) + '.' + (parseInt(key4) + 1), 'satker': value4.satker.nama_satker,
+                      'tanggal': value4.tanggal_awal + '-' + value4.tanggal_akhir, 'nama_lingkungan': value4.nama_lingkungan, 'pria': countMaleParticipants(value4.pegawai), 'wanita': countFemaleParticipants(value4.pegawai), 'jumlah_peserta': value4.pegawai.length, 'daftar_nama_peserta': formatNamaAlamat(value4.pegawai), 'hasil_test_urine': 'Positi - ' + formattedData.positif + ' Negatif - ' + formattedData.negatif + '', 'tindak_lanjut': value4.tindak_lanjut, 'dokumentasi': '/media/' + value4.dokumentasi
+                      , 'aksi': '', 'status': value4.status, 'level': value4.satker.level, 'type': 'second__child', 'id': value4.id, 'start_date': value4.tanggal_awal, 'end_date': value4.tanggal_akhir, 'kirim': hideableButton(value4.status, satkerLevel, 'kirim'), 'edit': hideableButton(value4.status, satkerLevel, 'edit'),
+                      'anggaran': 'Rp ' + parseInt(value4.anggaran).toLocaleString('id-ID'),
+                      'penyerapan_anggaran': 'Rp ' + parseInt(value4.penyerapan_anggaran).toLocaleString('id-ID'),
+                      'drive_url': value4.drive_url,
+                    };
+                    tableContent.push(baris);
+                  }
+                }
+              }
+            }
+          }
+
+          rakernisData.value = tableContent;
+          filteredPage.value = rakernisData.value;
+        });
+      };
+
+      // fungsi fill data untuk modal edit
+      async function handleEditModal(id) {
+        try {
+          const response = await axios.get(`/kegiatan/api/v1/psm/tes_urine_crud/${id}/get_detail_data_detail`);
+          const data = response.data[0];
+          id_edit_global = data.id
+
+          $('#edit__satker').val(data.satker_id).trigger('change'); // Assuming 'satker' is a property in data
+          $('#edit__tanggal_awal').val(data.tanggal_awal);
+          $('#edit__tanggal_akhir').val(data.tanggal_akhir);
+          $('#edit__satker_target').val(data.satker_target).trigger('change');
+          $('#edit__nama_lingkungan').val(data.nama_lingkungan);
+          $('#edit__tindak_lanjut').val(data.tindak_lanjut);
+          $('#edit__anggaran').val(data.anggaran);
+          $('#edit__penyerapan_anggaran').val(data.penyerapan_anggaran);
+          $('#edit__drive_url').val(data.drive_url);
+
+          var anggaran = data.anggaran,
+            penyerapan_anggaran = data.penyerapan_anggaran;
+          var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+          var formattedAmount = selisih.toLocaleString('id-ID');
+          $('span#edit__amount').text(formattedAmount);
+
+          $('[data-repeater-list="peserta-group-lama"]').children().remove();
+
+          populateFormRepeater(data.peserta);
+
+          $('#editData').modal('show');
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      async function handleLihatModal(id) {
+        try {
+          const response = await axios.get(`/kegiatan/api/v1/psm/tes_urine_crud/${id}/get_detail_data_detail`);
+          const data = response.data[0].peserta;
+
+          var tableBody = $('.table-responsive-lihat tbody');
+          tableBody.empty(); // Clear previous data if any
+
+          $.each(data, function (index, item) {
+
+            var var_isi = getSubstanceName(item.isi_parameter);
+            var keterangan;
+            var angka = index + 1;
+
+            if (item.isi_parameter == "ll") {
+              keterangan = item.keterangan_isi_parameter;
+            } else {
+              keterangan = "-"
+            }
+
+            var row = $('<tr>');
+            row.append('<td>' + angka + '</td>');
+            row.append('<td>' + item.nama_peserta + '</td>');
+            row.append('<td>' + item.jenis_kelamin + '</td>');
+            row.append('<td>' + item.hasil_test + '</td>');
+            row.append('<td>' + item.alamat + '</td>');
+            row.append('<td>' + var_isi + '</td>');
+            row.append('<td>' + keterangan + '</td>');
+
+            tableBody.append(row);
+          });
+
+          console.log(data);
+
+          if (myChart) {
+            myChart.destroy();
+          }
+
+          console.log(countLabels(data));
+
+          showPieChart(countLabels(data));
+
+          checkAndDisplayCanvas(data);
+
+          $('#lihatData').modal('show');
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      async function handleDelete(data) {
+        let id = data;
+
+        const confirmationText = `Untuk menghapus data tersebut? <br> Data yang dihapus tidak dapat <b>dipulihkan</b> kembali`;
+
+        const confirmResult = await showSwalConfirm(confirmationText, 'Ya, hapus data');
+
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.delete(
+            '/kegiatan/api/v1/psm/tes_urine/' + id + '/delete_kegiatan_peserta/'
+          ).then(function (response) {
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data kegiatan berhasil <b>dihapus</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+              showConfirmButton: false,
+              timer: 1000
+            }).then((result) => {
+              if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+                location.reload()
+              }
+            });
+          });
+        } catch (error) {
+          console.log('Terjadi kesalahan : ', error);
+          showSwalGenericError();
+        }
+
+      }
+
+      async function handleDownload(data) {
+        var currentURLOrigin = window.location.origin;
+        const combinedData = `${currentURLOrigin}${data}`;
+        window.location.href = combinedData;
+      }
+
+      // fungsi ubah status post data
+      async function handleSend(id, satker) {
+        const confirmResult = await showSwalConfirm(`Apakah anda yakin untuk mengirim semua kegiatan dari Satuan Kerja <b>${satker}</b>`, 'Ya, kirim data');
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.post(
+            `/kegiatan/api/v1/psm/tes_urine/kirim_kegiatan/`,
+            { id_: id }
+          ).then(function (response) {
+            const sendedToParent = response.data.parent.keterangan;
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data <b>kegiatan</b> untuk <b>${satker}</b> telah berhasil <b>dikirimkan ke BNN Pusat</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+              timer: 1000
+            }).then((result) => {
+              if (result.dismiss === Swal.DismissReason.timer) {
+                location.reload()
+              }
+            });
+          });
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      onMounted(async () => {
+        loadData();
+
+        await sleep(300);
+        filter.value.date = '';
+        var a = $("#filter_date_").val('');
+
+        $('#filter_date_').on('change', async (event) => {
+          if (a == '') {
+
+          } else {
+            filter.value.date = event.target.value;
+            await sleep(500);
+            await handleFilterDate();
+          }
+        });
+
+        $(".input-group-text").click(function () {
+          $("#filter_date_").val('');
+        });
+
+      });
+
+      return {
+        rakernisData,
+        satkerLevel,
+        totalPage,
+        perPage,
+        currentPage,
+        pagedData,
+        searchField,
+        filter,
+        loadData,
+        handleEditModal,
+        handleLihatModal,
+        handleDelete,
+        handleSend,
+        handleDownload,
+        goToNextPage,
+        goToPreviousPage,
+        searchData,
+        handleFilterDate
+      }
+    },
+    delimiters: ['${', '}']
+  }).mount('#app');
+</script>
+
+<!-- helper -->
+<script>
+  $(document).ready(function () {
+    // remove
+    $('[data-repeater-list="peserta-group-lama"]').on('click', '.hapus_lama', function () {
+      $(this).closest('[data-repeater-item-lama]').remove();
+    });
+
+    $('[data-repeater-list="peserta-group"]').on('change', '.status_param', function () {
+      var repeaterItem = $(this).closest('[data-repeater-item]');
+      var jenisParameterSection = repeaterItem.find('.jenis-parameter-section');
+
+      if ($(this).val() === 'P') {
+        jenisParameterSection.show();
+      } else {
+        jenisParameterSection.hide();
+      }
+    });
+
+    $('#create__anggaran, #create__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = ($('#create__anggaran').val()) ? $('#create__anggaran').val() : 0,
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = ($('#create__penyerapan_anggaran').val()) ? $('#create__penyerapan_anggaran').val() : 0,
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#amount').text(formattedAmount);
+    });
+
+    $('#edit__anggaran, #edit__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = $('#edit__anggaran').val(),
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#edit__amount').text(formattedAmount);
+    });
+  })
+
+  function handlePost(e) {
+    e.preventDefault();
+
+    // if (checkDataCompleteness(formData.peserta) == 2) {
+    Swal.fire({
+      title: "Simpan data ?",
+      icon: "warning",
+      showDenyButton: true,
+      confirmButtonText: "Simpan",
+      denyButtonText: `Batal`
+    }).then((result) => {
+      /* Read more about isConfirmed, isDenied below */
+      if (result.isConfirmed) {
+        savedata();
+      } else if (result.isDenied) {
+      }
+    });
+    // }else if (checkDataCompleteness(formData.peserta) == 0) {
+    //   Swal.fire({
+    //     title: "Terjadi Kesalahan !",
+    //     text: "Data Peserta kosong!",
+    //     icon: "error"
+    //   });
+    // } else {
+    //   Swal.fire({
+    //     title: "Terjadi Kesalahan !",
+    //     text: "Data Peserta tidak lengkap!",
+    //     icon: "error"
+    //   });
+    // }
+
+  };
+
+  async function savedata() {
+    showSwalLoading();
+
+    var url = "/kegiatan/api/v1/psm/tes_urine/"
+
+    var formData = new FormData();
+    formData.append('satker', $('#create__satker').val());
+    formData.append('tanggal_awal', $('#create__tanggal_awal').val());
+    formData.append('tanggal_akhir', $('#create__tanggal_akhir').val());
+    formData.append('satker_target', $('#create__satker_target').val());
+    formData.append('nama_lingkungan', $('#create__nama_lingkungan').val());
+    formData.append('tindak_lanjut', $('#create__tindak_lanjut').val());
+
+    var anggaran = $('#create__anggaran').val();
+    anggaran = anggaran.replace(/\./g, '').replace(',', '.');
+    var penyerapan_anggaran = $('#create__penyerapan_anggaran').val();
+    penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#create__drive_url").val();
+
+    formData.append('anggaran', anggaran);
+    formData.append('penyerapan_anggaran', penyerapan_anggaran);
+    formData.append('drive_url', drive_url);
+
+    formData.append('dokumentasi', $('#create__dokumentasi')[0].files[0]);
+
+    var pesertaArray = [];
+    $('.form-repeater.create [data-repeater-item]').each(function (index, element) {
+      console.log(element);
+      let lainnya = $(element).find('[id^="form-repeater"]').eq(12).val();
+      let status = $(element).find('[id^="form-repeater"]').eq(2).val();
+
+      const checkboxIds = [
+        'form-repeater-amp',
+        'form-repeater-met',
+        'form-repeater-mop',
+        'form-repeater-thc',
+        'form-repeater-coc',
+        'form-repeater-bzo',
+        'form-repeater-som',
+        'form-repeater-ll'
+      ];
+
+      if (status == "N") {
+        pesertaArray.push({
+          nama: $(element).find('[id^="form-repeater"]').eq(0).val(),
+          alamat: $(element).find('[id^="form-repeater"]').eq(1).val(),
+          gender: $(element).find('[id^="form-repeater"]').eq(3).val(),
+          status: $(element).find('[id^="form-repeater"]').eq(2).val(),
+          isi_parameter: "",
+          keterangan_isi_parameter: ""
+        });
+      } else {
+        checkboxIds.forEach(id => {
+          if ($(element).find('[id="' + id + '"]').is(':checked')) {
+            pesertaArray.push({
+              nama: $(element).find('[id^="form-repeater"]').eq(0).val(),
+              alamat: $(element).find('[id^="form-repeater"]').eq(1).val(),
+              gender: $(element).find('[id^="form-repeater"]').eq(3).val(),
+              status: $(element).find('[id^="form-repeater"]').eq(2).val(),
+              isi_parameter: $(element).find('[id="' + id + '"]').val(),
+              keterangan_isi_parameter: $(element).find('[id^="form-repeater"]').eq(12).val()
+            });
+          }
+        });
+      }
+    });
+
+    formData.append('peserta_array', JSON.stringify(pesertaArray));
+
+    try {
+      const response = await axios.post(
+        url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(function (response) {
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> ditambahkan!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 1500,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then((result) => {
+          if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+            location.reload()
+          }
+        });
+      });
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    } finally {
+      vm.loadData();
+    }
+  };
+
+  $('#editButton').click(function () {
+    var url = "/kegiatan/api/v1/psm/tes_urine_crud/" + id_edit_global + "/"
+
+    var formData = new FormData();
+
+
+    var anggaran = $('#edit__anggaran').val(),
+      penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+      anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+      penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#edit__drive_url").val();
+
+    // formData.append('satker', $('#edit__satker').val());
+    formData.append('tanggal_awal', $('#edit__tanggal_awal').val());
+    formData.append('tanggal_akhir', $('#edit__tanggal_akhir').val());
+    formData.append('satker_target', $('#edit__satker_target').val());
+    formData.append('nama_lingkungan', $('#edit__nama_lingkungan').val());
+    formData.append('tindak_lanjut', $('#edit__tindak_lanjut').val());
+    formData.append('anggaran', anggaran);
+    formData.append('penyerapan_anggaran', penyerapan_anggaran);
+    formData.append('drive_url', drive_url);
+
+    // Check if file is selected
+    var dokumentasiFile = $('#edit__dokumentasi')[0].files[0];
+    if (dokumentasiFile) {
+      formData.append('dokumentasi', dokumentasiFile);
+    }
+
+    var pesertaArray = [];
+    $('.form-repeater.edit [data-repeater-item]').each(function (index, element) {
+      let lainnya = $(element).find('[id^="form-repeater"]').eq(12).val()
+      let status = $(element).find('[id^="form-repeater"]').eq(2).val();
+
+      const checkboxIds = [
+        'form-repeater-amp',
+        'form-repeater-met',
+        'form-repeater-mop',
+        'form-repeater-thc',
+        'form-repeater-coc',
+        'form-repeater-bzo',
+        'form-repeater-som',
+        'form-repeater-ll'
+      ];
+
+      if (status == "N") {
+        pesertaArray.push({
+          nama: $(element).find('[id^="form-repeater"]').eq(0).val(),
+          alamat: $(element).find('[id^="form-repeater"]').eq(1).val(),
+          gender: $(element).find('[id^="form-repeater"]').eq(3).val(),
+          status: $(element).find('[id^="form-repeater"]').eq(2).val(),
+          isi_parameter: "",
+          keterangan_isi_parameter: ""
+        });
+      } else {
+        checkboxIds.forEach(id => {
+          if ($(element).find('[id="' + id + '"]').is(':checked')) {
+            pesertaArray.push({
+              nama: $(element).find('[id^="form-repeater"]').eq(0).val(),
+              alamat: $(element).find('[id^="form-repeater"]').eq(1).val(),
+              gender: $(element).find('[id^="form-repeater"]').eq(3).val(),
+              status: $(element).find('[id^="form-repeater"]').eq(2).val(),
+              isi_parameter: $(element).find('[id="' + id + '"]').val(),
+              keterangan_isi_parameter: $(element).find('[id^="form-repeater"]').eq(12).val()
+            });
+          }
+        });
+      }
+    });
+    formData.append('pesertaArray', JSON.stringify(pesertaArray));
+
+    var peserta_lamaArray = [];
+    $('.form-repeater-lama [data-repeater-item-lama]').each(function (index, element) {
+      let lainnya = $(element).find('[id^="form-repeater"]').eq(12).val()
+      let status = $(element).find('[id^="form-repeater"]').eq(2).val()
+
+      const checkboxIds = [
+        'form-repeater-edit-lama-amp',
+        'form-repeater-edit-lama-met',
+        'form-repeater-edit-lama-mop',
+        'form-repeater-edit-lama-thc',
+        'form-repeater-edit-lama-coc',
+        'form-repeater-edit-lama-bzo',
+        'form-repeater-edit-lama-som',
+        'form-repeater-edit-lama-ll'
+      ];
+
+      if (status == "N") {
+        peserta_lamaArray.push({
+          nama: $(element).find('[id^="form-repeater-edit-lama"]').eq(0).val(),
+          alamat: $(element).find('[id^="form-repeater-edit-lama"]').eq(1).val(),
+          gender: $(element).find('[id^="form-repeater-edit-lama"]').eq(3).val(),
+          status: $(element).find('[id^="form-repeater-edit-lama"]').eq(2).val(),
+          isi_parameter: "",
+          keterangan_isi_parameter: ""
+        });
+      } else {
+        checkboxIds.forEach(id => {
+          if ($(element).find('[id="' + id + '"]').is(':checked')) {
+            peserta_lamaArray.push({
+              nama: $(element).find('[id^="form-repeater-edit-lama"]').eq(0).val(),
+              alamat: $(element).find('[id^="form-repeater-edit-lama"]').eq(1).val(),
+              gender: $(element).find('[id^="form-repeater-edit-lama"]').eq(3).val(),
+              status: $(element).find('[id^="form-repeater-edit-lama"]').eq(2).val(),
+              isi_parameter: $(element).find('[id="' + id + '"]').val(),
+              keterangan_isi_parameter: $(element).find('[id^="form-repeater-edit-lama"]').eq(12).val()
+            });
+          }
+        });
+      }
+    });
+    formData.append('peserta_lamaArray', JSON.stringify(peserta_lamaArray));
+
+    // const pesertaCompleteness = checkDataCompleteness(pesertaArray);
+    // const pesertaLamaCompleteness = checkDataCompleteness(peserta_lamaArray);
+
+    // if (pesertaCompleteness === 2 && pesertaLamaCompleteness === 2) {
+    showConfirmationDialog(formData, url);
+    // } else if (pesertaLamaCompleteness === 0) {
+    //     showErrorDialog("Data Peserta kosong!");
+    // } else if (pesertaCompleteness === 1 || pesertaLamaCompleteness === 1) {
+    //     showErrorDialog("Data Peserta tidak lengkap!");
+    // }else{
+    //     showConfirmationDialog(formData, url);
+    // }
+  });
+
+  async function handleExport() {
+    showSwalLoading();
+    await sleep(1000);
+    try {
+      const response = await axios.post('/kegiatan/api/v1/psm/tes_urine/export_data/');
+
+      const data = response.data;
+      window.location.href = data.file_path;
+      const confirmation = await Swal.fire({
+        title: "Berhasil",
+        html: `Data <b>Kegiatan Tes Urine Deteksi Dini</b> telah <b>berhasil</b> diexport! <br>Klik tombol unduh ulang apabila <b>gagal</b>!`,
+        icon: "success",
+        confirmButtonText: "Unduh ulang.",
+        showCancelButton: true,
+        cancelButtonText: 'Batalkan',
+        showCloseButton: true,
+        allowOutsideClick: false,
+      });
+      if (confirmation.isConfirmed) {
+        console.log('Blud is downloading again!');
+        const response = await axios.post('/kegiatan/api/v1/psm/tes_urine/export_data/');
+        const data = response.data;
+        window.location.href = data.file_path;
+      }
+    } catch (error) {
+      showSwalGenericError();
+      console.error('Terjadi kesalahan :', error);
+    }
+
+    // var tbl = document.getElementById('__table');
+    // var wb = XLSX.utils.table_to_book(tbl);
+    // XLSX.writeFile(wb, "REKAPITULASI PEMBINAAN TEKNIS.xlsx");
+  }
+
+  async function handleDate(event, target) {
+    const currentDate = moment().format('YYYY-MM-DD');
+    const valueDate = $(event.target).val();
+    if (valueDate === currentDate) {
+      $('#create__tanggal_akhir').val(new Date().toISOString().split('T')[0]);
+    } else {
+    }
+  }
+
+  function countMaleParticipants(data) {
+    let count = 0;
+    data.forEach(function (row) {
+      if (row.jenis_kelamin === "Laki-Laki") {
+        count++;
+      }
+    });
+    return count;
+  }
+
+  function countFemaleParticipants(data) {
+    let count = 0;
+    data.forEach(function (row) {
+      if (row.jenis_kelamin === "Perempuan") {
+        count++;
+      }
+    });
+    return count;
+  }
+
+  function formatNamaAlamat(data) {
+    let formattedData = [];
+    data.forEach(function (row) {
+      let formattedString = row.nama_peserta + " - " + row.alamat;
+      formattedData.push(formattedString);
+    });
+    // Join the elements of the array with ", "
+    let result = formattedData.join(", ");
+    return result;
+  }
+
+  function countHasilTest(data) {
+    let countPositif = 0;
+    let countNegatif = 0;
+
+    data.forEach(function (row) {
+      if (row.hasil_test === "Positif") {
+        countPositif++;
+      } else if (row.hasil_test === "Negatif") {
+        countNegatif++;
+      }
+    });
+
+    return {
+      positif: countPositif,
+      negatif: countNegatif
+    };
+  }
+
+  function populateFormRepeater(data) {
+    data.forEach(function (item, index) {
+      var $repeaterItem = $('<div data-repeater-item-lama></div>');
+
+      $repeaterItem.append('<div class="row">' +
+        '<div class="mb-3 col-lg-6 col-sm-12 mb-0">' +
+        '<label class="form-label" for="form-repeater-edit-lama-1-1">Nama </label>' +
+        '<input type="text" class="form-control" id="form-repeater-edit-lama-1-1" placeholder="Nama Peserta" value="' + item.nama_peserta + '"/>' +
+        '</div>' +
+        '<div class="mb-3 col-lg-6 col-sm-12 mb-0">' +
+        '<label class="form-label" for="form-repeater-edit-lama-1-2">Alamat</label>' +
+        '<input type="text" class="form-control" id="form-repeater-edit-lama-1-2" placeholder="Alamat Peserta" value="' + item.alamat + '"/>' +
+        '</div>' +
+        '<div class="mb-3 col-lg-6 col-sm-12 mb-0">' +
+        '<label class="form-label mb-3 d-block" for="form-repeater-edit-lama-1-4">Status</label>' +
+        '<select class="form-select" id="form-repeater-edit-lama-1-4" name="status">' +
+        '<option value="" disabled>Pilih Status</option>' +
+        '<option value="P"' + (item.hasil_test === 'Positif' ? ' selected' : '') + '>Positif</option>' +
+        '<option value="N"' + (item.hasil_test === 'Negatif' ? ' selected' : '') + '>Negatif</option>' +
+        '</select>' +
+        '</div>' +
+        '<div class="mb-3 col-lg-6 col-sm-12 mb-0">' +
+        '<label class="form-label mb-3 d-block" for="form-repeater-edit-lama-1-3">Jenis Kelamin</label>' +
+        '<select class="form-select" id="form-repeater-edit-lama-1-3" name="jenis_kelamin">' +
+        '<option value="" disabled>Pilih Jenis Kelamin</option>' +
+        '<option value="L"' + (item.jenis_kelamin === 'Laki-Laki' ? ' selected' : '') + '>Laki-laki</option>' +
+        '<option value="P"' + (item.jenis_kelamin === 'Perempuan' ? ' selected' : '') + '>Perempuan</option>' +
+        '</select>' +
+        '</div>' +
+
+        '<div class="mb-3 col-lg-12 col-sm-12 mb-0 jenis-parameter-section">' +
+        '<label class="form-label" for="form-repeater-1-5">Jenis Parameter (Tidak perlu diisi jika status negatif)</label>' +
+        '<div class="mt-3 form-repeater" style="display:flex;justify-content:space-around;flex-wrap:wrap;flex-direction:row;">' +
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-amp" value="amp" ' + (item.isi_parameter === 'amp' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-amp">AMP</label>' +
+        '</div>' +
+
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-met" value="met" ' + (item.isi_parameter === 'met' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-net">MET</label>' +
+        '</div>' +
+
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-mop" value="mop" ' + (item.isi_parameter === 'mop' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-P">MOP</label>' +
+        '</div>' +
+
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-thc" value="thc" ' + (item.isi_parameter === 'thc' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-P">THC</label>' +
+        '</div>' +
+
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-coc" value="coc" ' + (item.isi_parameter === 'coc' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-P">COC</label>' +
+        '</div>' +
+
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-bzo" value="bzo" ' + (item.isi_parameter === 'bzo' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-P">BZO</label>' +
+        '</div>' +
+
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-som" value="som" ' + (item.isi_parameter === 'som' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-P">SOMA</label>' +
+        '</div>' +
+
+        '<div class="form-check form-check-inline">' +
+        '<input class="form-check-input" type="radio" name="parameter_' + index + '" id="form-repeater-edit-lama-ll" value="ll" ' + (item.isi_parameter === 'll' ? 'checked' : '') + '/>' +
+        '<label class="form-check-label" for="form-repeater-P">Lainnya</label>' +
+        '</div>' +
+        '</div>' +
+
+        '<input type="text" id="form-repeater-edit-lama-1-5" class="form-control mt-3" placeholder="Isi jika anda memilih parameter lainnya" value="' + (item.isi_parameter !== 'amp' && item.isi_parameter !== 'met' && item.isi_parameter !== 'mop' && item.isi_parameter !== 'thc' && item.isi_parameter !== 'coc' && item.isi_parameter !== 'bzo' && item.isi_parameter !== 'som' ? item.keterangan_isi_parameter : '') + '"/>' +
+        '</div>' +
+
+
+        '<div class="mb-3 col-lg-12 col-xl-2 col-12 d-flex align-items-center mb-0">' +
+        '<button class="btn btn-label-danger mt-4 hapus_lama" data-repeater-delete type="button"' +
+        'value="Delete">' +
+        '<i class="ti ti-x ti-xs me-1"></i>' +
+        '<span class="align-middle">Hapus</span>' +
+        '</button>' +
+        '</div>' +
+
+        '</div>' +
+        '<hr class="mx-n4">');
+
+      $('[data-repeater-list="peserta-group-lama"]').append($repeaterItem);
+    });
+  }
+
+  function removeEmptyObjects(array) {
+    return array.filter(function (obj) {
+      return obj.nama !== "" || obj.alamat !== "" || obj.gender !== null || obj.status !== null;
+    });
+  }
+
+  function checkDataCompleteness(dataArray) {
+    var isDataComplete = true;
+    var allNull = true;
+    var someNull = false;
+
+    $.each(dataArray, function (index, obj) {
+      if (!Object.values(obj).some(value => value !== null && value !== '')) {
+        allNull = true;
+      } else {
+        allNull = false;
+        if (Object.values(obj).some(value => value === null || value === '')) {
+          someNull = true;
+          return false; // Break the loop early if any null value is found
+        }
+      }
+    });
+
+    if (allNull) {
+      return 0;
+    } else if (someNull) {
+      return 1;
+    } else {
+      return 2;
+    }
+  }
+
+  function showConfirmationDialog(formData, url) {
+    Swal.fire({
+      title: "Update data ?",
+      icon: "warning",
+      showDenyButton: true,
+      confirmButtonText: "Simpan",
+      denyButtonText: `Batal`
+    }).then((result) => {
+      if (result.isConfirmed) {
+        sendData(formData, url);
+      }
+    });
+  }
+
+  async function sendData(formData, url) {
+    showSwalLoading();
+
+    try {
+      const response = await axios.patch(
+        url, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(function (response) {
+        $("#editModal").modal("hide");
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> diperbarui!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+          timer: 1500,
+          timerProgressBar: true,
+          allowOutsideClick: false,
+          allowEscapeKey: false,
+        }).then((result) => {
+          if (result.isConfirmed || result.dismiss === Swal.DismissReason.timer) {
+            location.reload()
+          }
+        });
+      });
+
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    }
+  }
+
+  function showErrorDialog(text) {
+    Swal.fire({
+      title: "Terjadi Kesalahan !",
+      text: text,
+      icon: "error"
+    });
+  }
+
+  function addCell(tr, content, colSpan = 2) {
+    let td = document.createElement('th');
+
+    td.colSpan = colSpan;
+    td.textContent = content;
+
+    tr.appendChild(td);
+  }
+
+  function hideableButton(status, satkerLevel, type) {
+    if (type == 'kirim') {
+      return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+    } else if (type == 'edit') {
+      return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+    }
+  }
+
+  $('#filter_date_').daterangepicker({
+    showDropdowns: true,
+    ranges: {
+      'Hari ini': [moment(), moment()],
+      'Kemarin': [moment().subtract(1, 'days'), moment().subtract(1, 'days')],
+      'Minggu ini': [moment().subtract(6, 'days'), moment()],
+      // '30 hari yang lalu': [moment().subtract(29, 'days'), moment()],
+      'Bulan ini': [moment().startOf('month'), moment().endOf('month')],
+      // 'Bulan lalu': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+      'Triwulan 1 (Januari - Maret)': [moment().startOf('year').startOf('quarter'), moment().startOf('year').startOf('quarter').add(2, 'months').endOf('month')],
+      'Triwulan 2 (April - Juni)': [moment().startOf('year').startOf('quarter').add(3, 'months'), moment().startOf('year').startOf('quarter').add(5, 'months').endOf('month')],
+      'Triwulan 3 (Juli - September)': [moment().startOf('year').startOf('quarter').add(6, 'months'), moment().startOf('year').startOf('quarter').add(8, 'months').endOf('month')],
+      'Triwulan 4 (Oktober - Desember)': [moment().startOf('year').startOf('quarter').add(9, 'months'), moment().startOf('year').endOf('year')],
+    },
+    locale: {
+      customRangeLabel: "Rentang Lainnya",
+      cancelLabel: 'Batalkan',
+      applyLabel: 'Terapkan'
+    }
+  });
+
+  function getSubstanceName(parameter) {
+    const lowercaseParameter = parameter.toLowerCase();
+
+    const substances = {
+      amp: "Amphetamine",
+      met: "Methamphetamine",
+      mop: "Morphine",
+      thc: "Thc/marijuana",
+      coc: "Cocaine",
+      bzo: "Benzoidazepine",
+      soma: "Carisoprodol",
+      ll: "Parameter Lainnya"
+    };
+
+    return substances[lowercaseParameter] || "-";
+  }
+
+  function showPieChart(data) {
+    var ctx = $('#myPieChart');
+
+    myChart = new Chart(ctx, {
+      type: 'pie',
+      data: {
+        labels: data.labels,
+        datasets: [{
+          data: data.values,
+          backgroundColor: [
+            'rgba(255, 99, 132, 0.7)',
+            'rgba(54, 162, 235, 0.7)',
+            'rgba(255, 206, 86, 0.7)',
+            'rgba(75, 192, 192, 0.7)',
+            'rgba(153, 102, 255, 0.7)',
+            'rgba(255, 159, 64, 0.7)',
+            'rgba(201, 203, 207, 0.7)'
+          ],
+          borderColor: [
+            'rgba(255, 99, 132, 1)',
+            'rgba(54, 162, 235, 1)',
+            'rgba(255, 206, 86, 1)',
+            'rgba(75, 192, 192, 1)',
+            'rgba(153, 102, 255, 1)',
+            'rgba(255, 159, 64, 1)',
+            'rgba(201, 203, 207, 1)'
+          ],
+          borderWidth: 1
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'right',
+          },
+          title: {
+            display: true,
+            text: 'Chart Data Peserta Positif'
+          }
+        }
+      }
+    });
+  }
+
+  function countLabels(data) {
+    var counts = {};
+
+    $.each(data, function (index, item) {
+      var isi_parameter = item.isi_parameter;
+
+      if (isi_parameter != "") {
+        if (!counts[isi_parameter]) {
+          counts[isi_parameter] = 1;
+        } else {
+          counts[isi_parameter]++;
+        }
+      }
+    });
+
+    var labels = [];
+    var values = [];
+
+    for (var label in counts) {
+      labels.push(getSubstanceName(label));
+      values.push(counts[label]);
+    }
+
+    return {
+      labels: labels,
+      values: values
+    };
+  }
+
+  function checkAndDisplayCanvas(data) {
+    var hasPositiveResult = false;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].hasil_test === "Positif") {
+        hasPositiveResult = true;
+        break; // Exit the loop once a positive result is found
+      }
+    }
+    if (hasPositiveResult) {
+      $('#myPieChart').show();
+    } else {
+      $('#myPieChart').hide();
+    }
+  }
+
+</script>
+
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include 'psm/tes_urine_deteksi_dini/modals/create.html' %}
+{% include 'psm/tes_urine_deteksi_dini/modals/edit.html' %}
+{% include 'psm/tes_urine_deteksi_dini/modals/lihat.html' %}
+{% endblock %}

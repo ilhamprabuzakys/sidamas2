@@ -1,0 +1,118 @@
+<div class="modal fade" id="tambahData" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambah">Tambah Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section id="formTambah">
+                    <div class="mb-3">
+                        <label for="satker" class="col-form-label required">Satuan Kerja:</label>
+                        <select class="form-control select2" name="satker" id="satker">
+                            <option value="" selected disabled>--Pilih Satuan Kerja--</option>
+                            {% for item in satker %}
+                            <option value="{{ item.nama_satker }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="nama_stakeholder" class="col-form-label required">Nama stakeholder:</label>
+                        <input type="text" name="nama_stakeholder" class="form-control" id="nama_stakeholder" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="kegiatan_yang_dilakukan" class="col-form-label required">Kegiatan yang
+                            dilakukan:</label>
+                        <textarea class="form-control" name="kegiatan_yang_dilakukan"
+                            id="kegiatan_yang_dilakukan"></textarea>
+                    </div>
+
+                    <hr class="mx-n4">
+
+                    <div class="mb-3">
+                        
+                        <label for="kawasan_yang_di_intervensi" class="col-form-label required">Kawasan Yang
+                            Diintervensi:</label>
+
+                        <div class="row" id="kawasan_yang_di_intervensi">
+                            
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="provinsi" id="pilih_provinsi">
+                                    <option value="" selected disabled>--Pilih provinsi--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="kota" id="pilih_kota">
+                                    <option value="" selected disabled>--Pilih kota/kabupaten--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="kecamatan" id="pilih_kecamatan">
+                                    <option value="" selected disabled>--Pilih kecamatan--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="desa" id="pilih_desa">
+                                    <option value="" selected disabled>--Pilih desa/kelurahan--</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <!-- <div class="row" id="kawasan_yang_di_intervensi">
+                            <div class="col-4">
+                                <input type="text" name="desa" class="form-control" id="desa"
+                                    placeholder="Nama Desa/Kelurahan" />
+                            </div>
+
+                            <div class="col-4">
+                                <input type="text" name="kecamatan" class="form-control" id="kecamatan"
+                                    placeholder="Nama Kecamatan" />
+                            </div>
+
+                            <div class="col-4">
+                                <input type="text" name="kota" class="form-control" id="kota"
+                                    placeholder="Nama Kota/Kabupaten" />
+                            </div>
+                        </div> -->
+
+                    </div>
+
+                    <hr class="mx-n4">
+
+                    <div class="mb-3">
+                        <label for="jumlah_sasaran" class="col-form-label required">Jumlah sasaran (orang):</label>
+                        <input type="text" name="jumlah_sasaran" class="form-control" id="jumlah_sasaran" />
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="hasil_dampak" class="col-form-label required">Hasil/ Dampak</label>
+                        <textarea class="form-control" name="hasil_dampak" id="hasil_dampak"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kesimpulan" class="col-form-label required">Kesimpulan:</label>
+                        <textarea class="form-control" name="kesimpulan" id="kesimpulan"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+                        <textarea class="form-control" name="tindak_lanjut" id="tindak_lanjut"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dokumentasi" class="col-form-label required">Dokumentasi:</label>
+                        <input type="file" class="form-control" name="dokumentasi" id="dokumentasi"></input>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>Tutup</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>

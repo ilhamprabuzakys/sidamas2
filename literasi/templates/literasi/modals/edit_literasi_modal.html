@@ -1,0 +1,87 @@
+<div class="modal fade" id="editModal" tabindex="-1" role="dialog" x-data="{ kategori: '' }">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Edit Data <b><span id="target_edited">Modul literasi A</span></b>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formUpdate" action="" method="post" enctype="multipart/form-data" onsubmit="handleUpdate(event)" x-data>
+                <div class="modal-body">
+                    <input type="hidden" name="edited_id" id="edited_id">
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="edit_judul">Judul</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="edit_judul" class="form-control" value="" />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="edit_kategori">Kategori</label>
+                        <div class="col-sm-9">
+                            <select id="edit_kategori" class="form-select input_dokumen" data-allow-clear="true" x-model='kategori'>
+                                <option value="" disabled>--Pilih kategori--</option>
+                                <option value="buku">Buku</option>
+                                <option value="audio">Audio</option>
+                                <option value="video">Video</option>
+                                <option value="video_youtube">Video Youtube</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="status">Status</label>
+                        <div class="col-sm-9 d-flex align-items-center">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="edit_status_published" value="published"/>
+                                <label class="form-check-label" for="edit_status_published">Published</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="edit_status_draft" value="draft"/>
+                                <label class="form-check-label" for="edit_status_draft">Draft</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="edit_status_archived" value="archived"/>
+                                <label class="form-check-label" for="edit_status_archived">Archived</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3" id="container_edit_input_dokumen" x-transition x-show="kategori !== 'video_youtube'">
+                        <label class="col-sm-3 col-form-label optional" for="edit_dokumen">Konten unggahan</label>
+                        <div class="col-sm-9">
+                            <input class="form-control input_dokumen" type="file" id="edit_dokumen">
+                        </div>
+
+                        <span class="mt-3">Mengunggah file baru berarti akan <b>menghapus</b> file anda saat ini!</span>
+                    </div>
+
+                    <div class="row mb-3" style="overflow-wrap: anywhere">
+                        <span class="d-flex justify-content-center">
+                            <span class="file_info">
+                                File anda saat ini :
+                                <a id="file_path" href="/media/uploads/file/modul_literasi_a.pdf">/media/uploads/file/modul_literasi_a.pdf</a>
+                            </span>
+
+                            {% comment %}
+                            <div class="form-check form-check-inline ms-5">
+                                <input class="form-check-input" type="checkbox" id="" value="hapus" name="isHapusFile" />
+                                <label class="form-check-label" for="">Hapus</label>
+                            </div>
+                            {% endcomment %}
+                        </span>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal"><i
+                            class="fas fa-xmark me-2"></i>Batalkan</button>
+                    <button type="submit" class="btn btn-primary" x-on:click="showSwalLoading()"><i
+                            class="fas fa-save me-2"></i>Simpan Data</button>
+
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

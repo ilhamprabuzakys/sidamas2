@@ -1,0 +1,34 @@
+<div class="modal fade" id="tambahData" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambah">Tambah Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section id="formTambah">
+                    <div class="mb-3">
+                        <label for="satker" class="col-form-label required">Satuan Kerja:</label>
+                        <select class="form-control select2" name="satker" id="satker">
+                            <option value="" selected disabled>Pilih Satuan Kerja</option>
+                            {% for item in satker %}
+                            <option value="{{ item.nama_satker }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    {% comment %} <div class="mb-3">
+                        <label for="jumlah_stakeholder" class="col-form-label required">Jumlah Stakeholder:</label>
+                        <input type="number" name="jumlah_stakeholder" class="form-control" id="jumlah_stakeholder" />
+                    </div> {% endcomment %}
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>Tutup</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>

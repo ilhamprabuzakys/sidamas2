@@ -1,0 +1,133 @@
+<div class="modal fade" id="editData" aria-labelledby="modalEdit" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="createModal">Update Data <b>KEGIATAN LAINNYA</b></h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        <section id="formEdit">
+
+          <div class="mb-3">
+            <label for="edit__tindak_lanjut" class="col-form-label required">Kegiatan Lainnya:</label>
+            <input type="text" class="form-control" id="edit__kegiatan" required placeholder="Nasional"></input>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__tindak_lanjut" class="col-form-label required">Tempat:</label>
+            <input type="text" class="form-control" id="edit__tempat" required placeholder="Nasional"></input>
+          </div>
+
+          <div class="row">
+            <div class="col-md-6">
+              <label for="edit__tindak_lanjut" class="col-form-label required">Waktu Awal:</label>
+              <input type="time" id="edit__awal_w" class="form-control" required>
+            </div>
+            <div class="col-md-6">
+              <label for="edit__tindak_lanjut" class="col-form-label required">Waktu Akhir:</label>
+              <input type="time" id="edit__akhir_w" class="form-control" required>
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__tindak_lanjut" class="col-form-label required">Lingkungan/Sasaran:</label>
+            <input type="text" class="form-control" id="edit__lingkungan" required placeholder="Lingkungan"></input>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__tindak_lanjut" class="col-form-label required">Jumlah Orang:</label>
+            <input type="number" class="form-control" id="edit__jumlah" required placeholder="Banyak Peserta"></input>
+          </div>
+
+          <!-- deskripsi hasil -->
+          <div class="mb-3">
+            <label for="edit__tindak_lanjut" class="col-form-label required">Hasil Dampak:</label>
+            <textarea class="form-control" id="edit__hasil_dampak" required placeholder="Deskripsi Hasil"></textarea>
+          </div>
+
+          <!-- simpulan -->
+          <div class="mb-3">
+            <label for="edit__tindak_lanjut" class="col-form-label required">Kesimpulan:</label>
+            <textarea class="form-control" id="edit__simpulan" required placeholder="Simpulan"></textarea>
+          </div>
+
+          <!-- tindak lanjut -->
+          <div class="mb-3">
+            <label for="edit__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+            <textarea class="form-control" id="edit__tindak_lanjut" required placeholder="Tindak Lanjut"></textarea>
+          </div>
+
+          
+          <!-- Kode -->
+          <div class="row mb-3">
+            <div class="col-md-5 col-sm-10 mb-3">
+              <label for="edit__kode" class="col-form-label required">Kode :</label>
+              <select id="edit__kode" class="form-select">
+                <option value="" selected disabled>--Pilih kode--</option>
+                {% for item in kegiatan_akun %}
+                <option value="{{ item.pk }}">{{ item.no_unit }} - {{ item.akun_kegiatan }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="col-md-1 col-sm-1 d-flex align-items-end mb-3">
+              <input type="text" class="form-control border-0" readonly value="-">
+            </div>
+            <div class="col-md-5 col-sm-10 d-flex align-items-end mb-3">
+              <select id="edit__kode_abjad" class="form-select" disabled>
+                <option value="" selected>--Pilih abjad --</option>
+              </select>
+            </div>
+          </div>
+          <!--/ Kode -->
+          <hr>
+
+          <!-- file yang di lampirkan -->
+          <div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label for="edit__anggaran" class="col-form-label required">Anggaran:</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Rp</span>
+                  <input type="text" id="edit__anggaran" class="form-control mask-currency" required />
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="edit__penyerapan_anggaran" class="col-form-label required">Penyerapan Anggaran:</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Rp</span>
+                  <input type="text" id="edit__penyerapan_anggaran" class="form-control mask-currency" />
+                </div>
+              </div>
+              <div class="mb-3 alert alert-warning" role="alert">
+                Terdapat selisih sebesar Rp <span id="edit__amount">0</span>
+              </div>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="mb-3">
+                <label for="edit__drive_url" class="col-form-label required">Tautan Drive</label>
+                <input type="url" class="form-control" id="edit__drive_url" required />
+                <div class="text-muted mt-2">Contoh: https://drive.google.com/****</div>
+              </div>
+              <div class="mb-3">
+                <label for="edit__dokumentasi" class="col-form-label">Dokumentasi</label>
+                <input type="file" class="form-control" id="edit__dokumentasi" accept=".xlsx, .pdf, docx." />
+              </div>
+            </div>
+          </div>
+
+        </section>
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+          <i class="fas fa-xmark me-2"></i>Tutup</button>
+        <button type="button" class="btn btn-primary" id="editButton">
+          <i class="fas fa-save me-2"></i>
+          Simpan</button>
+      </div>
+    </div>
+  </div>
+</div>

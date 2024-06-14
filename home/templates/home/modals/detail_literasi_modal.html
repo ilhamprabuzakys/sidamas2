@@ -1,0 +1,24 @@
+{% load static %}
+<div class="modal modal-literasi fade" id="detailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Detail <b><span id="detail_judul"></span></b>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="container-fluid">
+                    <embed id="detail_wadah" src="" width="100%" height="600px" autoplay="false" />
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-md btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>Tutup</button>
+                <a href="javascript:void(0)" id="detail_dokumen" class="btn btn-success btn-md"><i
+                        class="fas fa-download me-2"></i>Unduh Buku</a>
+            </div>
+        </div>
+    </div>
+</div>

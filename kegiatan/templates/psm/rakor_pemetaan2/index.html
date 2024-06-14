@@ -1,0 +1,62 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+  Rakor Pemetaan
+{% endblock %}
+{% block content %}
+  <div class="breadcrumb">
+    <div class="row">
+      <h3 class="heading mb-2">Rakor Pemetaan</h3>
+      <span class="mb-0">
+        <span class="text-muted fw-light">Kegiatan /</span>
+        <span class="ms-1 fw-medium">Rakor Pemetaan</span>
+      </span>
+    </div>
+  </div>
+
+  <section id="__data">
+    <div class="card">
+      <div class="card-body">
+        <div id="headline" class="mb-3">
+          <h3 class="text-center">RAKOR PEMETAAN KELOMPOK SASARAN<br /> <span id="currentYear"></span></h3>
+          <hr />
+        </div>
+
+        <div class="action-button">
+          <div class="d-flex justify-content-end mb-3 gap-2">
+            <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData"><i class="fas fa-file-export me-2"></i>Ekspor Data</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahData"><i class="fas fa-plus me-2"></i>Tambah Data</button>
+          </div>
+        </div>
+
+        <div class="table-responsive">
+          {% include 'psm/rakor_pemetaan2/table.html' %}
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block css_tambahan %}
+  <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+{% endblock %}
+
+{% block js_tambahan %}
+  <script src="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+  <script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+  <script src="{% static 'assets/dashboard/js/bawaan/forms-extras.js' %}"></script>
+
+  <script>
+    let table = $('#__table').DataTable({
+      language: dt_lang_config()
+    })
+    
+    $('#selectSatker, #selectSatkerDiundang').select2({
+      dropdownParent: $('#tambahData')
+    })
+  </script>
+{% endblock %}
+
+{% block modal_tambahan %}
+  {% include 'psm/modals/modal_create_rakor_pemetaan.html' %}
+{% endblock %}

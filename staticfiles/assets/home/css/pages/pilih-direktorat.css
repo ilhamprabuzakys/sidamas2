@@ -1,0 +1,74 @@
+main {
+    background-image: url("../../images/auth/bg-pilih-role.png");
+    background-size: cover;
+    /* atau contain, sesuai kebutuhan */
+    background-repeat: no-repeat;
+    height: 60vh;
+}
+
+#pilih-direktorat {
+    margin: 10rem 0;
+}
+
+#pilih-direktorat .headline {
+    color: #05a3ae !important;
+}
+
+#pilih-direktorat .title h2 {
+    text-transform: none;
+}
+
+.text-gray-400 {
+    color: #bdbdbd;
+}
+/* BUTTON */
+
+.btn .btn-dayatif i {
+    color: #03b3be;
+}
+
+.btn.btn-psm,
+.btn.btn-dayatif {
+    border-radius: 30px;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    -ms-border-radius: 30px;
+    -o-border-radius: 30px;
+    font-weight: 500;
+    padding: 10px 20px;
+    text-transform: uppercase;
+}
+
+.btn.btn-dayatif {
+    background-color: #fff0c8 !important;
+    color: #03b3be !important;
+}
+
+.btn.btn-dayatif:hover {
+    background-color: #e4d6af !important;
+}
+
+.btn.btn-dayatif:focus {
+    background-color: #e4d6af !important;
+}
+
+.btn.btn-dayatif:active {
+    background-color: #e4d6af !important;
+}
+
+.btn.btn-psm {
+    background-color: #ebbd86 !important;
+    color: #fff0c8 !important;
+}
+
+.btn.btn-psm:hover {
+    background-color: #c7a172 !important;
+}
+
+.btn.btn-psm:focus {
+    background-color: #c7a172 !important;
+}
+
+.btn.btn-psm:active {
+    background-color: #c7a172 !important;
+}

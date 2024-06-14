@@ -1,0 +1,487 @@
+<form id="editForm" @submit.prevent="handleUpdate()">
+    <div class="modal fade" id="editModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Data <b>Kegiatan</b> untuk Satuan Kerja Pelaksana <b id="edit__info"></b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Satuan Kerja Pelaksana -->
+                    <div class="mb-3">
+                        <label for="edit__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+                        <select class="form-control select2" id="edit__satker" v-model="edit.satker" disabled>
+                            {% if user.profile.satker.level == 2 %}
+                                {% for item in satker %}
+                                <option value="{{ item.pk }}">{{ item.nama_satker }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <!--/ Satuan Kerja Pelaksana -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Jenis -->
+                    <div class="mb-3">
+                        <label for="edit__jenis" class="col-form-label required">Jenis:</label>
+                        <select class="form-control select2" id="edit__jenis" v-model="edit.jenis">
+                            <option value="" disabled>--Pilih jenis--</option>
+                            <option value="Monitoring dan Evaluasi Kinerja">Monitoring dan Evaluasi Kinerja</option>
+                            <option value="Monitoring dan Evaluasi dalam rangka Pendampingan">Monitoring dan Evaluasi dalam Rangka Pendampingan</option>
+                        </select>
+                    </div>
+                    <!--/ Jenis -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Periode -->
+                    <div class="mb-3">
+                        <label for="edit__periode" class="col-form-label required">Periode:</label>
+                        <select class="form-control select2" id="edit__periode" v-model="edit.periode">
+                            <option value="" disabled>--Pilih periode--</option>
+                            <option value="Triwulan">Triwulan</option>
+                            <option value="Semester">Semester</option>
+                            <option value="Tahunan">Tahunan</option>
+                        </select>
+                    </div>
+                    <!--/ Periode -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tanggal Kegiatan -->
+                    <div class="row range_date edit">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="edit__tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                                <input type="date" id="edit__tanggal_awal" class="form-control" v-model="edit.tanggal_awal" required />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="edit__tanggal_akhir" class="col-form-label optional">Tanggal
+                                    Akhir:</label>
+                                <input type="date" id="edit__tanggal_akhir" class="form-control" v-model="edit.tanggal_akhir"  />
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Tanggal Kegiatan -->
+
+                    <div class="text-important my-2">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</div>
+
+                    <hr class="mx-n4">
+
+                    <!-- Tempat -->
+                    <div class="mb-3">
+                        <label for="edit__tempat" class="col-form-label required">Tempat:</label>
+                        <textarea class="form-control" id="edit__tempat" v-model="edit.tempat" required></textarea>
+                    </div>
+                    <!--/ Tempat -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Kawasan Yang Diintervensi -->
+                    <div class="mb-3">
+
+                        <label for="edit__selected_lokasi" class="col-form-label required">Kawasan Yang Diintervensi:</label>
+
+                        <v-lokasi :lokasi="store.lokasi"></v-lokasi>
+
+						<div class="my-2">
+                            <span class="text-information">Kosongkan <b>bagian</b> ini jika tidak ingin mengganti lokasi.</span>
+                        </div>
+
+                        <div class="row" id="edit__lokasi">
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__provinsi" v-model="edit.provinsi">
+                                    <option value="" selected >--Pilih provinsi--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__kabupaten" v-model="edit.kabupaten" disabled>
+                                    <option value="" selected >--Pilih kota/kabupaten--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__kecamatan" v-model="edit.kecamatan" disabled>
+                                    <option value="" selected >--Pilih kecamatan--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__desa" v-model="edit.desa" disabled>
+                                    <option value="" selected >--Pilih desa/kelurahan--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Kawasan Yang Diintervensi -->
+
+                    <!-- Keterampilan Yang Diberikan -->
+                    <div class="mb-3">
+                        <label for="edit__keterampilan" class="col-form-label required">Keterampilan Yang Diberikan:</label>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="edit__keterampilan" id="edit__keterampilan_menjahit"
+                            :checked="store.keterampilan.select == 'Menjahit'"
+                            @click="store.keterampilan.showKeterangan = false; store.keterampilan.select = 'Menjahit'; edit.keterampilan = 'Menjahit'" />
+                            <label class="form-check-label" for="edit__keterampilan_menjahit">Menjahit</label>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="edit__keterampilan" id="edit__keterampilan_kerajinan_tangan"
+                            :checked="store.checkedState('Kerajinan Tangan')"
+                            @click="store.keterampilan.showKeterangan = true; store.keterampilan.select = 'Kerajinan Tangan'; edit.keterampilan = ''" />
+                            <label class="form-check-label" for="edit__keterampilan_kerajinan_tangan">Kerajinan Tangan, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" v-if="store.checkVisibility('Kerajinan Tangan')"
+                            :value="edit.keterampilan"
+                            :checked="store.keterampilan.select == 'Kerajinan Tangan'"
+                            @change="store.keterampilan.keterangan = $event.target.value; edit.keterampilan = store.getKeterampilan"
+                            :required="store.checkVisibility('Kerajinan Tangan')"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="edit__keterampilan" id="edit__keterampilan_pengolahan_makanan"
+                            :checked="store.checkedState('Pengolahan Makanan')"
+                            @click="store.keterampilan.showKeterangan = true; store.keterampilan.select = 'Pengolahan Makanan'; edit.keterampilan = ''" />
+                            <label class="form-check-label" for="edit__keterampilan_pengolahan_makanan">Pengolahan Makanan, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" v-if="store.checkVisibility('Pengolahan Makanan')"
+                            :value="edit.keterampilan"
+                            @change="store.keterampilan.keterangan = $event.target.value; edit.keterampilan = store.getKeterampilan"
+                            :required="store.checkVisibility('Pengolahan Makanan')"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="edit__keterampilan" id="edit__keterampilan_pembuatan_sabun"
+                            :checked="store.keterampilan.select == 'Pembuatan Sabun'"
+                            @click="store.keterampilan.showKeterangan = false; store.keterampilan.select = 'Pembuatan Sabun'; edit.keterampilan = 'Pembuatan Sabun'" />
+                            <label class="form-check-label" for="edit__keterampilan_pembuatan_sabun">Pembuatan Sabun</label>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="edit__keterampilan" id="edit__keterampilan_barista_kopi"
+                            :checked="store.keterampilan.select == 'Barista Kopi'"
+                            @click="store.keterampilan.showKeterangan = false; store.keterampilan.select = 'Barista Kopi'; edit.keterampilan = 'Barista Kopi'" />
+                            <label class="form-check-label" for="edit__keterampilan_barista_kopi">Barista Kopi</label>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="edit__keterampilan" id="edit__keterampilan_lainnya"
+                            :checked="store.checkedState('Lainnya')"
+                            @click="store.keterampilan.showKeterangan = true; store.keterampilan.select = 'Lainnya'; edit.keterampilan = ''" />
+                            <label class="form-check-label" for="edit__keterampilan_lainnya">Lainnya, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" v-if="store.checkVisibility('Lainnya')"
+                            :value="edit.keterampilan"
+                            @change="store.keterampilan.keterangan = $event.target.value; edit.keterampilan = store.getKeterampilan"
+                            :required="store.checkVisibility('Lainnya')"
+                            ></textarea>
+                        </div>
+                    </div>
+                    <!--/ Keterampilan Yang Diberikan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Peserta -->
+                    <div id="edit__peserta_container">
+                        <label for="edit__peserta" class="col-form-label required text-muted">Data Peserta : </label>
+                        <div class="text-muted mt-2 mb-3">Saat ini terdapat : <span id="edit__peserta_info" class="text-primary"></span></div>
+                        <div id="edit__peserta" class="disable-form-repeater px-3">
+                            <div data-repeater-list="edit_peserta_group">
+                                <div data-repeater-item>
+                                    <div class="row" x-data="{ alihProfesi: '' }">
+                                        <div class="mb-3 col-lg-6 col-sm-10 mb-0">
+                                            <label class="form-label required" for="form-repeater-1-1">Nama :</label>
+                                            <input type="text" id="form-repeater-1-1" name="nama" class="form-control" placeholder="Nama Peserta"/>
+                                        </div>
+
+                                        <div class="mb-3 col-lg-6 col-sm-10 mb-0">
+                                            <label class="form-label required" for="form-repeater-1-2">Alamat :</label>
+                                            <input type="text" id="form-repeater-1-2" name="alamat" class="form-control" placeholder="Alamat Rumah Peserta"/>
+                                        </div>
+
+                                        <div class="mb-3 col-lg-6 col-sm-10 mb-0">
+                                            <label class="form-label required" for="form-repeater-1-3">Nomor HP :</label>
+                                            <input type="text" id="form-repeater-1-3" name="notelp" class="form-control" placeholder="Nomor HP Peserta"/>
+                                        </div>
+
+
+                                        <div class="mb-3 col-lg-6 col-sm-5 mb-0">
+                                            <label class="form-label required" for="form-repeater-1-5">Jenis Kelamin :</label>
+
+                                            <div class="mt-3">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="jenis_kelamin" id="create-peserta-jk-l" value="L" />
+                                                    <label class="form-check-label" for="create-peserta-jk-l">Laki-Laki</label>
+                                                </div>
+
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="jenis_kelamin" id="create-peserta-jk-p" value="P" />
+                                                    <label class="form-check-label" for="create-peserta-jk-p">Perempuan</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3 col-lg-6 col-sm-5 mb-0">
+                                            <label class="form-label required" for="form-repeater-1-6">Status Kemiskinan :</label>
+
+                                            <div class="mt-3">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="status_kemiskinan" id="create-status-kemiskinan-miskin" value="Miskin" />
+                                                    <label class="form-check-label" for="create-status-kemiskinan-miskin">Miskin</label>
+                                                </div>
+
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="status_kemiskinan" id="create-status-kemiskinan-tidak-miskin" value="Tidak Miskin" />
+                                                    <label class="form-check-label" for="create-status-kemiskinan-tidak-miskin">Tidak Miskin</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div class="mb-3 col-lg-6 col-sm-5 mb-0">
+                                            <label class="form-label required" for="form-repeater-1-7">Alih Profesi :</label>
+
+                                            <div class="mt-3">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="create-alih-profesi-ya" value="Ya" name="alih_profesi" />
+                                                    <label class="form-check-label" for="create-alih-profesi-ya">Ya</label>
+                                                </div>
+
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" id="create-alih-profesi-tidak" value="Tidak" name="alih_profesi" />
+                                                    <label class="form-check-label" for="create-alih-profesi-tidak">Tidak</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div
+                                            class="mb-3 col-lg-6 col-sm-10 mb-0"
+                                        >
+                                            <label class="form-label required" for="form-repeater-1-8">Jenis Usaha :</label>
+                                            <input type="text" id="form-repeater-1-8" class="form-control" placeholder="Jenis Usaha Peserta" name="jenis_usaha" />
+                                        </div>
+
+                                        <div
+                                            class="mb-3 col-lg-6 col-sm-10 mb-0"
+                                        >
+                                            <label class="form-label" for="form-repeater-1-9">Pendapatan :</label>
+                                            <input type="text" id="form-repeater-1-9" class="form-control mask-currency" name="pendapatan" placeholder="0,00" />
+                                        </div>
+
+                                        <div class="mb-3 col-lg-12 col-xl-12 col-12 d-flex justify-content-end align-items-center mb-0">
+                                            <button class="btn btn-label-danger mt-4" data-repeater-delete type="button"
+                                                value="Delete">
+                                                <i class="ti ti-x ti-xs me-1"></i>
+                                                <span class="align-middle">Hapus</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <hr class="hr-light mx-n4">
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <button class="btn btn-primary" data-repeater-create type="button" value="Add">
+                                    <i class="ti ti-plus me-1"></i>
+                                    <span class="align-middle">Tambah peserta</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Peserta -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Sinergi -->
+                    <div class="mb-3">
+						<label for="edit__sinergi" class="col-form-label text-muted me-3 required">Sinergi :</label>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="edit__sinergi_desa_bersinar" value="1" v-model="edit.sinergi_desa" :checked="edit.sinergi_desa" />
+                            <label class="form-check-label" for="edit__sinergi_desa_bersinar">Desa Bersinar</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="edit__sinergi_ibm" value="1" v-model="edit.sinergi_ibm" :checked="edit.sinergi_ibm" />
+                            <label class="form-check-label" for="edit__sinergi_ibm">IBM</label>
+                        </div>
+					</div>
+                    <!--/ Sinergi -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Hasil SKM -->
+                    <div class="mb-3">
+						<label for="edit__hasil_skm" class="col-form-label text-muted required">Hasil SKM:</label>
+
+                        <div class="row">
+                            <div class="col-md-6 col-sm-10 mb-2">
+                                <label for="edit__hasil_skm_nilai" class="col-form-label required">Nilai (1,00 - 4,00) :</label>
+                                <input type="text" class="form-control mask-hasil-nilai" id="edit__hasil_skm_nilai" value="1,00" required />
+                            </div>
+
+                            <div class="col-md-6 col-sm-10 mb-2">
+                                <label for="edit__hasil_skm_kategori" class="col-form-label">Kategori :</label>
+                                <input type="text" class="form-control" id="edit__hasil_skm_kategori" :value="store.getSKMKategori" :change="edit.hasil_skm_kategori = store.getSKMKategori" disabled readonly/>
+                            </div>
+                        </div>
+
+                        <div class="d-flex mt-3">
+                            <span class="text-muted">Keterangan :</span>
+                            <ul>
+                                <li>Nilai <span class="text-danger">1,00</span> – <span class="text-danger">1,74</span> = <b>Buruk</b></li>
+                                <li>Nilai <span class="text-warning">1,75</span> – <span class="text-warning">2,50</span> = <b>Cukup</b></li>
+                                <li>Nilai <span class="text-primary">2,51</span> – <span class="text-primary">3.25</span> = <b>Baik</b></li>
+                                <li>Nilai <span class="text-success">3,26</span> – <span class="text-success">4,00</span> = <b>Sangat Baik</b></li>
+                            </ul>
+                        </div>
+					</div>
+                    <!--/ Hasil SKM -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Hasil Indeks Kewirausahaan -->
+                    <div class="mb-3">
+                        <label for="edit__hasil_indeks_kewirausahaan" class="col-form-label text-muted required">Hasil Indeks Kewirausahaan:</label>
+
+                        <div class="row">
+                            <div class="col-md-6 col-sm-10 mb-2">
+                                <label for="edit__hasil_indeks_kewirausahaan_nilai" class="col-form-label required">Nilai (1,00 - 4,00) :</label>
+                                <input type="text" class="form-control mask-hasil-nilai" id="edit__hasil_indeks_kewirausahaan_nilai" value="1,00" required />
+                            </div>
+
+                            <div class="col-md-6 col-sm-10 mb-2">
+                                <label for="edit__hasil_indeks_kewirausahaan_kategori" class="col-form-label">Kategori :</label>
+                                <input type="text" class="form-control" id="edit__hasil_indeks_kewirausahaan_kategori" :value="store.getIndeksKewirausahaanKategori" :change="edit.hasil_indeks_kewirausahaan_kategori = store.getIndeksKewirausahaanKategori" disabled readonly/>
+                            </div>
+                        </div>
+
+                        <div class="d-flex mt-3">
+                            <span class="text-muted">Keterangan :</span>
+                            <ul>
+                                <li>Nilai <span class="text-danger">1,00</span> – <span class="text-danger">1,74</span> = <b>Buruk</b></li>
+                                <li>Nilai <span class="text-warning">1,75</span> – <span class="text-warning">2,50</span> = <b>Cukup</b></li>
+                                <li>Nilai <span class="text-primary">2,51</span> – <span class="text-primary">3.25</span> = <b>Baik</b></li>
+                                <li>Nilai <span class="text-success">3,26</span> – <span class="text-success">4,00</span> = <b>Sangat Baik</b></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!--/ Hasil Indeks Kewirausahaan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Status Kerawanan Kawasan -->
+                    <div class="row mb-3">
+                        <div class="col-12 mb-3">
+                            <label for="edit__status_kerawanan_kawasan_awal_kategori" class="col-form-label text-muted required">Awal:</label>
+
+                            <select
+                                class="form-select"
+                                id="edit__status_kerawanan_kawasan_awal_kategori"
+                                @change="store.status_kerawanan_kawasan.awal.status = $event.target.value"
+                                v-model="edit.status_kerawanan_kawasan_awal_kategori"
+                            >
+                                <option value="" disabled>--Pilih status Kerawanan--</option>
+                                <option value="Bahaya">Bahaya</option>
+                                <option value="Waspada">Waspada</option>
+                                <option value="Siaga">Siaga</option>
+                                <option value="Aman">Aman</option>
+                            </select>
+                        </div>
+
+                        <div class="col-6 mb-3">
+                            <label for="edit__status_kerawanan_kawasan_akhir_nilai" class="form-label text-muted required">Akhir Nilai:</label>
+
+                            <input type="text" class="form-control mask-hasil-nilai" id="edit__status_kerawanan_kawasan_akhir_nilai" value="1,00" required />
+                        </div>
+
+                        <div class="col-6 mb-3">
+                            <label for="edit__status_kerawanan_kawasan_akhir_kategori" class="form-label text-muted required">Akhir Kategori:</label>
+
+                            <input type="text" class="form-control" id="edit__status_kerawanan_kawasan_akhir_kategori"
+                            :value="store.getStatusKerawananKawasanAkhirKategori" :change="edit.status_kerawanan_kawasan_akhir_kategori = store.getStatusKerawananKawasanAkhirKategori" disabled readonly/>
+                        </div>
+
+                        <div class="col-12 mb-3">
+                            <label for="edit__status_kerawanan_kawasan_kepulihan" class="form-label text-muted required">Status Kepulihan:</label>
+
+                            <input type="text" class="form-control"
+                            :value="store.getStatusKepulihan"
+                            :change="edit.status_kerawanan_kawasan_kepulihan = store.getStatusKepulihan"
+                            id="edit__status_kerawanan_kawasan_kepulihan" disabled readonly />
+                        </div>
+
+                        <div class="d-flex mt-3">
+                            <span class="text-muted">Keterangan :</span>
+                            <ul>
+                                <li>Nilai <span class="text-danger">1,00</span> – <span class="text-danger">1,74</span> = <b>Bahaya</b></li>
+                                <li>Nilai <span class="text-warning">1,75</span> – <span class="text-warning">2,50</span> = <b>Waspada</b></li>
+                                <li>Nilai <span class="text-primary">2,51</span> – <span class="text-primary">3.25</span> = <b>Siaga</b></li>
+                                <li>Nilai <span class="text-success">3,26</span> – <span class="text-success">4,00</span> = <b>Aman</b></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <!--/ Status Kerawanan Kawasan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Kesimpulan -->
+					<div class="mb-3">
+						<label for="edit__kesimpulan" class="col-form-label required">Kesimpulan:</label>
+
+                        <textarea class="form-control my-3" id="edit__kesimpulan_rekomendasi" v-model="edit.kesimpulan" required></textarea>
+					</div>
+                    <!--/ Kesimpulan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tindak Lanjut -->
+                    <div class="mb-3">
+                        <label for="edit__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+
+                        <textarea class="form-control" id="edit__tindak_lanjut" v-model="edit.tindak_lanjut" required></textarea>
+                    </div>
+                    <!--/ Tindak Lanjut -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Dokumentasi Gambar -->
+                    <div class="mb-3">
+                        <label for="edit__dokumentasi_gambar" class="col-form-label optional">Dokumentasi Gambar:</label>
+                        <v-input-image id="edit__dokumentasi_gambar" :maxsize="5" v-model="edit.gambar" :init="store.image.url"></v-input-image>
+                    </div>
+                    <!--/ Dokumentasi Gambar -->
+
+                    <!-- Dokumentasi -->
+                    <div class="mb-3">
+                        <label for="edit__dokumentasi" class="col-form-label">Dokumentasi File:</label>
+                        <input type="file" class="form-control" id="edit__dokumentasi" @change="edit.dokumentasi = $event.target.files[0]" />
+                    </div>
+                    <!--/ Dokumentasi -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

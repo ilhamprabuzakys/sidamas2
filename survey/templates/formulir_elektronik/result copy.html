@@ -1,0 +1,83 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Formulir Elektronik {% endblock title %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            Formulir Elektronik
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Survei /</span>
+            <a class="text-muted fw-light" href="{% url 'formulir_elektronik' %}">Formulir Elektronik /</a>
+            <span class="ms-1 fw-medium">Hasil Formulir</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">HASIL FORM <span id="form_title">{{title_form}}</span></h3>
+                <hr>
+            </div>
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <button class="btn btn-success" onclick="handleExport()">
+                        <i class="fas fa-file-export me-2"></i>Ekspor Data
+                    </button>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-bordered" id="__table">
+                    <div id="survey-result-json" style="display: none;"></div>
+                    <thead class="text-center" style="background-color: #2ca8dc;" style="color: white;">
+                        <tr id="question"></tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <tr id="answer"></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+
+    $(document).ready(function () {
+        function getIdFromUrl() {
+            let pathSegments = window.location.pathname.split('/');
+            let id = pathSegments[pathSegments.length - 2];
+            return id;
+        }
+        let id = getIdFromUrl();
+        axios.get(`/survey/api/v1/survey_result/get_detail_data/?id=${id}`)
+            .then(function (response) {
+                $('#form_title').text(response.data.survey_title)
+                $.each(response.data.result, function (index, result) {
+                    let hasilObj = JSON.parse(result.hasil)
+                    let th = []
+                    Object.keys(hasilObj).forEach(function (key) {
+                        th.push(key);
+                    });
+                    console.log(th)
+                });
+            })
+            .catch(function (error) {
+                console.error(error);
+            });
+    });
+
+    function handleExport() {
+        let title = document.getElementById("form_title").innerText;
+        let tbl = document.getElementById('__table');
+        let wb = XLSX.utils.table_to_book(tbl);
+        XLSX.writeFile(wb, title + ".xlsx");
+    }
+</script>
+{% endblock %}

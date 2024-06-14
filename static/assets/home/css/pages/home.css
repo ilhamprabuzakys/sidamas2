@@ -1,0 +1,107 @@
+#headline img.head-img {
+   width: 160px;
+}
+
+#headline #slogan {
+   color: #2ca8dc;
+   font-weight: 500;
+}
+
+#headline #slogan .highlight {
+   color: #59A9FF;
+   font-weight: bold;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+   color: #2ca8dc;
+   font-weight: 500;
+}
+
+/* Berita */
+#daftar-berita .row a {
+   text-decoration: none;
+}
+
+#daftar-berita .card {
+   overflow: hidden;
+}
+
+#daftar-berita .card .card-author {
+   margin-bottom: 5px;
+   color: #6e6e6e;
+   font-size: 11px;
+}
+
+#daftar-berita .card .card-title:hover {
+   color: #0050a7;
+   transition: 0.1s ease-in-out;
+}
+
+#daftar-berita .card .card-image {
+   overflow: hidden;
+   height: 200px;
+}
+
+#daftar-berita .card .card-image img {
+   transition: transform 0.3s ease-in-out;
+   width: -webkit-fill-available;
+   height: 200px;
+   object-fit: cover;
+}
+
+#daftar-berita img:hover {
+   transform: scale(1.1);
+   /* Sesuaikan nilai scaling yang diinginkan */
+}
+
+#daftar-berita .list-kategori {
+   margin-bottom: 10px;
+}
+
+#daftar-berita .kategori {
+   color: #5f5f5f;
+   font-weight: 500;
+   font-size: 11px;
+}
+
+#daftar-berita h5 {
+   color: #303030;
+   font-size: 15px;
+   text-transform: capitalize;
+}
+
+#daftar-berita p {
+   color: #444444;
+   font-size: 12px;
+}
+
+/* ====================
+    MODAL
+=======================*/
+.modal.modal-literasi .modal-body {
+   padding: 0;
+}
+
+.modal.modal-literasi .modal-body .container-fluid {
+   padding: 5px;
+}
+
+/**=== VUE JS STYLING ===**/
+[v-cloak] {
+   display: none;
+}
+
+.v-enter-active,
+.v-leave-active {
+   transition: opacity 0.5s ease;
+}
+
+.v-enter-from,
+.v-leave-to {
+   opacity: 0;
+}

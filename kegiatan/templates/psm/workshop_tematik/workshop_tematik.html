@@ -1,0 +1,559 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Workshop Tematik
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+  <div class="row">
+    <h3 class="heading mb-2">Workshop Tematik</h3>
+    <span class="mb-0">
+      <span class="text-muted fw-light">Kegiatan /</span>
+      <span class="text-muted fw-light">PSM /</span>
+      <span class="ms-1 fw-medium">Workshop Tematik</span>
+    </span>
+  </div>
+</div>
+
+<section id="__data">
+  <div class="card">
+    <div class="card-body">
+      <div id="headline" class="mb-3">
+        <h3 class="text-center">
+          Workshop Tematik<br />
+          <span id="currentYear"></span>
+        </h3>
+        <hr />
+      </div>
+
+      <div class="action-button">
+        <div class="d-flex justify-content-end mb-3 gap-2">
+          <button class="btn btn-success" onclick="handleExport()">
+            <i class="fas fa-file-export me-2"></i>Ekspor Data
+          </button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+            <i class="fas fa-plus me-2"></i>Tambah Data
+          </button>
+        </div>
+      </div>
+      <div class="table-responsive">
+        {% include 'psm/workshop_tematik/table2.html' %}
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+<script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+<script>
+  const { createApp, ref, onMounted, computed } = Vue;
+  createApp({
+    setup() {
+      let workshop_tematikData = ref(null);
+      let satkerLevel = parseInt('{{ user.profile.satker.level }}');
+      let perPage = ref(10);
+      let currentPage = ref(1);
+      let searchField = ref(null);
+      let filteredPage = ref(null);
+      const totalPage = computed(() => {
+        if (workshop_tematikData.value) {
+          return Math.ceil(workshop_tematikData.value.length / perPage.value);
+        }
+        else return 0;
+      });
+
+      const pagedData = computed(() => {
+        if (filteredPage.value) {
+          const startIndex = (currentPage.value - 1) * perPage.value;
+          const endIndex = currentPage.value * perPage.value;
+          return filteredPage.value.slice(startIndex, endIndex);
+        }
+        else return [];
+      });
+
+      function searchData(e) {
+        currentPage.value = 1;
+
+        filteredPage.value = workshop_tematikData.value.filter((data) => {
+          idx = String(data.satker.toUpperCase());
+          jumlah_kegiatan = String(data.jumlah_kegiatan);
+          jumlah_peserta = String(data.jumlah_peserta);
+          stakeholder = String(data.stakeholder.toUpperCase());
+          deskripsi = String(data.deskripsi.toUpperCase());
+          kendala = String(data.kendala.toUpperCase());
+          kesimpulan = String(data.kesimpulan.toUpperCase());
+          tindak_lanjut = String(data.tindak_lanjut.toUpperCase());
+
+          bool1 = idx.indexOf(searchField.value.toUpperCase()) > -1;
+          bool2 = jumlah_kegiatan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool3 = deskripsi.indexOf(searchField.value.toUpperCase()) > -1;
+          bool4 = kendala.indexOf(searchField.value.toUpperCase()) > -1;
+          bool5 = kesimpulan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool6 = tindak_lanjut.indexOf(searchField.value.toUpperCase()) > -1;
+          bool7 = jumlah_peserta.indexOf(searchField.value.toUpperCase()) > -1;
+          bool8 = stakeholder.indexOf(searchField.value.toUpperCase()) > -1;
+          return bool1 || bool3 || bool4 || bool5 || bool6 || bool8 || bool2 || bool7;
+        });
+      };
+
+      function hideableButton(status, satkerLevel, type) {
+        if (type == 'kirim') {
+          return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        } else if (type == 'edit') {
+          return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        }
+      }
+
+      const apiURL = (satkerLevel == 1 ? '/kegiatan/api/v1/psm/workshop_tematik/get_data_bnnk/?format=datatables' : '/kegiatan/api/v1/psm/workshop_tematik/?format=datatables')
+      function loadData() {
+        tableContent = [];
+        axios.get(apiURL).then(function (response) {
+          data = response.data.data;
+          for ([key, value] of Object.entries(data)) {
+            if (value.data && value.data.length > 0) {
+              baris = {
+                'class': 'table-primary',
+                'hide_satker': false,
+                'index': parseInt(key) + 1,
+                'satker': value.satker.nama_satker + '(' + value.data.length + ' kegiatan)',
+                'jumlah_kegiatan': '',
+                'tanggal': '',
+                'jumlah_peserta': '',
+                'stakeholder': '',
+                'deskripsi': '',
+                'kendala': '',
+                'kesimpulan': '',
+                'tindak_lanjut': '',
+                'dokumentasi': '',
+                'status': '',
+                'type': 'parent'
+              };
+              tableContent.push(baris);
+              for ([key2, value2] of Object.entries(value.data)) {
+                baris = {
+                  'class': '',
+                  'hide_satker': true,
+                  'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1),
+                  'id': value2.id,
+                  'satker': value2.satker.nama_satker,
+                  'jumlah_kegiatan': value2.jumlah_kegiatan,
+                  'tanggal': (value2.tanggal_akhir) ? value2.tanggal_awal + '-' + value2.tanggal_akhir : value2.tanggal_awal,
+                  'jumlah_peserta': value2.jumlah_peserta,
+                  'stakeholder': value2.stakeholder,
+                  'deskripsi': value2.deskripsi,
+                  'kendala': value2.kendala,
+                  'kesimpulan': value2.kesimpulan,
+                  'tindak_lanjut': value2.tindak_lanjut,
+                  'drive_url': value2.drive_url,
+                  'anggaran': 'Rp ' + parseInt(value2.anggaran).toLocaleString('id-ID'),
+                  'penyerapan_anggaran': 'Rp ' + parseInt(value2.penyerapan_anggaran).toLocaleString('id-ID'),
+                  'dokumentasi': value2.dokumentasi,
+                  'status': value2.status,
+                  'level': value2.satker.level,
+                  'type': 'first__child',
+                  'kirim': hideableButton(value2.status, satkerLevel, 'kirim'),
+                  'edit': hideableButton(value2.status, satkerLevel, 'edit'),
+                };
+                tableContent.push(baris);
+              }
+              if (value.detail !== undefined && value.detail.length > 0) {
+                for ([key3, value3] of Object.entries(value.detail)) {
+                  baris = {
+                    'class': 'table-secondary',
+                    'hide_satker': false, 'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1) + '.' + (parseInt(key3) + 1),
+                    'satker': value3.satker.nama_satker + '(' + value3.data.length + ' kegiatan)',
+                    'jumlah_kegiatan': '',
+                    'tanggal': '',
+                    'jumlah_peserta': '',
+                    'stakeholder': '',
+                    'deskripsi': '',
+                    'kendala': '',
+                    'kesimpulan': '',
+                    'tindak_lanjut': '',
+                    'dokumentasi': '',
+                    'status': '',
+                    'type': 'parent'
+                  };
+                  tableContent.push(baris);
+                  for ([key4, value4] of Object.entries(value3.data)) {
+                    baris = {
+                      'class': '',
+                      'hide_satker': true,
+                      'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1) + '.' + (parseInt(key3) + 1) + '.' + (parseInt(key4) + 1),
+                      'id': value4.id,
+                      'satker': value4.satker.nama_satker,
+                      'jumlah_kegiatan': value4.jumlah_kegiatan,
+                      'tanggal': (value4.tanggal_akhir) ? value4.tanggal_awal + '-' + value4.tanggal_akhir : value4.tanggal_awal,
+                      'jumlah_peserta': value4.jumlah_peserta,
+                      'stakeholder': value4.stakeholder,
+                      'deskripsi': value4.deskripsi,
+                      'kendala': value4.kendala,
+                      'kesimpulan': value4.kesimpulan,
+                      'tindak_lanjut': value4.tindak_lanjut,
+                      'anggaran': 'Rp ' + parseInt(value4.anggaran).toLocaleString('id-ID'),
+                      'penyerapan_anggaran': 'Rp ' + parseInt(value4.penyerapan_anggaran).toLocaleString('id-ID'),
+                      'drive_url': value4.drive_url,
+                      'dokumentasi': value4.dokumentasi,
+                      'level': value4.satker.level,
+                      'status': value4.status,
+                      'type': 'second__child',
+                      'kirim': hideableButton(value4.status, satkerLevel, 'kirim'),
+                      'edit': hideableButton(value4.status, satkerLevel, 'edit'),
+                    };
+                    tableContent.push(baris);
+                  }
+                }
+              }
+            }
+          }
+          workshop_tematikData.value = tableContent;
+          filteredPage.value = workshop_tematikData.value;
+        });
+      };
+
+      console.log(pagedData)
+
+      const goToNextPage = (current, total) => {
+        if (currentPage.value < total) {
+          currentPage.value++;
+        }
+      }
+
+      const goToPreviousPage = (current, total) => {
+        if (currentPage.value > 0) {
+          currentPage.value--;
+        }
+      }
+
+      async function handleEditModal(id) {
+        try {
+          const response = await axios.get(`/kegiatan/api/v1/psm/workshop_tematik/get_detail_data/?id=${id}`);
+          const data = response.data;
+
+          $('#edit__id').val(data[0].id);
+          $('#edit__tanggal_awal').val(data[0].tanggal_awal);
+          $('#edit__tanggal_akhir').val(data[0].tanggal_akhir);
+          $('#edit__satker').val(data[0].satker_id).trigger('change');
+          $('#edit__jumlah_kegiatan').val(data[0].jumlah_kegiatan);
+          $('#edit__jumlah_peserta').val(data[0].jumlah_peserta);
+          $('#edit__stakeholder').val(data[0].stakeholder);
+          $('#edit__deskripsi').val(data[0].deskripsi);
+          $('#edit__kendala').val(data[0].kendala);
+          $('#edit__kesimpulan').val(data[0].kesimpulan);
+          $('#edit__tindak_lanjut').val(data[0].tindak_lanjut);
+          $('#edit__anggaran').val(data[0].anggaran);
+          $('#edit__penyerapan_anggaran').val(data[0].penyerapan_anggaran);
+          $('#edit__drive_url').val(data[0].drive_url);
+
+          var anggaran = data[0].anggaran,
+            penyerapan_anggaran = data[0].penyerapan_anggaran;
+          var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+          var formattedAmount = selisih.toLocaleString('id-ID');
+          $('span#edit__amount').text(formattedAmount);
+
+          console.log(data[0].id)
+
+          $('#modalEdit').modal('show');
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      async function handleDelete(id) {
+        console.log(id);
+        const confirmationText = `Untuk menghapus data tersebut ${id}? <br> Data yang dihapus tidak dapat <b>dipulihkan</b> kembali`;
+
+        const confirmResult = await showSwalConfirm(confirmationText, 'Ya, hapus data');
+
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+          try {
+              const response = await axios.delete(
+                `/kegiatan/api/v1/psm/workshop_tematik/perform_delete/?id=${id}`
+              ).then(function (response) {
+                  Swal.fire({
+                      title: 'Berhasil!',
+                      html: `Data kegiatan berhasil <b>dihapus</b>`,
+                      icon: 'success',
+                      confirmButtonText: 'OK',
+                  }).then((result) => {
+                      if (result.isConfirmed) {
+                          location.reload()
+                      }
+                  });
+              });
+            } catch (error) {
+                console.log('Terjadi kesalahan : ', error);
+                showSwalGenericError();
+          }
+        // try {
+        //   const response = await axios.delete(`/kegiatan/api/v1/psm/workshop_tematik/perform_delete/?id=${id}`);
+        //   showSwalSuccess('Berhasil', `Data kegiatan berhasil <b>dihapus</b>`, 10000);
+        //   location.reload()
+        // } catch (error) {
+        //   console.log('Terjadi kesalahan : ', error);
+        //   showSwalGenericError();
+        // }
+      }
+
+      async function handleKirim(satker, id) {
+        const confirmResult = await showSwalConfirm(`Apakah anda yakin untuk mengirim semua kegiatan dari Satuan Kerja <b>${satker}</b>`, 'Ya, kirim data');
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.post(
+            `/kegiatan/api/v1/psm/workshop_tematik/kirim_kegiatan/`,
+            { id: id }
+          ).then(function (response) {
+            const sendedToParent = response.data.parent.keterangan;
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data <b>kegiatan</b> untuk <b>${satker}</b> telah berhasil <b>dikirimkan ke ${sendedToParent}</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+            }).then((result) => {
+              if (result.isConfirmed) {
+                location.reload()
+              }
+            });
+          });
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      onMounted(() => {
+        loadData();
+      });
+      return {
+        workshop_tematikData,
+        satkerLevel,
+        loadData,
+        handleEditModal,
+        handleDelete,
+        handleKirim,
+        totalPage,
+        perPage,
+        currentPage,
+        pagedData,
+        searchData,
+        searchField,
+        goToPreviousPage,
+        goToNextPage
+      }
+    },
+    delimiters: ['${', '}']
+  }).mount('#app');
+</script>
+
+<!-- script handle crud -->
+<script>
+  $(document).ready(function () {
+    $('#create__anggaran, #create__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = ($('#create__anggaran').val()) ? $('#create__anggaran').val() : 0,
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = ($('#create__penyerapan_anggaran').val()) ? $('#create__penyerapan_anggaran').val() : 0,
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#amount').text(formattedAmount);
+    });
+
+    $('#edit__anggaran, #edit__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = $('#edit__anggaran').val(),
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#edit__amount').text(formattedAmount);
+    });
+  })
+
+  async function handlePost(e) {
+    e.preventDefault();
+    showSwalLoading();
+
+    const tanggal_awal = $("#create__tanggal_awal").val();
+    const tanggal_akhir = $("#create__tanggal_akhir").val();
+    const satker = $("#create__satker").val();
+    const deskripsi = $("#create__deskripsi").val();
+    const kendala = $("#create__kendala").val();
+    const kesimpulan = $("#create__kesimpulan").val();
+    const tindak_lanjut = $("#create__tindak_lanjut").val();
+    var anggaran = $('#create__anggaran').val();
+    anggaran = anggaran.replace(/\./g, '').replace(',', '.');
+    var penyerapan_anggaran = $('#create__penyerapan_anggaran').val();
+    penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#create__drive_url").val();
+    const jumlah_peserta = $("#create__jumlah_peserta").val();
+    const jumlah_kegiatan = $("#create__jumlah_kegiatan").val();
+    const stakeholder = $("#create__stakeholder").val();
+    const dokumentasi = $("#create__dokumentasi")[0].files[0];
+
+    const formData = new FormData();
+
+    formData.append("tanggal_awal", tanggal_awal);
+    formData.append("tanggal_akhir", tanggal_akhir);
+    formData.append("satker", parseInt(satker));
+    formData.append("deskripsi", deskripsi);
+    formData.append("kendala", kendala);
+    formData.append("kesimpulan", kesimpulan);
+    formData.append("jumlah_kegiatan", jumlah_kegiatan);
+    formData.append("jumlah_peserta", jumlah_peserta);
+    formData.append("stakeholder", stakeholder);
+    formData.append("tindak_lanjut", tindak_lanjut);
+    formData.append("anggaran", parseInt(anggaran));
+    formData.append("penyerapan_anggaran", parseInt(penyerapan_anggaran));
+    formData.append("drive_url", drive_url);
+    formData.append("dokumentasi", dokumentasi);
+
+    try {
+      const response = await axios.post(
+        `/kegiatan/api/v1/psm/workshop_tematik/perform_create/`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      ).then(function (response) {
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> ditambahkan!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            location.reload()
+          }
+        });
+      });
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    } finally {
+      vm.loadData();
+    }
+  }
+
+  async function handleEdit(e) {
+    e.preventDefault();
+    showSwalLoading();
+
+    const id = $('#edit__id').val();
+    const tanggal_awal = $("#edit__tanggal_awal").val();
+    const tanggal_akhir = $("#edit__tanggal_akhir").val();
+    const satker = $("#edit__satker").val();
+    const jumlah_kegiatan = $("#edit__jumlah_kegiatan").val();
+    const jumlah_peserta = $("#edit__jumlah_peserta").val();
+    const stakeholder = $("#edit__stakeholder").val();
+    const deskripsi = $("#edit__deskripsi").val();
+    const kendala = $("#edit__kendala").val();
+    const kesimpulan = $("#edit__kesimpulan").val();
+    const tindak_lanjut = $("#edit__tindak_lanjut").val();
+    var anggaran = $('#edit__anggaran').val(),
+      penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+      anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+      penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#edit__drive_url").val();
+    const dokumentasi = $("#edit__dokumentasi")[0].files[0];
+
+    const formData = new FormData();
+
+    formData.append("id", id);
+    formData.append("tanggal_awal", tanggal_awal);
+    formData.append("tanggal_akhir", tanggal_akhir);
+    // formData.append("satker", parseInt(satker));
+    formData.append("jumlah_kegiatan", (jumlah_kegiatan));
+    formData.append("jumlah_peserta", (jumlah_peserta));
+    formData.append("stakeholder", (stakeholder));
+    formData.append("deskripsi", deskripsi);
+    formData.append("kendala", kendala);
+    formData.append("kesimpulan", kesimpulan);
+    formData.append("tindak_lanjut", tindak_lanjut);
+    formData.append("anggaran", parseInt(anggaran));
+    formData.append("penyerapan_anggaran", parseInt(penyerapan_anggaran));
+    formData.append("drive_url", drive_url);
+    if (dokumentasi) { formData.append('dokumentasi', dokumentasi); }
+
+    try {
+      const response = await axios.patch(
+        `/kegiatan/api/v1/psm/workshop_tematik/perform_update/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(function (response) {
+        $("#editModal").modal("hide");
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> diperbarui!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            location.reload()
+          }
+        });
+      });
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    }
+  }
+
+
+
+  async function handleExport() {
+    showSwalLoading();
+    await sleep(1000);
+    try {
+      const response = await axios.post('/kegiatan/api/v1/psm/workshop_tematik/export_data/');
+
+      const data = response.data;
+      window.location.href = data.file_path;
+      const confirmation = await Swal.fire({
+        title: "Berhasil",
+        html: `Data <b>Kegiatan Workshop Tematik</b> telah <b>berhasil</b> diexport! <br>Klik tombol unduh ulang apabila <b>gagal</b>!`,
+        icon: "success",
+        confirmButtonText: "Unduh ulang.",
+        showCancelButton: true,
+        cancelButtonText: 'Batalkan',
+        showCloseButton: true,
+        allowOutsideClick: false,
+      });
+      if (confirmation.isConfirmed) {
+        console.log('Blud is downloading again!');
+        const response = await axios.post('/kegiatan/api/v1/psm/workshop_tematik/export_data/');
+        const data = response.data;
+        window.location.href = data.file_path;
+      }
+    } catch (error) {
+      showSwalGenericError();
+      console.error('Terjadi kesalahan :', error);
+    }
+  }
+</script>
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include 'psm/workshop_tematik/modals/create.html' %}
+{% include 'psm/workshop_tematik/create_kegiatan.html' %}
+{% include 'psm/workshop_tematik/modals/edit.html' %}
+{% include 'psm/workshop_tematik/edit_kegiatan.html' %}
+{% include 'psm/workshop_tematik/detail.html' %}
+{% endblock %}

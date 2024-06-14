@@ -1,0 +1,219 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block css_tambahan %}
+<script src="/static/js/knockout.min.js"></script>
+<script src="/static/js/survey-ko.min.js"></script>
+<script src="/static/js/survey-creator.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/survey-knockout@1.9.126/survey.css" />
+<link rel="stylesheet" href="https://unpkg.com/survey-creator@1.9.126/survey-creator.css" />
+
+{% endblock css_tambahan %}
+{% block title %} Formulir Elektronik {% endblock title %}
+{% block content %}
+
+<div class="breadcrumb">
+   <div class="row">
+      <h3 class="heading mb-2">
+         Formulir Elektronik
+      </h3>
+      <span class="mb-0">
+         <span class="text-muted fw-light">Survei /</span>
+         <a class="text-muted fw-light" href="{% url 'formulir_elektronik' %}">Formulir Elektronik /</a>
+         <span class="ms-1 fw-medium">Tambah Formulir</span>
+       </span>
+   </div>
+</div>
+
+<section id="__data">
+   <div class="card">
+      <div class="card-body">
+        <div id="headline" class="mb-3">
+            <h3 class="text-center">TAMBAH FORMULIR ELEKTRONIK</h3>
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <a class="btn btn-secondary" href="{% url 'formulir_elektronik' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Kembali ke daftar survei
+                    </a>
+
+                </div>
+            </div>
+            <hr>
+            <div class="row">
+                <div class="col">
+                    <label for="start_date" class="form-label">Tanggal Awal :</label>
+                    <input type="date" class="form-control" id="start_date" name="start_date">
+                </div>
+                <div class="col">
+                    <label for="end_date" class="form-label">Tanggal Akhir :</label>
+                    <input type="date" class="form-control" id="end_date" name="end_date">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <label for="batasan" class="form-label">Batasan Responden :</label>
+                    <input type="number" class="form-control" id="batasan" name="batasan" placeholder="isi jumlah responden">
+                </div>
+                <div class="col">
+                    <label for="status" class="form-label">Status Survei :</label>
+                    <select id="status" class="form-select">
+                        <option value="" selected disabled>Pilih Status</option>
+                        <option value="1">Draft</option>
+                        <option value="2">Publish</option>
+                        <option value="3">Archive</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div id="surveyCreatorContainer" style="width:100%;padding:10px;"></div>
+      </div>
+   </div>
+</section>
+{% endblock content %}
+{% block js_tambahan %}
+<script>
+    let id_user = "{{ user_id }}";
+    let role_user = "{{ role }}";
+    let satker_user = "{{ satker }}";
+
+    var creator = new SurveyCreator.SurveyCreator("surveyCreatorContainer");
+    SurveyCreator.StylesManager.applyTheme("Borderless");
+    SurveyCreator.localization.currentLocale = "id";
+    creator.haveCommercialLicense = true;
+    creator.showToolbox = "right";
+    creator.showPropertyGrid = "right";
+    creator.rightContainerActiveItem("toolbox");
+    creator.saveSurveyFunc = (saveNo, callback) => {
+        Swal.fire({
+            title: "Simpan survei ?",
+            icon: "warning",
+            showDenyButton: true,
+            confirmButtonText: "Simpan",
+            denyButtonText: `Tidak`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                validation(creator.JSON);
+            } else if (result.isDenied) {
+            }
+        });
+    };
+
+    function validation(json){
+        var awal = $('#start_date').val();
+        var akhir = $('#end_date').val();
+        var batasan = $('#batasan').val();
+        var status = $('#status').val();
+
+        if (status == null) {
+            status = 1;
+        } else {
+            status = status;
+        }
+
+        if (awal == "" && akhir == "") {
+            Swal.fire({
+                title: "Terjadi Kesalahan !",
+                text: "Tanggal awal & akhir harus diisi !",
+                icon: "error"
+            });
+        } else {
+            if (awal == "") {
+                Swal.fire({
+                    title: "Terjadi Kesalahan !",
+                    text: "Tanggal awal harus diisi !",
+                    icon: "error"
+                });
+            } else if (akhir == "") {
+                Swal.fire({
+                    title: "Terjadi Kesalahan !",
+                    text: "Tanggal akhir harus diisi !",
+                    icon: "error"
+                });
+            } else {
+                if (akhir < awal) {
+                    Swal.fire({
+                        title: "Terjadi Kesalahan !",
+                        text: "Tanggal akhir tidak valid !",
+                        icon: "error"
+                    });
+                } else {
+                    if (isValidNumber(batasan)) {
+                        saveSurveyJson(
+                            "/survey/api/v1/survey_create/",
+                            json,
+                            awal,
+                            akhir,
+                            status,
+                            batasan
+                        );
+                    } else {
+                        Swal.fire({
+                            title: "Terjadi Kesalahan !",
+                            text: "Batasan responden tidak valid !",
+                            icon: "error"
+                        });
+                    }
+                }
+            } 
+        }
+    }
+
+    function saveSurveyJson(url, json, awal, akhir, status, batasan) {
+        // console.log(status);
+        let judul = json.title
+        if (judul == undefined) {
+            judul = "Formulir " + moment().format("MMM Do YY");
+        }
+
+        const data = {
+            judul: judul,
+            jsontext: json,
+            pemilik: check_role(role_user),
+            batasan: batasan,
+            status: status,
+            satker: satker_user,
+            dibuat_oleh: id_user,
+            tanggal_awal: awal,
+            tanggal_akhir: akhir
+        }
+
+        console.log(data);
+
+        axios.post(url, data)
+        .then(function (response) {
+            console.log(response);
+            swal.fire({
+                title: "Berhasil menyimpan survei !",
+                icon : "success",
+                timer: 1500,
+                timerProgressBar: true,
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+            }).then((result) => {
+                window.location.href = "{% url 'formulir_elektronik' %}";
+            });
+        })
+        .catch(function (error) {
+            console.error(error);
+        });
+    }
+
+    $('html').addClass('layout-menu-collapsed');
+</script>
+
+<script>
+    // helper
+    function check_role(role) {
+        if (role.toLowerCase() === "psm") {
+            return 1;
+        } else if (role.toLowerCase() === "dayatif") {
+            return 2;
+        } else {
+            return 0;
+        }
+    }
+
+    function isValidNumber(str) {
+        return /^[1-9]/.test(str);
+    }
+</script>
+{% endblock js_tambahan %}

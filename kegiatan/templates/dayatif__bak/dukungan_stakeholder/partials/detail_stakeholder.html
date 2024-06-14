@@ -1,0 +1,86 @@
+<div class="modal fade" id="detailStakeholderModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitleId">
+                    Detail Stakeholder untuk Satuan Kerja
+                    <strong>{{ user.profile.satker }}</strong>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="bg-soft-success" rowspan="2">No</th>
+                                <th class="bg-soft-success" rowspan="2">Nama Stakeholder</th>
+                                <th class="bg-soft-success" rowspan="1" colspan="3">Dukungan Yang Diberikan</th>
+                                <th class="bg-soft-success" rowspan="2">Kawasan Yang Diintervensi</th>
+                                <th class="bg-soft-success" rowspan="2">Jumlah Sasaran</th>
+                                <th class="bg-soft-success" rowspan="2">Pengaruh/Manfaat</th>
+                                <th class="bg-soft-success" rowspan="2">Kesimpulan</th>
+                                <th class="bg-soft-success" rowspan="2">Tindak Lanjut</th>
+                                <th class="bg-soft-success" rowspan="2">Dokumentasi</th>
+                                <th class="bg-soft-success" rowspan="2">AKSI<i class="fas fa-edit ms-2"></i></th>
+                            </tr>
+                            <tr class="bg-soft-danger">
+                                <!-- Dukungan Yang Diberikan -->
+                                <th>Jenis</th>
+                                <th>Bentuk</th>
+                                <th>Jumlah</th>
+                                <!--/ Dukungan Yang Diberikan -->
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>1</td>
+                                <td>Dinas Pertanian Aceh Utara</td>
+                                <td>Dukungan Sarana Produksi</td>
+                                <td>Bibit Jagung</td>
+                                <td>Bibit untuk 30 Ha lahan</td>
+                                <td>
+                                    <ol class="my-auto">
+                                        <li>Kabupaten/Kota : Aceh Utara</li>
+                                        <li>Kecamatan : Sawang</li>
+                                        <li>Desa/Kelurahan : Jurong</li>
+                                    </ol>
+                                </td>
+                                <td>30 Ha Lahan</td>
+                                <td>
+                                    Masyarakat dapat menekan biaya produksi pertanian.
+                                </td>
+                                <td>
+                                    Pemberian bibit jagung oleh Dinas Pertanian Aceh Utara merupakan ejawantah dari kepedulian stakeholder dalam menyukseskan program dayatif. Dukungan SDM yang diberikan Universitas Malikkusaleh membantu masyarakat untuk meningkatkan kebiasaan baik dalam menjaga lingkungan dan berkehidupan sosial, sehingga dapat mendukung perubahan mindset
+                                </td>
+                                <td>
+                                    Koordinasi, konsolidasi dan evaluasi kegiatan yang dilakukan bersama.
+                                </td>
+                                <td>
+                                    <a href="javascript:;" class="text-primary text-decoration-none">Lihat
+                                        dokumentasi</a>
+                                </td>
+                                <td>
+                                    <div class="list-button mt-2">
+                                        <a href="javascript:;"
+                                            class="badge bg-success text-white text-decoration-none mb-1">
+                                            <i class="fas fa-pen-to-square me-2"></i>EDIT</a>
+                                        <a href="javascript:;"
+                                            class="badge bg-danger text-white text-decoration-none delete-data mb-1">
+                                            <i class="fas fa-trash-alt me-2"></i>HAPUS</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

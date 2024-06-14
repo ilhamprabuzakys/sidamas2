@@ -1,0 +1,169 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Pengaturan Keamanan {% endblock title %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Pengaturan Keamanan</h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Pengaturan / </span>
+            <span class="ms-1 fw-medium">Keamanan</span>
+        </span>
+    </div>
+</div>
+<section id="app">
+    <div class="row">
+        <div class="col-md-12">
+            {% include "dashboard/pengaturan/partials/list_menu_settings.html" with on="keamanan" %}
+
+            <!-- Change Password -->
+            <div class="card mb-4">
+                <h5 class="card-header">Ganti Password</h5>
+
+                <hr class="my-0" />
+
+                <div class="card-body">
+                    <form id="formUpdatePassword" onsubmit="handleUpdatePassword(event)">
+                        <div class="row">
+                            <div class="mb-3 col-md-6 form-password-toggle">
+                                <label class="form-label" for="current_password">Password anda saat ini</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="password" id="current_password"
+                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="mb-3 col-md-6 form-password-toggle">
+                                <label class="form-label" for="new_password">Password Baru</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="password" id="new_password"
+                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                                </div>
+                            </div>
+
+                            <div class="mb-3 col-md-6 form-password-toggle">
+                                <label class="form-label" for="new_password2">Ketik ulang Password Baru</label>
+                                <div class="input-group input-group-merge">
+                                    <input class="form-control" type="password" id="new_password2"
+                                        placeholder="&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;&#xb7;" />
+                                    <span class="input-group-text cursor-pointer"><i class="ti ti-eye-off"></i></span>
+                                </div>
+                                <div class="mt-1 d-none" id="new_password_confirmation_error">
+                                    <small class="text-danger">Password yang anda masukan tidak cocok.</small>
+                                </div>
+                            </div>
+                            <div class="col-12 mb-4">
+                                <h6>Ketentuan password:</h6>
+                                <ul class="ps-3 mb-0" id="error_fields">
+                                    <li class="mb-1" id="criteria_1">Minimal memiliki 8 karakter</li>
+                                    <li class="mb-1" id="criteria_2">Memiliki setidaknya 1 huruf besar</li>
+                                    <li class="mb-1" id="criteria_3">Memiliki setidaknya 1 nomor, dan simbol</li>
+                                </ul>
+                            </div>
+                            <div class="d-flex justify-content-end gap-2 ">
+                                <button type="reset" class="btn btn-label-secondary">
+                                    <i class="fas fa-xmark me-2"></i>Batalkan</button>
+                                <button type="submit" class="btn btn-primary me-2">
+                                    <i class="fas fa-save me-2"></i>Simpan perubahan</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block vue %}{% endblock vue %}
+
+{% block js_tambahan %}
+<script>
+    const user = parseInt('{{ user.id }}');
+
+    async function handleUpdatePassword(e) {
+        e.preventDefault();
+
+        const form = $('#formUpdatePassword');
+
+        let current_password = form.find('#current_password').val().trim();
+        let new_password = form.find('#new_password').val().trim();
+        let new_password2 = form.find('#new_password2').val().trim();
+
+        clearValidationErrors();
+
+        const statusValidation = validatePassword(new_password, new_password2);
+
+        if (!statusValidation) return;
+
+        const data = {
+            current_password,
+            new_password
+        };
+
+        console.log('Data : ', data);
+
+        showSwalLoading();
+
+        await sleep(1000);
+
+        try {
+
+            await axios.post(`/users/api/v1/users/update-password/`, data);
+
+            showSwalSuccess('Berhasil', `Password anda telah berhasil <b>diperbarui</b>`);
+
+            form.trigger('reset');
+        } catch (error) {
+            console.error('Terjadi kesalahan : ', error);
+
+            showSwalError('Terjadi kesalahan',
+                `Gagal memperbarui password dikarenakan. <br> <b>${error.response.data.error}</b>`, 0);
+        }
+    }
+
+    function validatePassword(new_password, new_password2) {
+        new_password = new_password.trim();
+        new_password2 = new_password2.trim();
+
+        // Validasi password
+        if (new_password !== new_password2) {
+            $('#new_password_confirmation_error').removeClass('d-none');
+            return false;
+        }
+
+        if (new_password.length < 8) {
+            showValidationError('#criteria_1');
+            console.log('Password minimal harus memiliki 8 karakter.');
+            return false;
+        }
+
+        if (!/[A-Z]/.test(new_password)) {
+            showValidationError('#criteria_2');
+            console.log('Password harus memiliki setidaknya 1 huruf besar.');
+            return false;
+        }
+
+        if (!/\d/.test(new_password) || !/[!@#$%^&*]/.test(new_password)) {
+            showValidationError('#criteria_3');
+            console.log('Password harus memilik setidaknya 1 nomor dan 1 simbol.');
+            return false;
+        }
+
+        return true;
+    }
+
+    function showValidationError(criteriaId) {
+        $(criteriaId).addClass('text-danger');
+    }
+
+    function clearValidationErrors() {
+        $('#criteria_1, #criteria_2, #criteria_3').removeClass('text-danger');
+        $('#new_password_confirmation_error').addClass('d-none');
+    }
+</script>
+{% endblock js_tambahan %}

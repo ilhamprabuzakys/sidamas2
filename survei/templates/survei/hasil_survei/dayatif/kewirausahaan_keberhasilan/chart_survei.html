@@ -1,0 +1,670 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Chart Hasil Survei {% endblock title %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@0.7.0"></script>
+
+<style>
+    .hi-font {
+        font-size: 17px;
+    }
+
+    .high-font {
+        font-size: 24px;
+    }
+
+    .text-primary {
+        color: #007bff;
+    }
+
+    .text-success {
+        color: #28a745;
+    }
+
+    .text-warning {
+        color: #ffc107;
+    }
+
+    .text-danger {
+        color: #dc3545;
+    }
+
+    #layout-menu {
+        display: none;
+    }
+
+    #layout-container {
+        padding-left: 1rem;
+    }
+
+    .layout-navbar{
+        display: none;
+    }
+
+    footer {
+        display: none;
+    }
+</style>
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            Chart Hasil Survei
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light"> Survei /</span><span class="ms-1 fw-medium">Chart Hasil Survei</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <a class="btn btn-secondary" href="{% url 'psm_skm_tes_urine' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Kembali ke daftar survei
+                    </a>
+                    <button class="btn btn-success" onclick="downloadHTMLAsPDF()">
+                        <i class="fas fa-file-export me-2"></i>Export Pdf
+                    </button>
+                </div>
+            </div>
+
+
+
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Chart Survei Data Keberhasilan Kewirausahaan 2024</h3>
+            </div>
+
+            <div class="container-fluid">
+
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U1.Apakah sudah dilaksanakan kegiatan pelatihan kewirausahaan di wilayah ini? (keterangan: pelatihan kewirausahaan meliputi: pelatihan atau lifeskill yang melibatkan BNN, Instruktur, Tokoh masyarakat &peserta) ?</h5>
+                                <canvas id="u1"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U2.Apakah pelatihan ini melibatkan masyarakat dari awal (perencanaan), prosesnya (kegiatan), tindaklanjutnya (monitoring) dan penilaian akhir hasilnya (evaluasi) ?</h5>
+                                <canvas id="u2"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U3.Apakah ada pihak-pihak lain yang memberikan kepedulian, fasilitasi, dukungan, bantuan, arahan, kunjungan kegiatan kewirausahaan warga? Siapa sajakah mereka ?</h5>
+                                <canvas id="u3"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U4.Apakah ada bentuk dukungan dan kepedulian pihak pemerintah daerah (Provinsi, Kabupaten/Walikota, Kecamatan, Kelurahan) dalam membantu keberlanjutan program kewirausahaan di wilayah ini ?</h5>
+                                <canvas id="u4"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U5.Apakah ada bentuk dukungan dan kepedulian pihak dunia usaha dalam membantu keberlanjutan program kewirausahaan di wilayah ini ?</h5>
+                                <canvas id="u5"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <br>
+
+                <div class="row">
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U6.Apakah ada bentuk dukungan dan kepedulian pihak praktisi & akademisi dalam membantu keberlanjutan program kewirausahaan di wilayah ini ?</h5>
+                                <canvas id="u6"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U7.Apakah para peserta masih melanjutkan program dan kegiatan kewirausahaan hingga hari ini ?</h5>
+                                <canvas id="u7"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U8.Apakah program dan kegiatan kewirausahaan masih berlanjut hingga saat ini ?</h5>
+                                <canvas id="u8"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U9.Apakah masyarakat binaan merasakan efek dari program dan kegiatan kewirausahaan ?</h5>
+                                <canvas id="u9"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">U10.Apakah program dan kegiatan kewirausahaan berdampak terhadap keterpulihan daerah rawan Narkoba di lingkungan ini ?</h5>
+                                <canvas id="u10"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+            
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    $(document).ready(function () {
+        const CSRF_TOKEN = getCookie('csrftoken');
+        var currentUrl = window.location.href;
+        var number_id = getNumberFromUrl(currentUrl);
+
+        Swal.fire({
+            title: "Tunggu sebentar",
+            icon: "info",
+            html: "Sedang memuat data !",
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        if (number_id != "kosong") {
+            axios.get('/survei/api/v1/data_pengisian_survei/?survei='+number_id, {
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then((response) => {
+                console.log(response);
+                mengolah_data_mentah(response);
+            })
+            .catch((error) => {
+                console.error('Error performing Axios request:', error);
+            });
+        } else {
+            Swal.close();
+            Swal.fire({
+                title: "Terjadi Kesalahan",
+                text: "ID tidak valid",
+                icon: "error"
+            });
+        }
+    });
+
+    function mengolah_data_mentah(res) {
+        let data_array_mentah = res.data;
+        let hasil_jawaban = [];
+        let data_kelamin = [];
+        let data_usia = [];
+        let data_pendidikan = [];
+
+        console.log(data_array_mentah);
+
+        for (let index = 0; index < data_array_mentah.length; index++) {
+            let element = data_array_mentah[index];
+            hasil_jawaban.push(element.array_nilai_jawaban);
+            data_kelamin.push(element.get_data_responden[0].jenis_kelamin);
+            data_usia.push(element.get_data_responden[0].rentang_usia);
+            data_pendidikan.push(element.get_data_responden[0].pendidikan);
+        }
+
+        var hasil = persiapan(hasil_jawaban);
+
+        var kelamin = countLabels(customSortlp(data_kelamin));
+        var usia = countLabels(customSortumur(data_usia));
+        var pendidikan = countLabels(customSortpendidikan(data_pendidikan));
+        
+        var u1 = countLabelsu(hasil.U1, 'Sangat Sesuai', 'Sesuai', 'Kurang Sesuai', 'Tidak Sesuai');
+        var u2 = countLabelsu(hasil.U2, 'Sangat Paham', 'Paham', 'Kurang Paham', 'Tidak Paham');
+        var u3 = countLabelsu(hasil.U3, 'Sangat Cepat', 'Cepat', 'Kurang Cepat', 'Tidak Cepat');
+        var u4 = countLabelsu(hasil.U4, 'Gratis', 'Murah', 'Cukup Mahal', 'Sangat Mahal');
+        var u5 = countLabelsu(hasil.U5, 'Sangat Setuju', 'Setuju', 'Kurang Setuju', 'Tidak Setuju');
+        var u6 = countLabelsu(hasil.U6, 'Sangat Sesuai', 'Sesuai', 'Kurang Sesuai', 'Tidak Sesuai');
+        var u7 = countLabelsu(hasil.U7, 'Sangat Kompeten', 'Kompeten', 'Kurang Kompeten', 'Tidak Kompeten');
+        var u8 = countLabelsu(hasil.U8, 'Sangat Sopan Dan Ramah', 'Sopan Dan Ramah', 'Kurang Sopan Dan Ramah', 'Tidak Sopan Dan Ramah');
+        var u9 = countLabelsu(hasil.U9, 'Dikelola Dengan Baik', 'Berfungsi Kurang Maksimal', 'Ada Tetapi Tidak Berfungsi', 'Tidak Ada');
+        var u10 = countLabelsu(hasil.U10, 'Sangat Baik', 'Baik', 'Cukup', 'Buruk');
+
+        // createPieChart('myChart', kelamin, 'lp');
+        // createPieChart('myChart2', usia, 'umr');
+        // createPieChart('myChart3', pendidikan, 'pdk');
+        createPieChart('u1', u1, '');
+        createPieChart('u2', u2, '');
+        createPieChart('u3', u3, '');
+        createPieChart('u4', u4, '');
+        createPieChart('u5', u5, '');
+        createPieChart('u6', u6, '');
+        createPieChart('u7', u7, '');
+        createPieChart('u8', u8, '');
+        createPieChart('u9', u9, '');
+        createPieChart('u10', u10, '');
+
+        Swal.close();
+    }
+
+    function createPieChart(canvasId, counts, category) {
+        var ctx = $("#" + canvasId)[0].getContext("2d");
+        var myPieChart;
+
+        var options = {
+            tooltips: {
+                enabled: true
+            },
+            plugins: {
+                datalabels: {
+                    display: true, // Add this line to enable datalabels
+                    formatter: (value, ctx) => {
+                        let sum = ctx.dataset.data.reduce((acc, data) => acc + data, 0);
+                        let percentage = (value * 100 / sum).toFixed(2) + "%";
+                        return percentage;
+                    },
+                    color: '#fff',
+                },
+            },
+            legend: {
+                display: true,
+                position: 'left'
+            },
+            title: {
+                display: true,
+            }
+        };
+
+        switch (category) {
+            case 'lp':
+                myPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            data: Object.values(counts),
+                            backgroundColor: Object.keys(counts).map(category => getcolorkelamin(category)),
+                            hoverBackgroundColor: Object.keys(counts).map(category => getcolorkelamin(category)),
+                        }]
+                    },
+                    options: options
+                });
+                break;
+
+            case 'umr':
+                myPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            data: Object.values(counts),
+                            backgroundColor: Object.keys(counts).map(category => getcolorumur(category)),
+                            hoverBackgroundColor: Object.keys(counts).map(category => getcolorumur(category)),
+                        }]
+                    },
+                    options: options
+                });
+                break;
+
+            case 'pdk':
+                myPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            data: Object.values(counts),
+                            backgroundColor: Object.keys(counts).map(category => getcolorpendidikan(category)),
+                            hoverBackgroundColor: Object.keys(counts).map(category => getcolorpendidikan(category)),
+                        }]
+                    },
+                    options: options
+                });
+                break;
+
+            default:
+                myPieChart = new Chart(ctx, {
+                    type: 'pie',
+                    data: {
+                        labels: Object.keys(counts),
+                        datasets: [{
+                            data: Object.values(counts),
+                            backgroundColor: Object.keys(counts).map(category => getColorBasedOnCategory(category)),
+                            hoverBackgroundColor: Object.keys(counts).map(category => getColorBasedOnCategory(category)),
+                        }]
+                    },
+                    options: options
+                });
+                break;
+        } 
+
+        
+    }
+
+    // menampilkan data ke chart
+    function persiapan(hasil_jawaban){
+        var pertanyaan_1 = [];
+        var pertanyaan_2 = [];
+        var pertanyaan_3 = [];
+        var pertanyaan_4 = [];
+        var pertanyaan_5 = [];
+        var pertanyaan_6 = [];
+        var pertanyaan_7 = [];
+        var pertanyaan_8 = [];
+        var pertanyaan_9 = [];
+        var pertanyaan_10 = [];
+        var variableObject = {};
+
+        for (let index = 0; index < hasil_jawaban.length; index++) {
+            const element = hasil_jawaban[index];
+            var array = element.split(',').map(Number);
+
+            pertanyaan_1.push(array[0]);
+            pertanyaan_2.push(array[1]);
+            pertanyaan_3.push(array[2]);
+            pertanyaan_4.push(array[3]);
+            pertanyaan_5.push(array[4]);
+            pertanyaan_6.push(array[5]);
+            pertanyaan_7.push(array[6]);
+            pertanyaan_8.push(array[7]);
+            pertanyaan_9.push(array[8]);
+            pertanyaan_10.push(array[9]);
+        }
+
+        variableObject['U' + (1)] = pertanyaan_1;
+        variableObject['U' + (2)] = pertanyaan_2;
+        variableObject['U' + (3)] = pertanyaan_3;
+        variableObject['U' + (4)] = pertanyaan_4;
+        variableObject['U' + (5)] = pertanyaan_5;
+        variableObject['U' + (6)] = pertanyaan_6;
+        variableObject['U' + (7)] = pertanyaan_7;
+        variableObject['U' + (8)] = pertanyaan_8;
+        variableObject['U' + (9)] = pertanyaan_9;
+        variableObject['U' + (10)] = pertanyaan_10;
+
+        return variableObject;
+    }
+
+    // function
+    function getNumberFromUrl(url) {
+        var match = url.match(/\/(\d+)\/$/);
+        if (match) {
+            return match[1];
+        } else {
+            return "kosong";
+        }
+    }
+
+    // fungsi warna chart
+    function getColorBasedOnCategory(category) {
+        switch (category) {
+            case 'Tidak Sesuai':
+            case 'Tidak Mudah':
+            case 'Tidak Cepat':
+            case 'Tidak Setuju':
+            case 'Tidak Sesuai':
+            case 'Tidak Kompeten':
+            case 'Tidak Sopan Dan Ramah':
+            case 'Tidak Ada':
+            case 'Tidak Paham':
+            case 'Sangat Mahal':
+            case 'Buruk':
+                return "#FF7E0A";
+            case 'Kurang Sesuai':
+            case 'Kurang Mudah':
+            case 'Kurang Cepat':
+            case 'Kurang Setuju':
+            case 'Kurang Sesuai':
+            case 'Kurang Kompeten':
+            case 'Kurang Sopan Dan Ramah':
+            case 'Ada Tetapi Tidak Berfungsi':
+            case 'Kurang Paham':
+            case 'Cukup Mahal':
+            case 'Cukup':
+                return "#EBBD86";
+            case 'Sesuai':
+            case 'Mudah':
+            case 'Cepat':
+            case 'Setuju':
+            case 'Sesuai':
+            case 'Kompeten':
+            case 'Sopan Dan Ramah':
+            case 'Berfungsi Kurang Maksimal':
+            case 'Paham':
+            case 'Murah':
+            case 'Baik':
+                return "#9BD8DC";
+            case 'Sangat Sesuai':
+            case 'Sangat Mudah':
+            case 'Sangat Cepat':
+            case 'Sangat Setuju':
+            case 'Sangat Sesuai':
+            case 'Sangat Kompeten':
+            case 'Sangat Sopan Dan Ramah':
+            case 'Dikelola Dengan Baik':
+            case 'Sangat Paham':
+            case 'Gratis':
+            case 'Sangat Baik':
+                return "#99EA59";
+            default:
+                return "#f53d3d"; // Default color, you can change this as needed
+        }
+    }
+
+    function getcolorkelamin(category) {
+        switch (category) {
+            case 'L':
+                return "#0085FF";
+            case 'P':
+                return "#FF0099";
+            default:
+                return "#f53d3d"; // Default color, you can change this as needed
+        }
+    }
+
+    function getcolorumur(category) {
+        switch (category) {
+            case '12-25':
+                return "#0085FF";
+            case '26-45':
+                return "#5AD65F";
+            case '46-65':
+                return "#FF7E0A";
+            default:
+                return "#f53d3d"; // Default color, you can change this as needed
+        }
+    }
+
+    function getcolorpendidikan(category) {
+        switch (category) {
+            case 'SMP/MTs':
+                return "#1e3566";
+            case 'SMA/SMK/MA':
+                return "#b3bbcc";
+            case 'Diploma (D1-D4)':
+                return "#f39c12";
+            case 'Sarjana (S1)':
+                return "#9b59b6";
+            case 'Magister (S2)':
+                return "#e74c3c";
+            case 'Doktor (S3)':
+                return "#2c3e50";
+            default:
+                return "#f53d3d"; // Default color, you can change this as needed
+        }
+    }
+    // fungsi warna chart
+
+    // fungsi ngubah array ke object
+    function countLabels(labels) {
+
+        var counts = {};
+
+        $.each(labels, function (i, label) {
+            if (!counts[label]) {
+                counts[label] = 1;
+            } else {
+                counts[label]++;
+            }
+        });
+
+        return counts;
+    }
+
+    function customSortlp(arr) {
+        // Define a custom sorting key function
+        function customKey(elem) {
+            if (elem === "L") {
+                return 0;
+            } else if (elem === "P") {
+                return 1;
+            } else {
+                // If there are other values, put them at the end
+                return 2;
+            }
+        }
+
+        // Sort the array using the custom key function
+        arr.sort(function(a, b) {
+            return customKey(a) - customKey(b);
+        });
+        return arr;
+    }
+
+    function customSortumur(arr) {
+        // Define a custom sorting key function
+        function customKey(elem) {
+            var parts = elem.split('-');
+            var lowerBound = parseInt(parts[0]);
+            var upperBound = parseInt(parts[1]);
+
+            if (lowerBound >= 12 && upperBound <= 25) {
+                return 0;
+            } else if (lowerBound >= 26 && upperBound <= 45) {
+                return 1;
+            } else if (lowerBound >= 46 && upperBound <= 65) {
+                return 2;
+            } else {
+                // If there are other values, put them at the end
+                return 3;
+            }
+        }
+
+        // Sort the array using the custom key function
+        arr.sort(function(a, b) {
+            return customKey(a) - customKey(b);
+        });
+        return arr;
+    }
+
+    function customSortpendidikan(arr) {
+        // Define a custom sorting key function
+        function customKey(elem) {
+            if (elem.startsWith("SMP") || elem.startsWith("MTs")) {
+                return 0; // Sort SMP/MTs first
+            } else if (elem.startsWith("SMA") || elem.startsWith("SMK") || elem.startsWith("MA")) {
+                return 1; // Sort SMA/SMK/MA next
+            } else if (elem.startsWith("Diploma")) {
+                return 2; // Sort Diploma next
+            } else if (elem.startsWith("Sarjana")) {
+                return 3; // Sort Sarjana next
+            } else if (elem.startsWith("Magister")) {
+                return 4; // Sort Magister next
+            } else if (elem.startsWith("Doktor")) {
+                return 5; // Sort Doktor last
+            } else {
+                // If there are other values, put them at the end
+                return 6;
+            }
+        }
+
+        // Sort the array using the custom key function
+        arr.sort(function(a, b) {
+            return customKey(a) - customKey(b);
+        });
+        return arr;
+    }
+
+    function countLabelsu(labels, var1, var2, var3, var4) {
+        labels.sort(function(a, b) {
+            return b - a;
+        });
+
+        var counts = {};
+
+        $.each(labels, function (i, label) {
+                var mappedLabel;
+
+                switch (label) {
+                    case 4:
+                        mappedLabel = var1;
+                        break;
+                    case 3:
+                        mappedLabel = var2;
+                        break;
+                    case 2:
+                        mappedLabel = var3;
+                        break;
+                    case 1:
+                        mappedLabel = var4;
+                        break;
+                    default:
+                        mappedLabel = "Tidak Diisi";
+                }
+
+                if (!counts[mappedLabel]) {
+                    counts[mappedLabel] = 1;
+                } else {
+                    counts[mappedLabel]++;
+                }
+
+            });
+            
+        return counts;
+    }
+    // fungsi ngubah array ke object
+
+    // persiapan download pdf
+    window.jsPDF = window.jspdf.jsPDF
+    window.html2canvas = html2canvas
+
+    function downloadHTMLAsPDF() {
+        $('.breadcrumb').hide();
+        $('.action-button').hide();
+        
+        html2canvas(document.body).then(canvas => {
+            const pdf = new jsPDF();
+
+            const imageData = canvas.toDataURL("image/png");
+            pdf.addImage(imageData, 'PNG', 0, 0, pdf.internal.pageSize.width, pdf.internal.pageSize.height);
+            pdf.save("pdf_chart_survei.pdf");
+            $('.breadcrumb').show();
+            $('.action-button').show();
+        });
+    }
+</script>
+{% endblock js_tambahan %}

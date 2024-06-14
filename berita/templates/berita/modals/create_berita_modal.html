@@ -1,0 +1,97 @@
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Tambah Data
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formCreate" onsubmit="handlePost(event)" enctype="multipart/form-data">
+                <div class="modal-body">
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="judul">Judul</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="judul" class="form-control" placeholder="Judul berita" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="kategori">Kategori</label>
+                        <div class="col-sm-9">
+                            <select id="kategori" class="form-select select2" data-allow-clear="true" required>
+                                <option value="" selected disabled>--Pilih kategori--</option>
+                                {% for item in list_kategori %}
+                                <option value="{{ item.pk }}">{{ item.nama }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="status">Status</label>
+                        <div class="col-sm-9 d-flex align-items-center">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="status_published"
+                                    value="published" required />
+                                <label class="form-check-label" for="status_published">Published</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="status_draft"
+                                    value="draft" required />
+                                <label class="form-check-label" for="status_draft">Draft</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="status_archived"
+                                    value="archived" required />
+                                <label class="form-check-label" for="status_archived">Archived</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="tags">Tags</label>
+                        <div class="col-sm-9">
+                            <input class="form-control tagify" type="text" id="tags">
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="isi_berita">Isi Berita</label>
+                        <div class="col-sm-9">
+                            <textarea id="isi_berita" rows="10" cols="80"></textarea>
+                        </div>
+                    </div>
+
+
+                    <div class="row mb-3" id="container_input_gambar">
+                        <label class="col-sm-3 col-form-label required" for="gambar">Gambar Berita</label>
+                        <div class="col-sm-9">
+                            <input class="form-control input_gambar" type="file" id="gambar">
+
+                            <div class="container_preview_image position-relative mt-2">
+                                <img id="preview_image" src="" style="
+                                    width: -webkit-fill-available;
+                                    max-height: 200px;
+                                    object-fit: cover;
+                                " />
+
+                                <span class="d-none clear_gambar_icon"
+                                    style="position: absolute; top: 0; right: 8px; color: #ffa9a9; font-size: 18pt; cursor: pointer">
+                                    <i class="fas fa-xmark"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal"><i
+                            class="fas fa-xmark me-2"></i>Batalkan</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

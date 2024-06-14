@@ -1,0 +1,67 @@
+<div class="modal fade" id="tambahDataKegiatan" aria-labelledby="modalTambah" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalTambah">Tambah Data</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form>
+          <div class="row mb-3">
+            <div class="col-6">
+              <div class="mb-3">
+                <label for="tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                <input type="date" id="tanggal_awal" class="form-control" />
+              </div>
+            </div>
+            <div class="col-6">
+              <div class="mb-3">
+                <label for="tanggal_akhir" class="col-form-label">Tanggal Akhir:</label>
+                <input type="date" id="tanggal_akhir" class="form-control" />
+              </div>
+            </div>
+            <label for="pelaksanaan" class="col-form-label text-light">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</label>
+          </div>
+          <div class="row mb-3">
+            <div class="col-3">
+              <label for="jumlah_peserta" class="col-form-label required">Jumlah Peserta:</label>
+              <input type="number" class="form-control" name="jumlah_peserta" id="jumlah_peserta" />
+            </div>
+            <div class="col-9">
+              <label for="stakeholder" class="col-form-label required">Stakeholder/Pendamping Yang Diundang:</label>
+              <input type="text" class="form-control" name="stakeholder" id="stakeholder" />
+            </div>
+          </div>
+          <div class="mb-3"></div>
+          <div class="mb-3">
+            <label for="deskripsi" class="col-form-label required">Deskripsi Hasil</label>
+            <textarea class="form-control" name="deskripsi_hasil" id="deskripsi_hasil"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="hambatan_kendala" class="col-form-label required">Kendala/Hambatan:</label>
+            <textarea class="form-control" name="hambatan_kendala" id="hambatan_kendala"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="simpulan" class="col-form-label required">Kesimpulan:</label>
+            <textarea class="form-control" name="simpulan" id="simpulan"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+            <textarea class="form-control" name="tindak_lanjut" id="tindak_lanjut"></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="dokumentasi" class="col-form-label required">Dokumentasi</label>
+            <input type="file" class="form-control" id="dokumentasi" aria-describedby="inputGroupFileAddon03" aria-label="Upload" />
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-xmark me-2"></i>Tutup</button>
+        <button type="button" class="btn btn-primary">
+          <i class="fas fa-save me-2"></i>
+          Simpan
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

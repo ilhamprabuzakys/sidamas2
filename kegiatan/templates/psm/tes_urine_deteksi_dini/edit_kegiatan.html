@@ -1,0 +1,70 @@
+<div class="modal fade" id="editDataKegiatan" aria-labelledby="edit" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="edit">Edit Data</h5>
+          <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#detailTesUrineDeteksiDini" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+            <form>
+              <div class="row range_date mb-3">
+                <div class="col-6">
+                  <div class="mb-3">
+                    <label for="edit_tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                    <input type="date" id="edit_tanggal_awal" class="form-control" value="2022-08-28" />
+                  </div>
+                </div>
+                <div class="col-6">
+                  <div class="mb-3">
+                    <label for="edit_tanggal_akhir" class="col-form-label">Tanggal Akhir:</label>
+                    <input type="date" id="edit_tanggal_akhir" class="form-control" value="2022-08-29"/>
+                  </div>
+                </div>
+                <label for="pelaksanaan" class="col-form-label text-light">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</label>
+              </div>
+              <div class="mb-3">
+                <div data-repeater-list="pelaksanaan-group">
+                  <div data-repeater-item>
+                    <div class="row">
+                      <div class="mb-3 col-lg-6 col-sm-10 mb-0">
+                        <label class="form-label" for="form-repeater-1-2">Nama Lingkungan</label>
+                        <input type="text" id="form-repeater-1-2" class="form-control" value="BNN Kota Surakarta"/>
+                      </div>
+                      <div class="mb-3 col-lg-3 col-sm-10 mb-0">
+                        <label class="form-label" for="form-repeater-2-2">Pria <span class="text-light fst-italic font-monospace">(berapa orang)</span></label>
+                        <input type="number" id="form-repeater-2-2" class="form-control" value="5" />
+                      </div>
+                      <div class="mb-3 col-lg-3 col-sm-10 mb-0">
+                        <label class="form-label" for="form-repeater-2-3">Wanita <span class="text-light fst-italic font-monospace">(berapa orang)</span></label>
+                        <input type="number" id="form-repeater-2-3" class="form-control" value="5"/>
+                      </div>
+                    </div>
+                    <hr />
+                  </div>
+                </div>
+              </div>
+              <div class="mb-3">
+                <label for="edit_hasil_tesUrin" class="col-form-label required">Hasil Tes Urin</label>
+                <textarea class="form-control" name="edit_hasil_tesUrin" id="edit_hasil_tesUrin">Contoh Hasil Tes Urin</textarea>
+              </div>
+              <div class="mb-3">
+                <label for="edit_tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+                <textarea class="form-control" name="edit_tindak_lanjut" id="edit_tindak_lanjut">Contoh Tindak Lanjut</textarea>
+              </div>
+              <div class="mb-3">
+                <label for="edit_dokumentasi" class="col-form-label required">Dokumentasi</label>
+                <input type="file" class="form-control" id="edit_dokumentasi" aria-describedby="inputGroupFileAddon03" aria-label="Upload" />
+              </div>
+            </form>
+          </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#detailTesUrineDeteksiDini"><i class="fas fa-xmark me-2"></i>Tutup</button>
+          <button type="button" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -1,0 +1,53 @@
+<div class="modal fade" id="downloadtriwulanModal" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambah">Pilih Filter</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="" id="formTriwulan">
+                <div class="modal-body">
+                    <section>
+                        <label for="download_triwulan" class="col-form-label">Triwulan :</label>
+                        <div class="input-group mb-3">
+                            <select class="form-select" id="download_triwulan" required>
+                                <option selected disabled>Pilih Triwulan</option>
+                                <option value="T1">Triwulan 1 (Januari- Maret)</option>
+                                <option value="T2">Triwulan 2 (April- Juni)</option>
+                                <option value="T3">Triwulan 3 (Juli- September)</option>
+                                <option value="T4">Triwulan 4 (Oktober- Desember)</option>
+                            </select>
+                        </div>
+            
+                        <label for="download_triwulan_tahun" class="col-form-label">Tahun :</label>
+                        <div class="input-group mb-3">
+                            <select class="form-select pilih_tahun" id="download_triwulan_tahun" required>
+                                <option selected disabled>Pilih Tahun</option>
+                            </select>
+                        </div>
+
+                        <label for="jumlah_responden" class="col-form-label">Pilih Satuan Kerja:</label>
+                        <div class="input-group mb-3">
+                            <select id="download_triwulan_satker" class="select2 form-select" v-model="satker" ref="satker">
+                                <option value="" selected disabled>Pilih Satuan Kerja</option>
+                                {% for satker_item in daftar_satker %}
+                                    <option value="{{ satker_item.id }}" :selected="'{{ satker_item }}' == satker">{{ satker_item }}</option>
+                                {% endfor %}>
+                            </select>
+                            {% if user.profile.satker is None %}
+                                <small class="text-danger">Tolong pilih satuan kerja anda</small>
+                            {% endif %}
+                        </div>
+            
+                    </section>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary" id="button_download_triwulan">
+                        <i class="fa-solid fa-eye"></i> Filter</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

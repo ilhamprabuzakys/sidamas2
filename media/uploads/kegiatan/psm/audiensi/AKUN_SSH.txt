@@ -1,0 +1,70 @@
+SERVER ID CLOUDHOST
+===================
+host : 103.210.54.17
+port : 22
+user : intioptima
+pass : P301216#lot2024
+
+Server IOTEKNO
+===================
+host : iotekno.id
+port : 22
+user : ptipo
+pass : P@ssw0rd.2019
+---DB---
+user : postgres
+pass : P4ssw0rd.2019
+
+SERVER BAPAK
+===================
+host : itfest-filkom.my.id
+port : 22
+user : azka2
+pass : P@ssw0rd
+
+REAN (cPanel)
+===================
+hosting.bnn.go.id:2083
+username : rean
+password : Datin2024
+
+DEKTARI
+===================
+host : 103.3.70.5
+port : 2222
+user : dektari
+pass : y2nNCvkM
+/home/dektari/
+
+rakaadit100@gmail.com
+2i5nu
+
+budidwiprasetyo49@gmail.com
+P@ssw0rd.2019
+
+command : ssh -r 8889:localhost:5432 ptipo@iotekno.id
+pass    : P@ssw0rd.2019
+
+SIDEPE
+===================
+host : 103.3.70.5
+port : 2222
+user : sidepe
+pass : y2nNCvkM
+
+CEGAH NARKOBA
+===================
+host : 103.3.70.5
+port : 2222
+user : cegahnarkoba
+pass : y2nNCvkM
+
+sidepe
+y2nNCvkM
+ssh -R 8889:localhost:8080 ptipo@iotekno.id
+P@ssw0rd.2019
+
+PASSWORD WIFI BAWAH
+====================
+usr: IOTekno
+pw: 301216#lot2024

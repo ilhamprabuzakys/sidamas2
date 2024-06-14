@@ -1,0 +1,82 @@
+<ul class="menu-sub">
+    <li class="menu-item {% if 'rakernis' in request.path %}active{% endif %}">
+        <a href="{% url "psm_rakernis" %}" class="menu-link">
+            <div data-i18n="Rapat Kerja Teknis">Rapat Kerja Teknis</div>
+        </a>
+    </li>
+    
+    {% if user.profile.satker.level == 0 or user.profile.satker.level == 2 %}
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_bintek' %}active{% endif %}">
+        <a href="{% url 'psm_bintek' %}" class="menu-link">
+            <div data-i18n="Binaan Teknis">Bintek</div>
+        </a>
+    </li>
+    {% endif %}
+
+    <li class="menu-item {% if 'rakor_pemetaan' in request.path %}active{% endif %}">
+        <a href="{% url "psm_rakor_pemetaan" %}" class="menu-link">
+            <div data-i18n="Rakor Pemetaan">Rakor Pemetaan</div>
+        </a>
+    </li>
+    <li class="menu-item {% if 'audiensi' in request.path %}active{% endif %}">
+        <a href="{% url "psm_audiensi" %}" class="menu-link">
+            <div data-i18n="Audiensi">Audiensi</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_konsolidasi_kebijakan' %}active{% endif %}">
+        <a href="{% url 'psm_konsolidasi_kebijakan' %}" class="menu-link">
+            <div data-i18n="Konsolidasi Kebijakan">Konsolidasi Kebijakan</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_workshop_penggiat' %}active{% endif %}">
+        <a href="{% url 'psm_workshop_penggiat' %}" class="menu-link">
+            <div data-i18n="Workshop Penggiat">Workshop Penggiat</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_bimtek_penggiat_p4gn' %}active{% endif %}">
+        <a href="{% url 'psm_bimtek_penggiat_p4gn' %}" class="menu-link">
+            <div data-i18n="Bimbingan Teknis Penggiat P4GN">Bimbingan Teknis Penggiat P4GN</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_sinkronisasi_kebijakan' %}active{% endif %}">
+        <a href="{% url 'psm_sinkronisasi_kebijakan' %}" class="menu-link">
+            <div data-i18n="Sinkronisasi Kebijakan">Sinkronisasi Kebijakan</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_workshop_tematik' %}active{% endif %}">
+        <a href="{% url 'psm_workshop_tematik' %}" class="menu-link">
+            <div data-i18n="Workshop Tematik">Workshop Tematik</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_asistensi' %}active{% endif %}">
+        <a href="{% url 'psm_asistensi' %}" class="menu-link">
+            <div data-i18n="Asistensi">Asistensi</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_tes_urine' %}active{% endif %}">
+        <a href="{% url 'psm_tes_urine' %}" class="menu-link">
+            <div data-i18n="Tes Urine Deteksi Dini">Tes Urine Deteksi Dini</div>
+        </a>
+    </li>
+    <li
+        class="menu-item {% if request.resolver_match.url_name == 'psm_monev_supervisi_kegiatan_kotan' %}active{% endif %}">
+        <a href="{% url 'psm_monev_supervisi_kegiatan_kotan' %}" class="menu-link">
+            <div data-i18n="Monitoring dan Evaluasi Supervisi Kegiatan Kotan">Monev Supervisi Kegiatan Kotan</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_pengumpulan_data_ikotan' %}active{% endif %}">
+        <a href="{% url 'psm_pengumpulan_data_ikotan' %}" class="menu-link">
+            <div data-i18n="Pengumpulan Data Ikotan">Pengumpulan Data Ikotan</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_dukungan_stakeholder' %}active{% endif %}">
+        <a href="{% url 'psm_dukungan_stakeholder' %}" class="menu-link">
+            <div data-i18n="Dukungan Data Stakeholder">Dukungan Data Stakeholder</div>
+        </a>
+    </li>
+    <li class="menu-item {% if request.resolver_match.url_name == 'psm_kegiatan_lainnya' %}active{% endif %}">
+        <a href="{% url 'psm_kegiatan_lainnya' %}" class="menu-link">
+            <div data-i18n="Kegiatan Lainnya">Kegiatan Lainnya</div>
+        </a>
+    </li>
+</ul>

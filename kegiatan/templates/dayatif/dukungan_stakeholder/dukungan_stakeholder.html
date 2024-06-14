@@ -1,0 +1,615 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Dukungan Stakeholder
+
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Dukungan Stakeholder</h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Kegiatan /</span>
+            <span class="ms-1 fw-medium">Dukungan Stakeholder</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">DUKUNGAN STAKEHOLDER DALAM PEMBERDAYAAN ALTERNATIF (MONEV)</h3>
+                <hr />
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-between mb-3">
+                    <div id="filter__btn_container" class="d-flex align-items-center gap-2">
+                        <v-generic-filter :satker="{ id: satkerPK, level: satkerLevel }" :data="tableData" @update="(data) => filteredPage = data"></v-generic-filter>
+                    </div>
+
+                    <v-page-action-button :satker="{ id: satkerPK, level: satkerLevel }" :data="{ url: 'dukungan_stakeholder', name: 'Dukungan Stakeholder' }"></v-page-action-button>
+                </div>
+            </div>
+
+            <!-- <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData"><i
+                            class="fas fa-file-export me-2"></i>Ekspor Data</button>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i
+                            class="fas fa-plus me-2"></i>Tambah Data</button>
+                </div>
+            </div> -->
+
+            <v-table-basic-filter :item="{ columns : ['nama_satker', 'stakeholder', 'jenis', 'bentuk', 'jumlah', 'nama_provinsi', 'nama_kabupaten', 'nama_kecamatan', 'nama_desa', 'jumlah_sasaran', 'pengaruh','kesimpulan', 'tindak_lanjut'], tableData, totalDefault: 10 }" @set-page="(page) => currentPage = page" @set-data="(data) => filteredPage = data" @set-perpage="(page) => perPage = page">
+            </v-table-basic-filter>
+
+            <div class="table-responsive">
+                <div class="table-responsive" id="__table_container">
+                    <v-table :item="{ pagedData }" :pagination="{ currentPage, totalPage, perPage, total: filteredPage?.length }" @go-pagination="(page) => currentPage = page">
+                        <template #thead>
+                            <tr>
+                                <th class="bg-soft-success" rowspan="2">No</th>
+                                <th class="bg-soft-success" rowspan="2">Satuan Kerja</th>
+                                <th class="bg-soft-success" rowspan="2">Nama Stakeholder</th>
+                                <th class="bg-soft-success" rowspan="1" colspan="3">Dukungan Yang Diberikan</th>
+                                <th class="bg-soft-success" rowspan="2">Kawasan Yang Diintervensi</th>
+                                <th class="bg-soft-success" rowspan="2">Jumlah Sasaran</th>
+                                <th class="bg-soft-success" rowspan="2">Pengaruh/Manfaat</th>
+                                <th class="bg-soft-success" rowspan="2">Kesimpulan</th>
+                                <th class="bg-soft-success" rowspan="2">Tindak Lanjut</th>
+                                <th class="bg-soft-success" rowspan="2">Dokumentasi</th>
+                                <th class="bg-soft-success" rowspan="2">AKSI<i class="fas fa-edit ms-2"></i></th>
+                            </tr>
+                            <tr class="bg-soft-danger">
+                                <!-- Dukungan Yang Diberikan -->
+                                <th rowspan="1">Jenis</th>
+                                <th rowspan="1">Bentuk</th>
+                                <th rowspan="1">Jumlah</th>
+                                <!--/ Dukungan Yang Diberikan -->
+                            </tr>
+                        </template>
+                        <template #tbody>
+                            <template v-for="(item, index) in pagedData" :key="index">
+                                <tr :class="item.class">
+                                    <td class='text-center' v-text="item.index"></td>
+                                    <td :colspan="item.hide_satker ? 0 : 12">
+                                        <template v-if="!item.hide_satker">
+                                            <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan"></v-item-header>
+                                        </template>
+                                        <template v-else>
+                                            <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan" :fade="true" :index="item.index"></v-item-header>
+                                        </template>
+                                    </td>
+                                    <template v-if="item.hide_satker">
+                                        <td>
+                                            <span v-text="item.stakeholder"></span>
+                                        </td>
+                                        <td>
+                                            <span v-text="item.jenis"></span>
+                                        </td>
+                                        <td>
+                                            <span v-text="item.bentuk"></span>
+                                        </td>
+                                        <td>
+                                            <span v-text="item.jumlah"></span>
+                                        </td>
+                                        <td>
+                                            <v-lokasi :lokasi="{ provinsi: item.nama_provinsi, kabupaten: item.nama_kabupaten, kecamatan: item.nama_kecamatan, desa: item.nama_desa }"></v-lokasi>
+                                        </td>
+                                        <td>
+                                            <span v-text="item.jumlah_sasaran"></span>
+                                        </td>
+                                        <td>
+                                            <span v-text="item.pengaruh"></span>
+                                        </td>
+                                        <td>
+                                            <span v-text="item.kesimpulan"></span>
+                                        </td>
+                                        <td>
+                                            <span v-text="item.tindak_lanjut"></span>
+                                        </td>
+                                        <td>
+                                            <div class="d-flex justify-content-center">
+                                                <a class="bg-primary badge text-white text-decoration-none d-flex align-items-center" :href="item.dokumentasi">
+                                                    <i class="fas fa-download me-2"></i>
+                                                    Lihat dokumentasi
+                                                </a>
+                                            </div>
+                                        </td>
+                                        <!-- <td>
+                                            <v-item-dokumentasi :information="{ satker: item.satker.nama_satker, tanggal: item.tanggal }" :file="item.dokumentasi" :image="item.gambar || item.file" :id="index"></v-item-dokumentasi>
+                                        </td> -->
+                                        <td>
+                                            <v-action-button :item="{ id: item.id, nama: item.satker.nama_satker, level: item.satker.level, status: item.status }" :level="satkerLevel" :url="'dukungan_stakeholder'" @update="loadData()" @edit="(id) => handleEdit(id)"></v-action-button>
+                                        </td>
+                                    </template>
+                                </tr>
+                            </template>
+                        </template>
+                        <template #not-found>
+                            <v-result-not-found colspan="12" text="Hasil pencarian tidak ditemukan"></v-result-not-found>
+                        </template>
+                    </v-table>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/js/initialize/form_repeater_dashboard.js' %}"></script>
+
+{% include "dayatif/partials/components.html" %}
+
+<script>
+    const { createApp, watch, reactive, ref, onMounted, computed } = Vue;
+
+    const app = createApp({
+        delimiters,
+        components,
+        setup() {
+            const title = ref('Dukungan Stakeholder');
+            const satkerPK = ref(parseInt('{{ user.profile.satker.pk }}'));
+            const satkerLevel = ref(parseInt('{{ user.profile.satker.level }}'));
+
+            const tableData = ref(null);
+            const filteredPage = ref(null);
+
+            const apiURL = `/kegiatan/api/v1/dayatif/dukungan_stakeholder/list/${satkerLevel.value == 1 ? 'bnnk/' : ''}?format=datatables`;
+
+            const loadData = async () => {
+                block($('#__table'));
+                const tableContent = [];
+                const response = await axios.get(apiURL);
+                const data = response.data.data;
+                console.log(response);
+
+                const getClass = (level) => {
+                    const classMap = {
+                        2: 'bg-soft-danger',
+                        0: 'bg-soft-primary',
+                        1: 'bg-soft-warning',
+                    }
+
+                    return classMap[level];
+                }
+
+                let key, value, key2, value2, key3, value3, key4, value4;
+
+                for ([key, value] of Object.entries(data)) {
+                    const baris = {
+                        class: getClass(value.satker.level),
+                        id: value.id,
+                        status: value.status,
+                        hide_satker: false,
+                        index: parseInt(key) + 1,
+                        jumlah_kegiatan: value.data.length,
+                        satker: value.satker,
+
+                        stakeholder: "",
+                        jenis: "",
+                        bentuk: "",
+                        jumlah: "",
+
+                        provinsi: "",
+                        kabupaten: "",
+                        kecamatan: "",
+                        desa: "",
+
+                        nama_provinsi: "",
+                        nama_kabupaten: "",
+                        nama_kecamatan: "",
+                        nama_desa: "",
+
+                        jumlah_sasaran: "",
+                        pengaruh: "",
+                        kesimpulan: "",
+                        tindak_lanjut: "",
+                        dokumentasi: "",
+                    };
+
+                    tableContent.push(baris);
+
+                    for ([key2, value2] of Object.entries(value.data)) {
+                        const indexKey = `${parseInt(key) +1}.${parseInt(key2) + 1}`;
+                        const baris = {
+                            class: "bg-soft-light",
+                            id: value2.id,
+                            status: value2.status,
+                            hide_satker: true,
+                            index: indexKey,
+                            satker: value2.satker,
+                            jumlah_kegiatan: value.data.length,
+
+                            stakeholder: value2.stakeholder,
+                            jenis: value2.jenis,
+                            bentuk: value2.bentuk,
+                            jumlah: value2.jumlah,
+
+                            provinsi: value2.provinsi,
+                            kabupaten: value2.kabupaten,
+                            kecamatan: value2.kecamatan,
+                            desa: value2.desa,
+
+                            nama_provinsi: value2.nama_provinsi,
+                            nama_kabupaten: value2.nama_kabupaten,
+                            nama_kecamatan: value2.nama_kecamatan,
+                            nama_desa: value2.nama_desa,
+
+                            jumlah_sasaran: value2.jumlah,
+                            pengaruh: value2.pengaruh,
+                            kesimpulan: value2.kesimpulan,
+                            tindak_lanjut: value2.tindak_lanjut,
+                            dokumentasi: value2.dokumentasi,
+                        };
+
+                        tableContent.push(baris);
+                    }
+
+                    if (value?.detail?.length > 0) {
+                        for ([key3, value3] of Object.entries(value.detail)) {
+                            const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}`;
+
+                            const baris = {
+                                class: "bg-soft-warning",
+                                id: value3.id,
+                                status: value3.status,
+                                hide_satker: false,
+                                index: indexKey,
+                                jumlah_kegiatan: value3.data.length,
+                                satker: value3.satker,
+
+                                stakeholder: "",
+                                jenis: "",
+                                bentuk: "",
+                                jumlah: "",
+
+                                provinsi: "",
+                                kabupaten: "",
+                                kecamatan: "",
+                                desa: "",
+
+                                nama_provinsi: "",
+                                nama_kabupaten: "",
+                                nama_kecamatan: "",
+                                nama_desa: "",
+
+                                jumlah_sasaran: "",
+                                pengaruh: "",
+                                kesimpulan: "",
+                                tindak_lanjut: "",
+                                dokumentasi: "",
+                            };
+
+                            tableContent.push(baris);
+
+                            for ([key4, value4] of Object.entries(value3.data)) {
+                                const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}.${parseInt(key4) + 1}`;
+
+                                const baris = {
+                                    class: "bg-soft-light",
+                                    id: value4.id,
+                                    status: value4.status,
+                                    hide_satker: true,
+                                    index: indexKey,
+                                    jumlah_kegiatan: value3.data.length,
+                                    satker: value4.satker,
+
+                                    stakeholder: value4.stakeholder,
+                                    jenis: value4.jenis,
+                                    bentuk: value4.bentuk,
+                                    jumlah: value4.jumlah,
+
+                                    provinsi: value4.provinsi,
+                                    kabupaten: value4.kabupaten,
+                                    kecamatan: value4.kecamatan,
+                                    desa: value4.desa,
+
+                                    nama_provinsi: value4.nama_provinsi,
+                                    nama_kabupaten: value4.nama_kabupaten,
+                                    nama_kecamatan: value4.nama_kecamatan,
+                                    nama_desa: value4.nama_desa,
+
+                                    jumlah_sasaran: value4.jumlah,
+                                    pengaruh: value4.pengaruh,
+                                    kesimpulan: value4.kesimpulan,
+                                    tindak_lanjut: value4.tindak_lanjut,
+                                    dokumentasi: value4.dokumentasi,
+                                };
+                                tableContent.push(baris);
+                            }
+                        }
+                    }
+                }
+
+                tableData.value = tableContent;
+                filteredPage.value = tableData.value;
+                unblock($('#__table'));
+            }
+
+            const post = ref({});
+
+            const handlePost = async () => {
+                showSwalLoading();
+
+                const modal = $('#createModal');
+
+                const { stakeholder, jenis, bentuk, jumlah, provinsi, kabupaten, kecamatan, desa, nama_provinsi, nama_kabupaten, nama_kecamatan, nama_desa, jumlah_sasaran, pengaruh, kesimpulan, tindak_lanjut, dokumentasi } = post.value;
+
+                const satker = satkerPK.value
+
+                const payload = {
+                    satker,
+                    stakeholder,
+                    jenis,
+                    bentuk,
+                    jumlah,
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    jumlah_sasaran,
+                    pengaruh,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(dokumentasi && {
+                        dokumentasi
+                    }),
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                try {
+                    const response = await axios.post('/kegiatan/api/v1/dayatif/dukungan_stakeholder/',
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> ditambahkan!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    await loadData();
+                    post.value = {
+                        provinsi: '',
+                        kabupaten: '',
+                        kecamatan: '',
+                        desa: ''
+                    }
+                }
+            }
+
+            const edit = ref({});
+
+            const handleEdit = async (id) => {
+                try {
+                    const response = await axios.get(`/kegiatan/api/v1/dayatif/dukungan_stakeholder/${id}/`);
+
+                    const data = response.data;
+
+                    console.log('Data:', data);
+
+                    const modal = $('#editModal');
+                    const form = $('#editForm');
+
+                    form.find('#edit__info').text(data.satker.nama_satker);
+                    form.find('#edit__satker').val(data.satker.id).trigger('change');
+
+                    // Kawasan Yang Diintervensi
+                    form.find('#edit__selected_provinsi').text(data.nama_provinsi);
+                    form.find('#edit__selected_kabupaten').text(data.nama_kabupaten);
+                    form.find('#edit__selected_kecamatan').text(data.nama_kecamatan);
+                    form.find('#edit__selected_desa').text(data.nama_desa);
+
+                    edit.value = {
+                        provinsi: data.provinsi,
+                        kabupaten: data.kabupaten,
+                        kecamatan: data.kecamatan,
+                        desa: data.desa,
+                        ...data
+                    };
+
+                    edit.value.dokumentasi = null;
+
+                    modal.modal('show');
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                }
+            }
+
+            const handleUpdate = async (id) => {
+                showSwalLoading();
+
+                const modal = $('#editModal');
+
+                const { stakeholder, jenis, bentuk, jumlah, provinsi, kabupaten, kecamatan, desa, nama_provinsi, nama_kabupaten, nama_kecamatan, nama_desa,jumlah_sasaran, pengaruh, kesimpulan, tindak_lanjut, dokumentasi } = edit.value;
+
+                const payload = {
+                    stakeholder,
+                    jenis,
+                    bentuk,
+                    jumlah,
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    jumlah_sasaran,
+                    pengaruh,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(dokumentasi && {
+                        dokumentasi
+                    }),
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                //Swal.close(); return;
+
+                try {
+                    const response = await axios.patch(
+                        `/kegiatan/api/v1/dayatif/dukungan_stakeholder/${edit.value.id}/`,
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> diperbarui!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    await loadData();
+                    edit.value = {
+                        provinsi: '',
+                        kabupaten: '',
+                        kecamatan: '',
+                        desa: ''
+                    }
+                }
+            }
+
+            const inputTargets = ['provinsi', 'kabupaten', 'kecamatan', 'desa'];
+
+            const handleChange = (type, name, event) => {
+                const text = $(`#${type}__${name}`).find(':selected').text();
+                const value = event.target.value;
+
+                if (type === 'create') {
+                    post.value[name] = value;
+                    post.value[`nama_${name}`] = text;
+                } else {
+                    edit.value[name] = value;
+                    edit.value[`nama_${name}`] = text;
+                }
+            };
+
+            onMounted(async () => {
+                await loadData();
+                inputTargets.forEach(name => {
+                    ['create', 'edit'].forEach(type => {
+                        $(`#${type}__${name}`).on('change', (event) => handleChange(type, name, event));
+                    });
+                });
+                await sleep(1000);
+
+                console.log('[INFO] Paged data :', pagedData.value);
+            })
+
+            // ********/ GENERIC TABLE CONFIGURATION \********
+            const getPage = () => {
+                const params = new URLSearchParams(window.location.search);
+                let page = parseInt(params.get('page'));
+
+                if (isNaN(page) || page <= 0) {
+                    removeParams('page');
+                    page = 1;
+                }
+
+                return page;
+            }
+            const perPage = ref(10); // Placeholder
+
+            const currentPage = ref(getPage());
+            const totalPage = computed(() => filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0);
+
+            watch(totalPage, () => {
+                // console.log({'TotalPage': totalPage.value, 'perPage': perPage.value, 'currentPage': currentPage.value});
+
+                if (totalPage.value != 0 && (currentPage.value > totalPage.value)) {
+                    const message = `Kembali ke halaman <b>1</b> dikarenakan Data pada halaman <b>${currentPage.value}</b> tidak ditemukan`;
+                    toastr['warning'](message, "Terjadi kesalahan");
+                    currentPage.value = 1;
+                    removeParams('page');
+                }
+            })
+
+            const pagedData = computed(() => {
+                if (!filteredPage.value) return [];
+                const startIndex = (currentPage.value - 1) * perPage.value;
+                const endIndex = currentPage.value * perPage.value;
+                return filteredPage.value.slice(startIndex, endIndex);
+            });
+
+            // ********/ GENERIC TABLE CONFIGURATION \********
+
+            return {
+                title,
+                satkerLevel,
+                satkerPK,
+                edit,
+                post,
+                handlePost,
+                handleEdit,
+                handleUpdate,
+                loadData,
+                tableData,
+                filteredPage,
+                getPage,
+                perPage,
+                currentPage,
+                totalPage,
+                pagedData,
+
+            }
+        }
+
+    })
+    app.mount('#app');
+</script>
+
+<script>
+    function toggleInput(type = "create") {
+        const selectElement = type == 'edit' ? document.getElementById("dukungan_jenis_edit") : document.getElementById("dukungan_jenis") ;
+        const inputElement = type == 'edit' ? document.getElementById("input_lainnya_edit"): document.getElementById("input_lainnya") ;
+
+        if (selectElement.value === "Lainnya") {
+            inputElement.style.display = "block";
+        } else {
+            inputElement.style.display = "none";
+        }
+    }
+</script>
+
+<script src="{% static 'dayatif/fetch-lokasi.js' %}"></script>
+{% endblock %}
+
+
+
+{% block modal_tambahan %}
+{% include 'dayatif/dukungan_stakeholder/modals/create_modal.html' %}
+{% include 'dayatif/dukungan_stakeholder/modals/edit_modal.html' %}
+{% endblock %}

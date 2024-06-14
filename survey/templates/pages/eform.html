@@ -1,0 +1,61 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% load partials %}
+{% block css_tambahan %} 
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet">
+{% endblock css_tambahan %}
+{% block title %} Formulir Elektronik {% endblock title %}
+{% block content %}
+{% topbar user %}
+{% breadcrumb bc %}
+
+<section id="__data">
+   <div class="card">
+      <div class="card-body">
+
+        <div id="headline" class="mb-3">
+            <h3 class="text-center">PENGELOLAAN FORMULIR ELEKTRONIK</h3>
+            <hr>
+        </div>
+
+         <div class="action-button">
+            <div class="d-flex justify-content-end mb-3 gap-2">
+               <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData">
+                  <i class="fas fa-file-export me-2"></i>Ekspor Data
+               </button>
+               <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#tambahData">
+                  <i class="fas fa-plus me-2"></i>Tambah Data
+               </button>
+            </div>
+         </div>
+         <div id="eform-table"></div>
+      </div>
+   </div>
+</section>
+{% endblock content %}
+{% block script %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.4/luxon.min.js" integrity="sha512-dUlSLLkxslGILhPdCkALwk4szPhp3xmZIKFtlUD+O9Lslq41Aksmdt5OGqpomDoT4FsCUH70jQU8ezZHI3v1RQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script>
+//initialize table
+var printIcon = function(cell, formatterParams){ //plain text value
+   return "<i class='fa fa-print'></i>";
+};
+var table = new Tabulator("#eform-table", {
+   ajaxURL:"http://103.210.54.17:8000/survey/api/v1/survey/", //ajax URL
+   pagination:"local",
+   paginationSize:6,
+   paginationSizeSelector:[5, 10, 15],
+   paginationCounter:"rows",
+   columns:[
+    {title:"Judul", field:"judul"},
+    {title:"Pemilik", field:"pemilik"},
+    {title:"Dibuat oleh", field:"dibuat_oleh.username"},
+    {title:"Dibuat pada", field:"created"},
+    {title:"Status", field:"status", },
+    {title:"Actions", formatter:printIcon, cellClick:function(e, cell){alert("Printing row data for: " + cell.getRow().getData().name)}},
+    ],
+});
+</script>
+
+{% endblock script %}

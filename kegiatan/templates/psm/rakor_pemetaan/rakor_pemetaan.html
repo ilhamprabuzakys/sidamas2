@@ -1,0 +1,591 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Rakor Pemetaan
+{% endblock %}
+{% block content %}
+<div class="breadcrumb">
+  <div class="row">
+    <h3 class="heading mb-2">Rakor Pemetaan</h3>
+    <span class="mb-0">
+      <span class="text-muted fw-light">Kegiatan /</span>
+      <span class="ms-1 fw-medium">Rakor Pemetaan</span>
+    </span>
+  </div>
+</div>
+
+<section id="__data">
+  <div class="card">
+    <div class="card-body">
+      <div id="headline" class="mb-3">
+        <h3 class="text-center">RAKOR PEMETAAN KELOMPOK SASARAN<br /> <span id="currentYear"></span></h3>
+        <hr />
+      </div>
+
+      <div class="action-button">
+        <div class="d-flex justify-content-end mb-3 gap-2">
+          <button class="btn btn-success" onclick="handleExport()">
+            <i class="fas fa-file-export me-2"></i>Ekspor Data</button>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal">
+            <i class="fas fa-plus me-2"></i>Tambah Data
+          </button>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <div class="col-4 form-outline mb-4">
+          <label class="form-label" for="datatable-search-input">Pencarian</label>
+          <input type="text" class="form-control" v-model="searchField" @input="searchData($event)"
+            @blur="searchData($event)" placeholder="Cari Data" />
+        </div>
+        {% include 'psm/rakor_pemetaan/table.html' %}
+        <nav class="mt-3" aria-label="Page navigation example">
+          <ul class="pagination">
+            <li class="page-item">
+              <button :disabled='currentPage <= 1' class="page-link" href="#" aria-label="Previous"
+                @click="currentPage--">
+                <span aria-hidden="true">&laquo;</span>
+                <span class="sr-only">Previous</span>
+              </button>
+            </li>
+            <template v-for="p in totalPage" :key="i">
+              <li class="page-item"><button class="page-link" @click="currentPage=p">${p}</button></li>
+            </template>
+            <li class="page-item">
+              <button :disabled='currentPage => totalPage' class="page-link" aria-label="Next" @click="currentPage++">
+                <span aria-hidden="true">&raquo;</span>
+                <span class="sr-only">Next</span>
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/dashboard/js/bawaan/forms-extras.js' %}"></script>
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+<script>
+  const { createApp, ref, onMounted, computed } = Vue;
+  createApp({
+    setup() {
+      let dataKegiatan = ref(null);
+      let satkerLevel = parseInt('{{ user.profile.satker.level }}');
+      let perPage = ref(10);
+      let currentPage = ref(1);
+      let searchField = ref(null);
+      let filteredPage = ref(null);
+
+      const totalPage = computed(() => {
+        if (dataKegiatan.value) {
+          return Math.ceil(dataKegiatan.value.length / perPage.value);
+        }
+        else return 0;
+      });
+
+      const pagedData = computed(() => {
+        if (filteredPage.value) {
+          d = filteredPage.value.slice((currentPage.value - 1) * perPage.value, (currentPage.value) * perPage.value);
+          return d;
+        }
+        else return [];
+      });
+
+      function searchData(e) {
+        filteredPage.value = dataKegiatan.value.filter((data) => {
+          idx = String(data.satker.toUpperCase());
+          nama_lingkungan = String(data.nama_lingkungan.toUpperCase());
+          tanggal_awal = String(data.tanggal_awal);
+          tanggal_akhir = String(data.tanggal_akhir);
+          deskripsi = String(data.deskripsi.toUpperCase());
+          kendala = String(data.kendala.toUpperCase());
+          kesimpulan = String(data.kesimpulan.toUpperCase());
+          tindak_lanjut = String(data.tindak_lanjut.toUpperCase());
+
+          bool1 = idx.indexOf(searchField.value.toUpperCase()) > -1;
+          bool2 = nama_lingkungan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool3 = deskripsi.indexOf(searchField.value.toUpperCase()) > -1;
+          bool4 = kendala.indexOf(searchField.value.toUpperCase()) > -1;
+          bool5 = kesimpulan.indexOf(searchField.value.toUpperCase()) > -1;
+          bool6 = tindak_lanjut.indexOf(searchField.value.toUpperCase()) > -1;
+          bool7 = tanggal_awal.indexOf(searchField.value.toUpperCase()) > -1;
+          bool8 = tanggal_akhir.indexOf(searchField.value.toUpperCase()) > -1;
+          return bool1 || bool2 || bool3 || bool4 || bool5 || bool6 || bool7 || bool8;
+        });
+      };
+
+      function hideableButton(status, satkerLevel, type) {
+        if (type == 'kirim') {
+          return satkerLevel != 2 && ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        } else if (type == 'edit') {
+          return satkerLevel == 2 || ((satkerLevel == 0 && status < 2) || (satkerLevel == 1 && status < 1));
+        }
+      }
+
+      const apiURL = (satkerLevel == 1 ? '/kegiatan/api/v1/psm/rakor_pemetaan/get_data_bnnk/?format=datatables' : '/kegiatan/api/v1/psm/rakor_pemetaan/?format=datatables')
+
+      function loadData() {
+        tableContent = [];
+
+        axios.get(apiURL).then(function (response) {
+          data = response.data.data;
+          for ([key, value] of Object.entries(data)) {
+            if (value.data && value.data.length > 0) {
+              baris = {
+                'class': 'table-primary',
+                'hide_satker': false,
+                'index': parseInt(key) + 1,
+                'satker': value.satker.nama_satker + '(' + value.data.length + ' kegiatan)',
+                'tanggal': '',
+                'nama_lingkungan': '',
+                'peserta': '',
+                'deskripsi': '',
+                'kendala': '',
+                'kesimpulan': '',
+                'tindak_lanjut': '',
+                'status': '',
+                'type': 'parent'
+              };
+              tableContent.push(baris);
+              for ([key2, value2] of Object.entries(value.data)) {
+                baris = {
+                  'class': '',
+                  'hide_satker': true,
+                  'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1),
+                  'id': value2.id,
+                  'satker': value2.satker.nama_satker,
+                  'tanggal': (value2.tanggal_akhir) ? value2.tanggal_awal + ' s/d ' + value2.tanggal_akhir : value2.tanggal_awal,
+                  'nama_lingkungan': value2.nama_lingkungan,
+                  'peserta': value2.peserta,
+                  'deskripsi': value2.deskripsi,
+                  'kendala': value2.kendala,
+                  'kesimpulan': value2.kesimpulan,
+                  'tindak_lanjut': value2.tindak_lanjut,
+                  'anggaran': 'Rp ' + parseInt(value2.anggaran).toLocaleString('id-ID'),
+                  'penyerapan_anggaran': 'Rp ' + parseInt(value2.penyerapan_anggaran).toLocaleString('id-ID'),
+                  'drive_url': value2.drive_url,
+                  'dokumentasi': value2.dokumentasi,
+                  'status': value2.status,
+                  'level': value2.satker.level,
+                  'type': 'first__child',
+                  'kirim': hideableButton(value2.status, satkerLevel, 'kirim'),
+                  'edit': hideableButton(value2.status, satkerLevel, 'edit'),
+                };
+                tableContent.push(baris);
+              }
+            }
+            if (value.detail !== undefined && value.detail.length > 0) {
+              for ([key3, value3] of Object.entries(value.detail)) {
+                baris = {
+                  'class': 'table-secondary',
+                  'hide_satker': false, 'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1) + '.' + (parseInt(key3) + 1),
+                  'satker': value3.satker.nama_satker + '(' + value3.data.length + ' kegiatan)',
+                  'tanggal': '',
+                  'nama_lingkungan': '',
+                  'peserta': '',
+                  'deskripsi': '',
+                  'kendala': '',
+                  'kesimpulan': '',
+                  'tindak_lanjut': '',
+                  'status': '',
+                  'type': 'parent'
+                };
+                tableContent.push(baris);
+                for ([key4, value4] of Object.entries(value3.data)) {
+                  baris = {
+                    'class': '',
+                    'hide_satker': true,
+                    'index': (parseInt(key) + 1) + '.' + (parseInt(key2) + 1) + '.' + (parseInt(key3) + 1) + '.' + (parseInt(key4) + 1),
+                    'id': value4.id,
+                    'satker': value4.satker.nama_satker,
+                    'tanggal': (value4.tanggal_akhir) ? value4.tanggal_awal + ' s/d ' + value4.tanggal_akhir : value4.tanggal_awal,
+                    'nama_lingkungan': value4.nama_lingkungan,
+                    'peserta': value4.peserta,
+                    'deskripsi': value4.deskripsi,
+                    'kendala': value4.kendala,
+                    'kesimpulan': value4.kesimpulan,
+                    'tindak_lanjut': value4.tindak_lanjut,
+                    'anggaran': 'Rp ' + parseInt(value4.anggaran).toLocaleString('id-ID'),
+                    'penyerapan_anggaran': 'Rp ' + parseInt(value4.penyerapan_anggaran).toLocaleString('id-ID'),
+                    'drive_url': value4.drive_url,
+                    'dokumentasi': value4.dokumentasi,
+                    'level': value4.satker.level,
+                    'status': value4.status,
+                    'type': 'second__child',
+                    'kirim': hideableButton(value4.status, satkerLevel, 'kirim'),
+                    'edit': hideableButton(value4.status, satkerLevel, 'edit'),
+                  };
+                  tableContent.push(baris);
+                }
+              }
+            }
+          }
+          dataKegiatan.value = tableContent;
+          filteredPage.value = dataKegiatan.value;
+        });
+      }
+
+      async function handleDelete(id) {
+        const confirmationText = `Untuk menghapus data tersebut? <br> Data yang dihapus tidak dapat <b>dipulihkan</b> kembali`;
+        const confirmResult = await showSwalConfirm(confirmationText, 'Ya, hapus data');
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.delete(
+            `/kegiatan/api/v1/psm/rakor_pemetaan/perform_delete/?id=${id}`
+          ).then(function (response) {
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data kegiatan berhasil <b>dihapus</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+            }).then((result) => {
+              if (result.isConfirmed) {
+                location.reload()
+              }
+            });
+          });
+        } catch (error) {
+          console.log('Terjadi kesalahan : ', error);
+          showSwalGenericError();
+        }
+      }
+
+      async function handleEditModal(id) {
+        try {
+          const response = await axios.get(`/kegiatan/api/v1/psm/rakor_pemetaan/get_detail_data/?id=${id}`);
+          const data = response.data;
+
+          $('#edit__id').val(data[0].id);
+          $('#edit__tanggal_awal').val(data[0].tanggal_awal);
+          $('#edit__tanggal_akhir').val(data[0].tanggal_akhir);
+          $('#edit__satker').val(data[0].satker_id).trigger('change');
+          $('#edit__lingkungan').val(data[0].nama_lingkungan).trigger('change');
+          $('#edit__deskripsi').val(data[0].deskripsi);
+          $('#edit__kendala').val(data[0].kendala);
+          $('#edit__kesimpulan').val(data[0].kesimpulan);
+          $('#edit__tindak_lanjut').val(data[0].tindak_lanjut);
+          $('#edit__anggaran').val(data[0].anggaran);
+          $('#edit__penyerapan_anggaran').val(data[0].penyerapan_anggaran);
+          $('#edit__drive_url').val(data[0].drive_url);
+
+          var anggaran = data[0].anggaran,
+            penyerapan_anggaran = data[0].penyerapan_anggaran;
+          var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+          var formattedAmount = selisih.toLocaleString('id-ID');
+          $('span#edit__amount').text(formattedAmount);
+
+          var formRepeater = $('#edit__form-repeater');
+          formRepeater.repeater({
+            show: function () {
+              $(this).slideDown();
+            },
+            hide: function (deleteElement) {
+              $(this).slideUp(deleteElement);
+            }
+          });
+          var list = [];
+          data[0].peserta.forEach(function (peserta) {
+            list.push({
+              'repeater_nama': peserta.nama,
+              'repeater_jabatan': peserta.jabatan,
+            });
+          });
+          formRepeater.setList(list);
+          formRepeater.find('[data-repeater-create]').off('click').on('click', function () {
+            var newItem = formRepeater.find('[data-repeater-item]').first().clone();
+            newItem.find('input').val('');
+            newItem.hide()
+            formRepeater.find('[data-repeater-list]').append(newItem)
+            newItem.slideDown();
+          });
+          $('#editModal').modal('show');
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      async function handleKirim(satker, id) {
+        const confirmResult = await showSwalConfirm(`Apakah anda yakin untuk mengirim data kegiatan dari Satuan Kerja <b>${satker}</b>`, 'Ya, kirim data');
+        if (!confirmResult.isConfirmed) return;
+        showSwalLoading();
+        await sleep(1000);
+        try {
+          const response = await axios.post(
+            `/kegiatan/api/v1/psm/rakor_pemetaan/kirim_kegiatan/`,
+            { id: id }
+          ).then(function (response) {
+            const sendedToParent = response.data.parent.keterangan;
+            Swal.fire({
+              title: 'Berhasil!',
+              html: `Data <b>kegiatan</b> untuk <b>${satker}</b> telah berhasil <b>dikirimkan ke ${sendedToParent}</b>`,
+              icon: 'success',
+              confirmButtonText: 'OK',
+            }).then((result) => {
+              if (result.isConfirmed) {
+                location.reload()
+              }
+            });
+          })
+        } catch (error) {
+          showSwalGenericError();
+          console.error('Terjadi kesalahan :', error);
+        }
+      }
+
+      const daftarPeserta = ref({});
+      function modalPeserta(data, satker) {
+        daftarPeserta.value = data
+        $('#detailPeserta').modal('show');
+        $('#detailPeserta #detail__info').text(satker)
+      }
+
+      onMounted(() => {
+        loadData();
+      });
+
+      return {
+        dataKegiatan,
+        satkerLevel,
+        loadData,
+        handleDelete,
+        handleKirim,
+        handleEditModal,
+        modalPeserta,
+        daftarPeserta,
+        totalPage,
+        perPage,
+        currentPage,
+        pagedData,
+        searchData,
+        searchField
+      }
+    },
+    delimiters: ['${', '}']
+  }).mount('#app');
+</script>
+
+<script>
+  $(document).ready(function () {
+    $('#create__anggaran, #create__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = ($('#create__anggaran').val()) ? $('#create__anggaran').val() : 0,
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = ($('#create__penyerapan_anggaran').val()) ? $('#create__penyerapan_anggaran').val() : 0,
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#amount').text(formattedAmount);
+    });
+
+    $('#edit__anggaran, #edit__penyerapan_anggaran').on('keyup', function () {
+      var anggaran = $('#edit__anggaran').val(),
+        anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+        penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+        penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+
+      var selisih = (parseInt(anggaran) - parseInt(penyerapan_anggaran));
+      var formattedAmount = selisih.toLocaleString('id-ID');
+      $('span#edit__amount').text(formattedAmount);
+    });
+  })
+
+  async function handleExport() {
+    /* var tbl = document.getElementById('__table');
+
+    // Remove the column you want to exclude from export
+    var excludeColumnIndex = 2; // Change this to the index of the column you want to exclude
+    var rows = tbl.rows;
+    for (var i = 0; i < rows.length; i++) {
+      rows[i].deleteCell(excludeColumnIndex);
+    }
+
+    // Convert the modified table to workbook
+    var wb = XLSX.utils.table_to_book(tbl);
+
+    // Save the workbook as Excel file
+    XLSX.writeFile(wb, "PSM_RAKOR PEMETAAN.xlsx"); */
+
+    showSwalLoading();
+    await sleep(1000);
+    try {
+      const response = await axios.post('/kegiatan/api/v1/psm/rakor_pemetaan/export_data/');
+
+      const data = response.data;
+      window.location.href = data.file_path;
+      const confirmation = await Swal.fire({
+        title: "Berhasil",
+        html: `Data <b>Kegiatan Rakor Pemetaan</b> telah <b>berhasil</b> diexport! <br>Klik tombol unduh ulang apabila <b>gagal</b>!`,
+        icon: "success",
+        confirmButtonText: "Unduh ulang.",
+        showCancelButton: true,
+        cancelButtonText: 'Batalkan',
+        showCloseButton: true,
+        allowOutsideClick: false,
+      });
+      if (confirmation.isConfirmed) {
+        console.log('Blud is downloading again!');
+        const response = await axios.post('/kegiatan/api/v1/psm/rakor_pemetaan/export_data/');
+        const data = response.data;
+        window.location.href = data.file_path;
+      }
+    } catch (error) {
+      showSwalGenericError();
+      console.error('Terjadi kesalahan :', error);
+    }
+  }
+
+  async function handlePost(e) {
+    e.preventDefault();
+    showSwalLoading()
+
+    const tanggal_awal = $("#create__tanggal_awal").val();
+    const tanggal_akhir = $("#create__tanggal_akhir").val();
+    const satker = parseInt($("#create__satker").val());
+    const nama_lingkungan = $("#create__lingkungan").val();
+    const deskripsi = $("#create__deskripsi").val();
+    const kendala = $("#create__kendala").val();
+    const kesimpulan = $("#create__kesimpulan").val();
+    const tindak_lanjut = $("#create__tindak_lanjut").val();
+    var anggaran = $('#create__anggaran').val();
+    anggaran = anggaran.replace(/\./g, '').replace(',', '.');
+    var penyerapan_anggaran = $('#create__penyerapan_anggaran').val();
+    penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#create__drive_url").val();
+    const dokumentasi = $("#create__dokumentasi")[0].files[0];
+    const peserta = [];
+
+    $('.form-repeater.create [data-repeater-item]').each(function (index, element) {
+      peserta.push({
+        nama: $(element).find('[id^="form-repeater"]').eq(0).val(),
+        jabatan: $(element).find('[id^="form-repeater"]').eq(1).val(),
+      });
+    });
+
+    const formData = new FormData();
+
+    formData.append("tanggal_awal", tanggal_awal);
+    formData.append("tanggal_akhir", tanggal_akhir);
+    formData.append("satker", parseInt(satker));
+    formData.append("nama_lingkungan", nama_lingkungan);
+    formData.append("deskripsi", deskripsi);
+    formData.append("kendala", kendala);
+    formData.append("kesimpulan", kesimpulan);
+    formData.append("tindak_lanjut", tindak_lanjut);
+    formData.append("anggaran", parseInt(anggaran));
+    formData.append("penyerapan_anggaran", parseInt(penyerapan_anggaran));
+    formData.append("drive_url", drive_url);
+    formData.append("dokumentasi", dokumentasi);
+    formData.append("peserta", JSON.stringify(peserta));
+
+    console.log(formData);
+
+    try {
+      axios.post('/kegiatan/api/v1/psm/rakor_pemetaan/perform_create/', formData, {
+        headers: {
+          'Content-Type': 'multipart/form-data'
+        }
+      }).then(function (response) {
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> ditambahkan!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            location.reload()
+          }
+        });
+      });
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    }
+  }
+
+  async function handleEdit(e) {
+    e.preventDefault();
+    showSwalLoading();
+
+    const id = $('#edit__id').val();
+    const tanggal_awal = $("#edit__tanggal_awal").val();
+    const tanggal_akhir = $("#edit__tanggal_akhir").val();
+    const satker = $("#edit__satker").val();
+    const nama_lingkungan = $("#edit__lingkungan").val();
+    const deskripsi = $("#edit__deskripsi").val();
+    const kendala = $("#edit__kendala").val();
+    const kesimpulan = $("#edit__kesimpulan").val();
+    const tindak_lanjut = $("#edit__tindak_lanjut").val();
+    var anggaran = $('#edit__anggaran').val(),
+      penyerapan_anggaran = $('#edit__penyerapan_anggaran').val(),
+      anggaran = anggaran.replace(/\./g, '').replace(',', '.'),
+      penyerapan_anggaran = penyerapan_anggaran.replace(/\./g, '').replace(',', '.');
+    const drive_url = $("#edit__drive_url").val();
+    const dokumentasi = $("#edit__dokumentasi")[0].files[0];
+    const peserta = [];
+
+    $('#edit__form-repeater [data-repeater-item]').each(function (index, element) {
+      peserta.push({
+        nama: $(element).find('[id^="form-repeater"]').eq(0).val(),
+        jabatan: $(element).find('[id^="form-repeater"]').eq(1).val(),
+      });
+    });
+
+    const formData = new FormData();
+
+    formData.append("id", id);
+    formData.append("tanggal_awal", tanggal_awal);
+    formData.append("tanggal_akhir", tanggal_akhir);
+    formData.append("satker", parseInt(satker));
+    formData.append("nama_lingkungan", nama_lingkungan);
+    formData.append("deskripsi", deskripsi);
+    formData.append("kendala", kendala);
+    formData.append("kesimpulan", kesimpulan);
+    formData.append("tindak_lanjut", tindak_lanjut);
+    formData.append("anggaran", parseInt(anggaran));
+    formData.append("penyerapan_anggaran", parseInt(penyerapan_anggaran));
+    formData.append("drive_url", drive_url);
+    formData.append("peserta", JSON.stringify(peserta));
+    if (dokumentasi) { formData.append('dokumentasi', dokumentasi); }
+
+    console.log(data);
+
+    try {
+      const response = await axios.patch(
+        `/kegiatan/api/v1/psm/rakor_pemetaan/perform_update/`, formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      }).then(function (response) {
+        $("#editModal").modal("hide");
+        Swal.fire({
+          title: 'Berhasil!',
+          html: `Data kegiatan telah <b>berhasil</b> diperbarui!`,
+          icon: 'success',
+          confirmButtonText: 'OK',
+        }).then((result) => {
+          if (result.isConfirmed) {
+            location.reload()
+          }
+        });
+      });
+    } catch (error) {
+      showSwalGenericError();
+      console.error("Terjadi kesalahan :", error);
+    }
+  }
+</script>
+{% endblock %}
+
+{% block modal_tambahan %}
+{% include 'psm/rakor_pemetaan/modals/create.html' %}
+{% include 'psm/rakor_pemetaan/modals/edit.html' %}
+{% include 'psm/rakor_pemetaan/modals/detail_peserta.html' %}
+{% endblock %}

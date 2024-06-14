@@ -1,0 +1,1195 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Monitoring Dan Evaluasi Dayatif {% endblock %}
+
+{% block modal_tambahan %}
+{% include 'dayatif/monev_dayatif/modals/create_modal.html' %}
+{% include 'dayatif/monev_dayatif/modals/edit_modal.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Monitoring Dan Evaluasi Dayatif</h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Kegiatan /</span>
+            <span class="ms-1 fw-medium">Monitoring Dan Evaluasi Dayatif</span>
+        </span>
+    </div>
+</div>
+
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">
+                    REKAPITULASI KEGIATAN MONITORING DAN EVALUASI PROGRAM PEMBERDAYAAN ALTERNATIF <br>
+                    <span id="currentYear"></span>
+                </h3>
+                <hr>
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-between mb-3">
+                    <div id="filter__btn_container" class="d-flex align-items-center gap-2">
+                        <v-generic-filter :satker="{ id: satkerPK, level: satkerLevel }" :data="tableData" @update="(data) => filteredPage = data"></v-generic-filter>
+                    </div>
+
+                    <v-page-action-button :satker="{ id: satkerPK, level: satkerLevel }" :data="{ url: 'monev_dayatif', name: 'Monitoring Dan Evaluasi Dayatif' }"></v-page-action-button>
+                </div>
+            </div>
+
+            <v-table-basic-filter :item="{ columns : searchAbleColumns, tableData, totalDefault: 10 }" @set-page="(page) => currentPage = page" @set-data="(data) => filteredPage = data" @set-perpage="(page) => perPage = page">
+            </v-table-basic-filter>
+
+
+            <div id="__table_container" class="table-responsive">
+                <v-table :item="{ pagedData }" :pagination="{ currentPage, totalPage, perPage, total: filteredPage?.length }" @go-pagination="(page) => currentPage = page">
+                    <template #thead>
+                        <tr>
+                            <th class="bg-soft-success text-center cursor-pointer" rowspan="2" @click="handleSort('no')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>No.</span>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="2">Satuan Kerja Pelaksana</th>
+                            <th class="bg-soft-success" rowspan="2">Jenis</th>
+                            <th class="bg-soft-success" rowspan="2">Periode</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Pelaksanaan</th>
+                            <th class="bg-soft-success" rowspan="2">Kawasan Yang Diintervensi</th>
+                            <th class="bg-soft-success" rowspan="2">Keterampilan Yang Diberikan</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Peserta</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Sinergi</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Hasil SKM</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Hasil Kewirausahaan</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="3">Status Kerawanan Kawasan</th>
+                            <th class="bg-soft-success" rowspan="2">Kesimpulan</th>
+                            <th class="bg-soft-success" rowspan="2">Tindak Lanjut</th>
+                            <th class="bg-soft-success" rowspan="2">Dokumentasi</th>
+                            <th class="bg-soft-success text-center" rowspan="2" style="max-width: 150px">Aksi <i class="fas fa-edit ms-2"></i>
+                            </th>
+                        </tr>
+                        <tr>
+                            <!-- Pelaksanaan -->
+                            <th class="bg-soft-success cursor-pointer" rowspan="1" @click="handleSort('tanggal')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>Tanggal</span>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="1">Tempat</th>
+                            <!--/ Pelaksanaan -->
+
+                            <!-- Peserta -->
+                            <th class="bg-soft-success" rowspan="1">Daftar Peserta</th>
+                            <th class="bg-soft-success" rowspan="1">Jumlah Peserta</th>
+                            <!--/ Peserta -->
+
+                            <!-- Sinergi -->
+                            <th class="bg-soft-success" rowspan="1">Desa Bersinar</th>
+                            <th class="bg-soft-success" rowspan="1">IBM</th>
+                            <!--/ Sinergi -->
+
+                            <!-- Hasil SKM -->
+                            <th class="bg-soft-success" rowspan="1">Nilai (1,00 - 4,00)</th>
+                            <th class="bg-soft-success" rowspan="1">Kategori</th>
+                            <!--/ Hasil SKM -->
+
+                            <!-- Hasil Indeks Kewirausahaan -->
+                            <th class="bg-soft-success" rowspan="1">Nilai (1,00 - 4,00)</th>
+                            <th class="bg-soft-success" rowspan="1">Kategori</th>
+                            <!--/ Hasil Indeks Kewirausahaan -->
+
+                            <!-- Status Kerawanan Kawasan -->
+                            <th class="bg-soft-success" rowspan="1">Awal</th>
+                            <th class="bg-soft-success" rowspan="1">Akhir</th>
+                            <th class="bg-soft-success" rowspan="1">Status</th>
+                            <!--/ Status Kerawanan Kawasan -->
+                        </tr>
+                    </template>
+                    <template #tbody>
+                        <template v-for="(item, index) in pagedData" :key="index">
+                            <tr :class="item.class">
+                                <td class="text-center" v-text="item.index"></td>
+                                <td :colspan="item.hide_satker ? 0 : 22">
+                                    <template v-if="!item.hide_satker">
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan"></v-item-header>
+                                    </template>
+                                    <template v-else>
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan" :fade="true" :index="item.index"></v-item-header>
+                                    </template>
+                                </td>
+                                <template v-if="item.hide_satker">
+                                    <td>
+                                        <span v-text="item.jenis"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="item.periode"></span>
+                                    </td>
+
+                                    <!-- Pelaksanaan -->
+                                    <td>
+                                        <v-item-tanggal :awal="item.tanggal_awal" :akhir="item.tanggal_akhir"></v-item-tanggal>
+                                    </td>
+                                    <td>
+                                        <span v-text="item.tempat"></span>
+                                    </td>
+                                    <!--/ Pelaksanaan -->
+
+                                    <td>
+                                        <v-lokasi :lokasi="item.lokasi"></v-lokasi>
+                                    </td>
+
+                                    <td>
+                                        <span v-text="item.keterampilan"></span>
+                                    </td>
+
+                                    <!-- Peserta -->
+                                    <td>
+                                        <v-daftar-peserta :id="index" :data="item.peserta" :satker="item.satker.nama_satker" :version="2"></v-daftar-peserta>
+                                    </td>
+                                    <td>
+                                        <span v-text="`${item.jumlah_peserta} orang`"></span>
+                                    </td>
+                                    <!--/ Peserta -->
+
+                                    <!-- Sinergi -->
+                                    <td>
+                                        { item.sinergi_desa == 'Tidak' ? 'Tidak' : 'Ya' }
+                                    </td>
+                                    <td>
+                                        { item.sinergi_ibm == 'Tidak' ? 'Tidak' : 'Ya' }
+                                    </td>
+                                    <!--/ Sinergi -->
+
+                                    <!-- Hasil SKM -->
+                                    <td>
+                                        { parseFloat(item.hasil_skm_nilai).toFixed(2) }
+                                    </td>
+                                    <td>
+                                        <span v-text="item.hasil_skm_kategori"></span>
+                                    </td>
+                                    <!--/ Hasil SKM -->
+
+                                    <!-- Hasil Kewirausahaan -->
+                                    <td>
+                                        { parseFloat(item.hasil_indeks_kewirausahaan_nilai).toFixed(2) }
+                                    </td>
+                                    <td>
+                                        <span v-text="item.hasil_indeks_kewirausahaan_kategori"></span>
+                                    </td>
+                                    <!--/ Hasil Kewirausahaan -->
+
+                                    <!-- Status Kerawanan Kawasan -->
+                                    <td>
+                                        <span v-text="item.status_kerawanan_kawasan_awal_kategori"></span>
+                                    </td>
+                                    <td>
+                                        { parseFloat(item.status_kerawanan_kawasan_akhir_nilai).toFixed(2) } (<span v-text="item.status_kerawanan_kawasan_akhir_kategori"></span>)
+                                    </td>
+                                    <td>
+                                        <span v-text="item.status_kerawanan_kawasan_kepulihan"></span>
+                                    </td>
+                                    <!--/ Status Kerawanan Kawasan -->
+
+                                    <td>
+                                        <v-item-text :text="item.kesimpulan"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.tindak_lanjut"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-dokumentasi :information="{ satker: item.satker.nama_satker, tanggal: item.tanggal }" :file="item.dokumentasi" :image="item.gambar || item.file" :id="index"></v-item-dokumentasi>
+                                    </td>
+                                    <td>
+                                        <v-action-button :item="{ id: item.id, nama: item.satker.nama_satker, level: item.satker.level, status: item.status }" :level="satkerLevel" :url="'monev_dayatif'" @update="refreshData()" @edit="(id) => handleEdit(id)"></v-action-button>
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </template>
+                    <template #not-found>
+                        <v-result-not-found colspan="23" text="Hasil pencarian tidak ditemukan"></v-result-not-found>
+                    </template>
+                </v-table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+
+<!-- Jquery Form Reapeater Js -->
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/js/initialize/form_repeater_dashboard.js' %}"></script>
+
+<script>
+    const { createApp, watch, reactive, ref, onMounted, computed } = Vue;
+
+    const useFormStore = defineStore('form', () => {
+        const base = {
+            lokasi: { provinsi: '', kabupaten: '', kecamatan: '', desa: '' },
+            keterampilan : {
+                showKeterangan: false,
+                select: null,
+                keterangan: '',
+            },
+            skm: { nilai: 1 },
+            indeks_kewirausahaan: { nilai: 1 },
+            status_kerawanan_kawasan: {
+                awal: { status: '' },
+                akhir: { nilai: 1, status: '' },
+                kepulihan: { status: '' },
+            },
+            image: { url: '' },
+        };
+
+        const lokasi = ref({ ...base.lokasi });
+        const keterampilan = ref({ ...base.keterampilan });
+        const skm = ref({ ...base.skm });
+        const indeks_kewirausahaan = ref({ ...base.indeks_kewirausahaan});
+        const status_kerawanan_kawasan = ref({ ...base.status_kerawanan_kawasan});
+        const image = ref({ ...base.image });
+
+        const getKeterampilan = computed(() => `${keterampilan.value.select}, ${keterampilan.value.keterangan}`);
+
+        const getKategori = (paramNilai, isKerawanan=false) => {
+            const nilai = parseFloat(paramNilai).toFixed(2);
+
+            /*
+                const checkingState = {
+                    'Nilai': nilai,
+                    'Kriteria 1 (1.00 - 1.74)': nilai >= 1.00 && nilai <= 1.74,
+                    'Kriteria 2 (1.75 - 2.50)': nilai >= 1.75 && nilai <= 2.50,
+                    'Kriteria 3 (2.51 - 3.25)': nilai >= 2.51 && nilai <= 3.25,
+                    'Kriteria 4 (3.26 - 4.00)': nilai >= 3.26 && nilai <= 4.00
+                };
+
+                console.log(checkingState);
+            */
+
+            let text = '';
+
+            if (nilai >= 1.00 && nilai <= 1.74) {
+                text = isKerawanan  ? 'Bahaya' : 'Buruk';
+            } else if (nilai >= 1.75 && nilai <= 2.50) {
+                text = isKerawanan  ? 'Waspada' : 'Cukup';
+            } else if (nilai >= 2.51 && nilai <= 3.25) {
+                text = isKerawanan  ? 'Siaga' : 'Baik'
+            } else if (nilai >= 3.26 && nilai <= 4.00) {
+                text = isKerawanan ? 'Aman' : 'Sangat Baik';
+            } else {
+                text = 'Nilai tidak valid';
+            }
+
+            return text;
+        }
+
+        const getSKMKategori = computed(() => getKategori(skm.value.nilai));
+
+        const getIndeksKewirausahaanKategori = computed(() => getKategori(indeks_kewirausahaan.value.nilai));
+
+        const getStatusKerawananKawasanAkhirKategori = computed(() => getKategori(status_kerawanan_kawasan.value.akhir.nilai, true));
+
+        const getStatusKepulihan = computed(() => {
+            const akhirStatus = getStatusKerawananKawasanAkhirKategori.value;
+            const awalStatus = status_kerawanan_kawasan.value.awal.status ?? 'Aman';
+
+            const statusToValue = {
+                'Bahaya': 1,
+                'Waspada': 2,
+                'Siaga': 3,
+                'Aman': 4
+            };
+
+            // Rounded
+            const akhirNilai = statusToValue[akhirStatus];
+            const awalNilai = statusToValue[awalStatus];
+
+            if (awalNilai < akhirNilai) {
+                return 'Pulih';
+            } else if (awalNilai > akhirNilai) {
+                return 'Tidak Pulih';
+            } else if (awalNilai == akhirNilai) {
+                return 'Pulih';
+            } else {
+                return '-';
+            }
+        });
+
+        const checkedState = (name) => {
+            const value = keterampilan.value.select;
+            return value && value.includes(name)
+        }
+
+        const checkVisibility = (name) => keterampilan.value.showKeterangan && checkedState(name);
+
+        return { lokasi, keterampilan, skm, indeks_kewirausahaan, status_kerawanan_kawasan, image, getKeterampilan, getSKMKategori, getIndeksKewirausahaanKategori, getStatusKerawananKawasanAkhirKategori, getStatusKepulihan, checkVisibility, checkedState };
+    });
+</script>
+
+{% include "dayatif/partials/components.html" %}
+
+<script>
+    const app = createApp({
+        delimiters,
+        components,
+        setup() {
+            const store = useFormStore()
+
+            const title = ref('Monitoring Dan Evaluasi Dayatif');
+
+            const satkerPK = ref(parseInt('{{ user.profile.satker.pk }}'));
+            const satkerNama = ref('{{ user.profile.satker.nama_satker }}');
+            const satkerLevel = ref(parseInt('{{ user.profile.satker.level }}'));
+
+            const tableData = ref(null);
+            const filteredPage = ref(null);
+
+            const apiURL = `/kegiatan/api/v1/dayatif/monev_dayatif/list/${satkerLevel.value === 1 ? 'bnnk/' : ''}?format=datatables`;
+
+            const getHasilSKMKategori = (value) => {
+                const dataMap = {
+                    'buruk': 'Buruk',
+                    'cukup': 'Cukup',
+                    'baik': 'Baik',
+                    'sangat_baik': 'Sangat Baik',
+                };
+
+                return dataMap[value] || 'cukup';
+            }
+
+            const searchAbleColumns = [
+                'nama_satker', 'tanggal', 'jumlah_kegiatan', 'jenis', 'periode',
+                'nama_provinsi', 'nama_kabupaten', 'nama_kecamatan', 'nama_desa',
+                'keterampilan', 'tempat', 'hasil_skm_nilai', 'hasil_skm_kategori', 'hasil_indeks_kewirausahaan_nilai', 'hasil_indeks_kewirausahaan_kategori', 'status_kerawanan_kawasan_awal_kategori', 'status_kerawanan_kawasan_akhir_nilai', 'status_kerawanan_kawasan_akhir_kategori', 'status_kerawanan_kawasan_kepulihan','kesimpulan', 'tindak_lanjut'
+            ];
+
+            const loadData = async () => {
+                setIsLoading(true);
+
+                const tableContent = [];
+                const response = await axios.get(apiURL);
+                const data = response.data.data;
+
+                const getClass = (level) => {
+                    const classMap = {
+                        2: 'bg-soft-danger',
+                        0: 'bg-soft-primary',
+                        1: 'bg-soft-warning',
+                    }
+
+                    return classMap[level];
+                }
+
+                let key, value, key2, value2, key3, value3, key4, value4;
+
+                for ([key, value] of Object.entries(data)) {
+                    const baris = {
+                        class: getClass(value.satker.level),
+                        id: value.id,
+                        status: value.status,
+                        hide_satker: false,
+                        index: parseInt(key) + 1,
+                        jumlah_kegiatan: value.data.length,
+                        satker: value.satker,
+
+                        jenis: "",
+                        periode: "",
+
+                        tempat: "",
+                        lokasi: {},
+
+                        keterampilan: "",
+                        sinergi_desa: "",
+                        sinergi_ibm: "",
+
+                        hasil_skm_nilai: "",
+                        hasil_skm_kategori: "",
+
+                        hasil_indeks_kewirausahaan_nilai: "",
+                        hasil_indeks_kewirausahaan_kategori: "",
+
+                        status_kerawanan_kawasan_awal_kategori: "",
+                        status_kerawanan_kawasan_akhir_nilai: "",
+                        status_kerawanan_kawasan_akhir_kategori: "",
+                        status_kerawanan_kawasan_kepulihan: "",
+
+                        tanggal: "",
+                        tanggal_awal: "",
+                        tanggal_akhir: "",
+
+                        jumlah_peserta: "",
+                        peserta: "",
+
+                        kesimpulan: "",
+                        tindak_lanjut: "",
+                        dokumentasi: "",
+                        gambar: "",
+                    };
+
+                    tableContent.push(baris);
+
+                    for ([key2, value2] of Object.entries(value.data)) {
+                        const indexKey = `${parseInt(key) +1}.${parseInt(key2) + 1}`;
+                        const lokasi = { provinsi: value2.nama_provinsi, kabupaten: value2.nama_kabupaten, kecamatan: value2.nama_kecamatan, desa: value2.nama_desa };
+
+                        const baris = {
+                            class: "bg-soft-light",
+                            id: value2.id,
+                            status: value2.status,
+                            hide_satker: true,
+                            index: indexKey,
+                            satker: value2.satker,
+                            jumlah_kegiatan: value.data.length,
+
+                            jenis: value2.jenis,
+                            periode: value2.periode,
+
+                            tempat: value2.tempat,
+                            lokasi,
+
+                            keterampilan: value2.keterampilan,
+                            sinergi_desa: value2.sinergi_desa ? 'Sinergi Desa' : 'Tidak',
+                            sinergi_ibm: value2.sinergi_ibm ? 'Sinergi IBM' : 'Tidak',
+
+                            hasil_skm_nilai: value2.hasil_skm_nilai,
+                            hasil_skm_kategori: getHasilSKMKategori(value2.hasil_skm_kategori),
+
+                            hasil_indeks_kewirausahaan_nilai: value2.hasil_indeks_kewirausahaan_nilai,
+                            hasil_indeks_kewirausahaan_kategori: getHasilSKMKategori(value2.hasil_indeks_kewirausahaan_kategori),
+
+                            status_kerawanan_kawasan_awal_kategori: value2.status_kerawanan_kawasan_awal_kategori,
+                            status_kerawanan_kawasan_akhir_nilai: value2.status_kerawanan_kawasan_akhir_nilai,
+                            status_kerawanan_kawasan_akhir_kategori: value2.status_kerawanan_kawasan_akhir_kategori,
+                            status_kerawanan_kawasan_kepulihan: value2.status_kerawanan_kawasan_kepulihan,
+
+                            tanggal: getTanggalKegiatan(value2.tanggal_awal, value2.tanggal_akhir),
+                            tanggal_awal: value2.tanggal_awal,
+                            tanggal_akhir: value2.tanggal_akhir,
+
+                            jumlah_peserta: value2.jumlah_peserta,
+                            peserta: value2.peserta,
+
+                            kesimpulan: value2.kesimpulan,
+                            tindak_lanjut: value2.tindak_lanjut,
+                            dokumentasi: value2.dokumentasi,
+                            gambar: value2.gambar,
+                        };
+
+                        tableContent.push(baris);
+                    }
+
+                    if (value?.detail?.length > 0) {
+                        for ([key3, value3] of Object.entries(value.detail)) {
+                            const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}`;
+
+                            const baris = {
+                                class: "bg-soft-warning",
+                                id: value3.id,
+                                status: value3.status,
+                                hide_satker: false,
+                                index: indexKey,
+                                jumlah_kegiatan: value3.data.length,
+                                satker: value3.satker,
+
+                                jenis: "",
+                                periode: "",
+
+                                tempat: "",
+                                lokasi: {},
+
+                                keterampilan: "",
+                                sinergi_desa: "",
+                                sinergi_ibm: "",
+
+                                hasil_skm_nilai: "",
+                                hasil_skm_kategori: "",
+
+                                hasil_indeks_kewirausahaan_nilai: "",
+                                hasil_indeks_kewirausahaan_kategori: "",
+
+                                status_kerawanan_kawasan_awal_kategori: "",
+                                status_kerawanan_kawasan_akhir_nilai: "",
+                                status_kerawanan_kawasan_akhir_kategori: "",
+                                status_kerawanan_kawasan_kepulihan: "",
+
+                                tanggal: "",
+                                tanggal_awal: "",
+                                tanggal_akhir: "",
+
+                                jumlah_peserta: "",
+                                peserta: "",
+
+                                kesimpulan: "",
+                                tindak_lanjut: "",
+                                dokumentasi: "",
+                                gambar: "",
+                            };
+
+                            tableContent.push(baris);
+
+                            for ([key4, value4] of Object.entries(value3.data)) {
+                                const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}.${parseInt(key4) + 1}`;
+                                const lokasi = { provinsi: value4.nama_provinsi, kabupaten: value4.nama_kabupaten, kecamatan: value4.nama_kecamatan, desa: value4.nama_desa };
+
+                                const baris = {
+                                    class: "bg-soft-light",
+                                    id: value4.id,
+                                    status: value4.status,
+                                    hide_satker: true,
+                                    index: indexKey,
+                                    jumlah_kegiatan: value3.data.length,
+                                    satker: value4.satker,
+
+                                    jenis: value4.jenis,
+                                    periode: value4.periode,
+
+                                    tempat: value4.tempat,
+                                    lokasi,
+
+                                    keterampilan: value4.keterampilan,
+                                    sinergi_desa: value4.sinergi_desa ? 'Sinergi Desa' : 'Tidak',
+                                    sinergi_ibm: value4.sinergi_ibm ? 'Sinergi IBM' : 'Tidak',
+
+                                    hasil_skm_nilai: value4.hasil_skm_nilai,
+                                    hasil_skm_kategori: getHasilSKMKategori(value4.hasil_skm_kategori),
+
+                                    hasil_indeks_kewirausahaan_nilai: value4.hasil_indeks_kewirausahaan_nilai,
+                                    hasil_indeks_kewirausahaan_kategori: getHasilSKMKategori(value4.hasil_indeks_kewirausahaan_kategori),
+
+                                    status_kerawanan_kawasan_awal_kategori: value4.status_kerawanan_kawasan_awal_kategori,
+                                    status_kerawanan_kawasan_akhir_nilai: value4.status_kerawanan_kawasan_akhir_nilai,
+                                    status_kerawanan_kawasan_akhir_kategori: value4.status_kerawanan_kawasan_akhir_kategori,
+                                    status_kerawanan_kawasan_kepulihan: value4.status_kerawanan_kawasan_kepulihan,
+
+                                    tanggal: getTanggalKegiatan(value4.tanggal_awal, value4.tanggal_akhir),
+                                    tanggal_awal: value4.tanggal_awal,
+                                    tanggal_akhir: value4.tanggal_akhir,
+
+                                    jumlah_peserta: value4.jumlah_peserta,
+                                    peserta: value4.peserta,
+
+                                    kesimpulan: value4.kesimpulan,
+                                    tindak_lanjut: value4.tindak_lanjut,
+                                    dokumentasi: value4.dokumentasi,
+                                    gambar: value4.gambar,
+                                };
+                                tableContent.push(baris);
+                            }
+                        }
+                    }
+                }
+
+                tableData.value = tableContent;
+                filteredPage.value = tableData.value;
+
+                setIsLoading(false);
+            }
+            const baseForm = {
+                provinsi: '',
+                kabupaten: '',
+                kecamatan: '',
+                desa: '',
+                status_kerawanan_kawasan_awal_kategori: ''
+            };
+
+            const post = ref({...baseForm});
+            const edit = ref({...baseForm});
+
+            const handlePost = async () => {
+                showSwalLoading();
+
+                const modal = $('#createModal');
+
+                const $repeaterValues = $('#create__peserta').repeaterVal();
+                const dataPeserta = $repeaterValues.create_peserta_group;
+
+                const {
+                    jenis,
+                    periode,
+                    tanggal_awal,
+                    tanggal_akhir,
+                    tempat,
+                    provinsi,
+                    kabupaten,
+                    kecamatan,
+                    desa,
+                    nama_provinsi,
+                    nama_kabupaten,
+                    nama_kecamatan,
+                    nama_desa,
+                    keterampilan,
+                    sinergi_desa,
+                    sinergi_ibm,
+                    hasil_skm_nilai,
+                    hasil_skm_kategori,
+                    hasil_indeks_kewirausahaan_nilai,
+                    hasil_indeks_kewirausahaan_kategori,
+                    status_kerawanan_kawasan_awal_kategori,
+                    status_kerawanan_kawasan_akhir_nilai,
+                    status_kerawanan_kawasan_akhir_kategori,
+                    kesimpulan,
+                    tindak_lanjut,
+                    dokumentasi,
+                    gambar,
+                } = post.value;
+
+                const satker = satkerPK.value
+
+                const jumlah_peserta = dataPeserta.length;
+                const peserta = JSON.stringify(dataPeserta);
+
+                const data_sinergi_desa = sinergi_desa ?? false;
+                const data_sinergi_ibm = sinergi_ibm ?? false;
+
+                const payload = {
+                    satker,
+                    jenis,
+                    periode,
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    tempat,
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    keterampilan,
+                    peserta,
+                    jumlah_peserta,
+                    sinergi_desa: data_sinergi_desa,
+                    sinergi_ibm: data_sinergi_ibm,
+                    hasil_skm_nilai: parseFloat(hasil_skm_nilai).toFixed(2),
+                    hasil_skm_kategori: getHasilSKMKategori(hasil_skm_kategori),
+                    hasil_indeks_kewirausahaan_nilai: parseFloat(hasil_indeks_kewirausahaan_nilai).toFixed(2),
+                    hasil_indeks_kewirausahaan_kategori: getHasilSKMKategori(hasil_indeks_kewirausahaan_kategori),
+
+                    status_kerawanan_kawasan_awal_kategori,
+                    status_kerawanan_kawasan_akhir_nilai: parseFloat(status_kerawanan_kawasan_akhir_nilai).toFixed(2),
+                    status_kerawanan_kawasan_akhir_kategori,
+
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(gambar && { gambar }),
+                    dokumentasi,
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                //Swal.close(); return;
+
+                try {
+                    await axios.post('/kegiatan/api/v1/dayatif/monev_dayatif/',
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> ditambahkan!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    refreshData();
+
+                    store.$reset();
+                    post.value = {...baseForm};
+                }
+            }
+
+            const handleEdit = async (id) => {
+                try {
+                    const response = await axios.get(`/kegiatan/api/v1/dayatif/monev_dayatif/${id}/`);
+
+                    const data = response.data;
+
+                    console.log('Data:', data);
+
+                    const modal = $('#editModal');
+                    const form = $('#editForm');
+
+                    form.find('#edit__info').text(data.satker.nama_satker);
+                    form.find('#edit__satker').val(data.satker.id).trigger('change');
+
+                    // Kawasan Yang Diintervensi
+                    store.lokasi = {
+                        provinsi: data.nama_provinsi,
+                        kabupaten: data.nama_kabupaten,
+                        kecamatan: data.nama_kecamatan,
+                        desa: data.nama_desa,
+                    };
+
+                    // Keterampilan
+                    // Mengandung 'Kerajinan Tangan', 'Pengolahan Makanan', 'Lainnya'
+                    if (data.keterampilan.includes('Kerajinan Tangan') || data.keterampilan.includes('Pengolahan Makanan') || data.keterampilan.includes('Lainnya')) {
+                        store.keterampilan.showKeterangan = true;
+                    }
+
+                    store.keterampilan.select = data.keterampilan;
+
+                    // Hasil SKM Nilai
+                    const dataNilaiSKM = parseFloat(data.hasil_skm_nilai).toFixed(2);
+                    form.find('#edit__hasil_skm_nilai').val(dataNilaiSKM);
+                    store.skm.nilai = dataNilaiSKM;
+
+                    // Hasil Kewirausahaan Nilai
+                    const dataNilaiKewirausahaan = parseFloat(data.hasil_indeks_kewirausahaan_nilai).toFixed(2);
+                    form.find('#edit__hasil_indeks_kewirausahaan_nilai').val(dataNilaiKewirausahaan);
+                    store.indeks_kewirausahaan.nilai = dataNilaiKewirausahaan;
+
+                    // Hasil Status Kawasan Rawan
+                    store.status_kerawanan_kawasan.awal.status = data.status_kerawanan_kawasan_awal_kategori;
+
+                    const dataNilaiStatusKawasanRawanAkhir = parseFloat(data.status_kerawanan_kawasan_akhir_nilai).toFixed(2);
+                    form.find('#edit__status_kerawanan_kawasan_akhir_nilai').val(dataNilaiStatusKawasanRawanAkhir);
+                    store.status_kerawanan_kawasan.akhir.nilai = dataNilaiStatusKawasanRawanAkhir;
+
+                    edit.value = {
+                        provinsi: data.provinsi,
+                        kabupaten: data.kabupaten,
+                        kecamatan: data.kecamatan,
+                        desa: data.desa,
+                        ...data
+                    };
+
+                    // Reset files
+                    edit.value.dokumentasi = null;
+
+                    // Gambar
+                    store.image.url = data.gambar;
+
+                    // Stakeholders (Repeater)
+                    const $formRepeater = $('#edit__peserta');
+
+                    $formRepeater.repeater(getRepeaterConfig({ isFirstItemUndeletable: false }));
+
+                    const list = data.peserta.map((item) => ({
+                        'nama': item.nama,
+                        'alamat': item.alamat,
+                        'notelp': item.notelp,
+                        'jenis_kelamin': item.jenis_kelamin,
+                        'status_kemiskinan': item.status_kemiskinan,
+                        'alih_profesi': item.alih_profesi,
+                        'jenis_usaha': item.jenis_usaha,
+                        'pendapatan': item.pendapatan,
+                    }));
+
+                    $formRepeater.setList(list);
+
+                    form.find('#edit__peserta_info').text(`${data.peserta.length} Peserta`);
+
+                    // Trigger select2
+                    form.find('#edit__jenis').val(data.jenis).trigger('change');
+                    form.find('#edit__periode').val(data.periode).trigger('change');
+
+                    modal.modal('show');
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                }
+            }
+
+            const handleUpdate = async (id) => {
+                showSwalLoading();
+
+                const modal = $('#editModal');
+
+                const $repeaterValues = $('#edit__peserta').repeaterVal();
+                const dataPeserta = $repeaterValues.edit_peserta_group;
+
+                const { jenis, periode, tanggal_awal, tanggal_akhir, tempat, provinsi, kabupaten, kecamatan, desa, nama_provinsi, nama_kabupaten, nama_kecamatan, nama_desa, keterampilan, sinergi_desa, sinergi_ibm, hasil_skm_nilai, hasil_skm_kategori, anggaran, kendala, kesimpulan, tindak_lanjut, dokumentasi, gambar } = edit.value;
+
+                const jumlah_peserta = dataPeserta.length;
+                const peserta = JSON.stringify(dataPeserta);
+
+                const data_sinergi_desa = sinergi_desa ?? false;
+                const data_sinergi_ibm = sinergi_ibm ?? false;
+
+                let delete_gambar = false;
+                let fileGambar = null;
+
+                if (gambar && gambar.size) {
+                    fileGambar = gambar;
+                } else if (!gambar) {
+                    delete_gambar = true;
+                }
+
+                const payload = {
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    jenis,
+                    periode,
+                    tempat,
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    keterampilan,
+                    jumlah_peserta,
+                    sinergi_desa: data_sinergi_desa,
+                    sinergi_ibm: data_sinergi_ibm,
+                    hasil_skm_nilai: parseFloat(hasil_skm_nilai),
+                    hasil_skm_kategori: getHasilSKMKategori(hasil_skm_kategori),
+                    anggaran,
+                    kendala,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(dokumentasi && {
+                        dokumentasi
+                    }),
+                    ...(fileGambar && {
+                        gambar: fileGambar
+                    }),
+                    ...(delete_gambar && { delete_gambar }),
+                    peserta
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                //Swal.close(); return;
+
+                try {
+                    const response = await axios.patch(`/kegiatan/api/v1/dayatif/monev_dayatif/${edit.value.id}/`,
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> diperbarui!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    refreshData();
+                    store.$reset();
+                    edit.value = {...baseForm};
+                }
+            }
+
+            const inputTargets = ['jenis', 'periode', 'provinsi', 'kabupaten', 'kecamatan', 'desa'];
+
+            const handleChange = (type, name, event) => {
+                const text = $(`#${type}__${name}`).find(':selected').text();
+                const value = event.target.value;
+
+                if (type === 'create') {
+                    post.value[name] = value;
+                    post.value[`nama_${name}`] = text;
+                } else {
+                    edit.value[name] = value;
+                    edit.value[`nama_${name}`] = text;
+                }
+            };
+
+            const getUserInfo = () => {
+                const roles = { 0: 'BNNP', 1: 'BNNK', 2: 'PUSAT' };
+                console.log('[INFO] Logged in Satker Level :', satkerLevel.value, `- ${roles[satkerLevel.value]}`);
+            };
+
+            onMounted(async () => {
+                await loadData();
+
+                getUserInfo();
+
+                $('#editModal, #createModal').on('hidden.bs.modal', () => store.$reset());
+
+                inputTargets.forEach(name => {
+                    ['create', 'edit'].forEach(type => {
+                        $(`#${type}__${name}`).on('change', (event) => handleChange(type, name, event));
+                    });
+                });
+
+                // Hasil SKM Nilai
+                const getValueAndStoreNilai = (rawValue) => {
+                    const value = rawValue.replace(',', '.');
+                    store.skm.nilai = parseFloat(value).toFixed(2);
+                }
+
+                $('#create__hasil_skm_nilai').on('input', function(e) {
+                    getValueAndStoreNilai(e.target.value);
+                    post.value.hasil_skm_nilai = store.skm.nilai;
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.skm.nilai = e.target.value;
+                    post.value.hasil_skm_nilai = e.target.value;
+                });
+
+                $('#edit__hasil_skm_nilai').on('input', function(e) {
+                    getValueAndStoreNilai(e.target.value);
+                    edit.value.hasil_skm_nilai = store.skm.nilai;
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.skm.nilai = e.target.value;
+                    edit.value.hasil_skm_nilai = e.target.value;
+                });
+
+                // Hasil Indeks Kewirausahaan
+                const getValueAndStoreNilaiKewirausahaan = (rawValue) => {
+                    const value = rawValue.replace(',', '.');
+                    store.indeks_kewirausahaan.nilai = parseFloat(value).toFixed(2);
+                }
+
+                $('#create__hasil_indeks_kewirausahaan_nilai').on('input', function(e) {
+                    getValueAndStoreNilaiKewirausahaan(e.target.value);
+                    post.value.hasil_indeks_kewirausahaan_nilai = store.indeks_kewirausahaan.nilai;
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.indeks_kewirausahaan.nilai = e.target.value;
+                    post.value.hasil_indeks_kewirausahaan_nilai = e.target.value;
+                });
+
+                $('#edit__hasil_indeks_kewirausahaan_nilai').on('input', function(e) {
+                    getValueAndStoreNilaiKewirausahaan(e.target.value);
+                    edit.value.hasil_indeks_kewirausahaan_nilai = store.indeks_kewirausahaan.nilai;
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.indeks_kewirausahaan.nilai = e.target.value;
+                    edit.value.hasil_indeks_kewirausahaan_nilai = e.target.value;
+                });
+
+                // Hasil Status Kerawanan Kawasan Akhir
+                const getValueAndStoreNilaiKerawanan = (rawValue) => {
+                    const value = rawValue.replace(',', '.');
+                    store.status_kerawanan_kawasan.akhir.nilai = parseFloat(value).toFixed(2);
+                }
+
+                $('#create__status_kerawanan_kawasan_akhir_nilai').on('input', function(e) {
+                    getValueAndStoreNilaiKerawanan(e.target.value);
+                    post.value.status_kerawanan_kawasan_akhir_nilai = store.status_kerawanan_kawasan.akhir.nilai
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.status_kerawanan_kawasan.akhir.nilai = e.target.value;
+                    post.value.status_kerawanan_kawasan_akhir_nilai = e.target.value;
+                });
+
+                $('#edit__status_kerawanan_kawasan_akhir_nilai').on('input', function(e) {
+                    getValueAndStoreNilaiKerawanan(e.target.value);
+                    edit.value.status_kerawanan_kawasan_akhir_nilai = store.status_kerawanan_kawasan.akhir.nilai
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.status_kerawanan_kawasan.akhir.nilai = e.target.value;
+                    edit.value.status_kerawanan_kawasan_akhir_nilai = e.target.value;
+                });
+
+                await sleep(1000);
+
+                console.log('[INFO] Paged data :', pagedData.value);
+            });
+
+            /* ========================================
+                  !! GENERIC TABLE CONFIGURATION !!
+            =========================================== */
+
+            /* -----------------------------------------
+             * Pagination
+            -----------------------------------------*/
+            const getPage = () => {
+                const params = new URLSearchParams(window.location.search);
+                let page = parseInt(params.get('page'));
+
+                if (isNaN(page) || page <= 0) {
+                    removeParams('page');
+                    page = 1;
+                }
+
+                return page;
+            }
+
+            const perPage = ref(10); // Placeholder
+            const currentPage = ref(getPage());
+            const totalPage = computed(() => filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0);
+
+            watch(totalPage, () => {
+                // console.log({'TotalPage': totalPage.value, 'perPage': perPage.value, 'currentPage': currentPage.value});
+                const checkingState = totalPage.value != 0 && (currentPage.value > totalPage.value);
+                if (!checkingState) return;
+
+                const message = `Kembali ke halaman <b>1</b> dikarenakan Data pada halaman <b>${currentPage.value}</b> tidak ditemukan`;
+                toastr['warning'](message, "Terjadi kesalahan");
+                currentPage.value = 1;
+                removeParams('page');
+            })
+
+            const pagedData = computed(() => {
+                if (!filteredPage.value) return [];
+                const startIndex = (currentPage.value - 1) * perPage.value;
+                const endIndex = currentPage.value * perPage.value;
+                return filteredPage.value.slice(startIndex, endIndex);
+            });
+
+            /**-----------------------------------------
+             * Sorting
+            -----------------------------------------*/
+            const sortColumn = ref('no')
+            const sortDirection = ref('asc')
+
+            const handleSort = (column) => {
+                currentPage.value = 1;
+                removeParams('page');
+                sortColumn.value = column;
+
+                sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+
+                if (column === 'no') {
+                    filteredPage.value.sort((a, b) => {
+                        const dataA = `${a.index}`;
+                        const dataB = `${b.index}`;
+
+                        const indexA = dataA.split('.').map(Number);
+                        const indexB = dataB.split('.').map(Number);
+
+                        for (let i = 0; i < Math.max(indexA.length, indexB.length); i++) {
+                            const numA = indexA[i] || 0;
+                            const numB = indexB[i] || 0;
+
+                            if (numA !== numB) {
+                                return sortDirection.value === 'asc' ? (numA - numB) : (numB - numA);
+                            }
+                        }
+                        return 0;
+                    });
+                } else if (column === 'tanggal') {
+                    filteredPage.value.sort((a, b) => {
+                        const dateA = new Date(a.tanggal_awal);
+                        const dateB = new Date(b.tanggal_awal);
+                        return sortDirection.value === 'asc' ? (dateA - dateB) : (dateB - dateA);
+                    });
+                }
+            }
+
+            /**-----------------------------------------
+             * Websocket
+            -----------------------------------------*/
+            // const basePathName = window.location.pathname.split('/');
+            // const slug = basePathName[basePathName.length - 2];
+            // const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            // const wsEndpoint = `${wsProtocol}://${window.location.host}/ws/${slug}/`;
+            // const socket = new WebSocket(wsEndpoint);
+
+            // socket.onmessage = async (e) => await loadData();
+
+            // const refreshData = () => socket.send(JSON.stringify({ message: 'Data updated ...', sender: satkerNama.value }));
+
+            const refreshData = async () => await loadData();
+
+            return {
+                // Preparation
+                store,
+                satkerLevel,
+                satkerPK,
+                satkerNama,
+                title,
+
+                // Action
+                post,
+                handlePost,
+
+                edit,
+                handleEdit,
+                handleUpdate,
+
+                // Data
+                loadData,
+                tableData,
+                refreshData,
+                searchAbleColumns,
+
+                // Pagination
+                perPage,
+                currentPage,
+                filteredPage,
+                totalPage,
+                pagedData,
+
+                // Sorting
+                sortColumn,
+                sortDirection,
+                handleSort,
+            }
+        },
+    })
+
+    app.use(pinia)
+    app.mount('#app');
+
+    // TODO: Logic alih profesi
+    // $(function() {
+    //     // Form repeater handle Alih Profesi
+    //     $('input[name*="alih_profesi"]').change(function() {
+    //         const value = $(this).val();
+    //         console.log('Alih Profesi :', value);
+
+    //         if ($(this).val() === "Ya") {
+    //             console.log('Alih Profesi Ya :', value);
+    //             $('.jenis-usaha, .pendapatan').show();
+    //         } else {
+    //             console.log('Alih Profesi Tidak :', value);
+    //             $('.jenis-usaha, .pendapatan').hide();
+    //         }
+    //     });
+    // });
+</script>
+
+<script src="{% static 'dayatif/fetch-lokasi.js' %}"></script>
+{% endblock %}

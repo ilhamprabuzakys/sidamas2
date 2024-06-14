@@ -1,0 +1,68 @@
+<div class="modal fade" id="editDataKegiatan" aria-labelledby="edit" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="edit">Edit Data</h5>
+          <button type="button" class="btn-close" data-bs-toggle="modal" data-bs-target="#detailWorkshopTematik" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="row mb-3">
+              <div class="col-6">
+                <div class="mb-3">
+                  <label for="edit_tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                  <input type="date" id="edit_tanggal_awal" class="form-control" value="2022-08-28" />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-3">
+                  <label for="edit_tanggal_akhir" class="col-form-label">Tanggal Akhir:</label>
+                  <input type="date" id="edit_tanggal_akhir" class="form-control" value="2022-08-29" />
+                </div>
+              </div>
+              <label for="pelaksanaan" class="col-form-label text-light">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</label>
+            </div>
+            <div class="row mb-3">
+              <div class="col-3">
+                <label for="edit_jumlah_peserta" class="col-form-label required">Jumlah Peserta:</label>
+                <input type="number" class="form-control" name="edit_jumlah_peserta" id="edit_jumlah_peserta" value="1" />
+              </div>
+              <div class="col-9">
+                <label for="edit_stakeholder" class="col-form-label required">Stakeholder Yang Diasistensi Dalam Rangka Kotan:</label>
+                <input type="text" class="form-control" name="edit_stakeholder" id="edit_stakeholder" value="Contoh Stakeholder" />
+              </div>
+            </div>
+            <div class="mb-3"></div>
+            <div class="mb-3">
+              <label for="edit_deskripsi_hasil" class="col-form-label required">Deskripsi Hasil</label>
+              <textarea class="form-control" name="edit_deskripsi_hasil" id="edit_deskripsi_hasil">Contoh Deskripsi Hasil</textarea>
+            </div>
+            <div class="mb-3">
+              <label for="edit_hambatan_kendala" class="col-form-label required">Kendala/Hambatan:</label>
+              <textarea class="form-control" name="edit_hambatan_kendala" id="edit_hambatan_kendala">Contoh Kendala/Hambatan</textarea>
+            </div>
+            <div class="mb-3">
+              <label for="edit_kesimpulan" class="col-form-label required">Kesimpulan:</label>
+              <textarea class="form-control" name="edit_kesimpulan" id="edit_kesimpulan">Contoh Kesimpulan</textarea>
+            </div>
+            <div class="mb-3">
+              <label for="edit_tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+              <textarea class="form-control" name="edit_tindak_lanjut" id="edit_tindak_lanjut">Contoh Tindak Lanjut</textarea>
+            </div>
+            <div class="mb-3">
+              <label for="edit_dokumentasi" class="col-form-label required">Dokumentasi</label>
+              <input type="file" class="form-control" id="edit_dokumentasi" aria-describedby="inputGroupFileAddon03" aria-label="Upload" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#detailWorkshopTematik"><i class="fas fa-xmark me-2"></i>Tutup</button>
+          <button type="button" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

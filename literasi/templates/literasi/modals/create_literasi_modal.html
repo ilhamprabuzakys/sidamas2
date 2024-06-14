@@ -1,0 +1,65 @@
+<div class="modal fade" id="createModal" tabindex="-1" role="dialog" x-data="{ kategori : '' }">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">
+                    Tambah Data
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form id="formCreate" onsubmit="handlePost(event)" enctype="multipart/form-data">
+                <div class="modal-body">
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="judul">Judul</label>
+                        <div class="col-sm-9">
+                            <input type="text" id="judul" class="form-control" placeholder="Judul literasi" required />
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="kategori">Kategori</label>
+                        <div class="col-sm-9">
+                            <select id="kategori" class="form-select input_kategori" data-allow-clear="true" x-model='kategori' required>
+                                <option value="" selected disabled>--Pilih kategori--</option>
+                                <option value="buku">Buku</option>
+                                <option value="audio">Audio</option>
+                                <option value="video">Video</option>
+                                {% comment %} <option value="video_youtube">Video Youtube</option> {% endcomment %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3">
+                        <label class="col-sm-3 col-form-label required" for="status">Status</label>
+                        <div class="col-sm-9 d-flex align-items-center">
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="status_published" value="published" required />
+                                <label class="form-check-label" for="status_published">Published</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="status_draft" value="draft" required/>
+                                <label class="form-check-label" for="status_draft">Draft</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                <input class="form-check-input" type="radio" name="status" id="status_archived" value="archived" required/>
+                                <label class="form-check-label" for="status_archived">Archived</label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row mb-3" id="container_input_dokumen" x-transition x-show="kategori !== 'video_youtube'">
+                        <label class="col-sm-3 col-form-label required" for="dokumen">Konten unggahan</label>
+                        <div class="col-sm-9">
+                            <input class="form-control input_dokumen" type="file" id="dokumen">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer" x-data>
+                    <button type="reset" class="btn btn-label-secondary" data-bs-dismiss="modal"><i
+                            class="fas fa-xmark me-2"></i>Batalkan</button>
+                    <button type="submit" class="btn btn-primary"><i class="fas fa-save me-2"></i>Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,23 @@
+<!-- Logout Modal -->
+<div class="modal modal-top fade" id="logoutModal" tabindex="-1" data-bs-backdrop="static" data-bs-keyboard="false" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logoutModalTitle">Keluar untuk akhiri sesi?</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>
+                    Apakah anda yakin untuk mengakhiri sesi anda?
+                    Klik <strong>Keluar</strong> untuk mengakhiri sesi.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i
+                        class="fas fa-xmark me-2"></i>Batalkan</button>
+                <a href="{% url 'logout' %}" class="btn btn-danger">
+                    <i class="menu-icon tf-icons ti ti-logout me-2"></i>Ya, saya yakin</a>
+            </div>
+        </div>
+    </div>
+</div>

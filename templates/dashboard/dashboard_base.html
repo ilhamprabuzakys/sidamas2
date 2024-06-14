@@ -1,0 +1,294 @@
+{% load static %}
+<!DOCTYPE html>
+<!--=========================================================
+* SIDAMAS - Sistem Informasi Pemberdayaan Masyarakat | v1.0
+==============================================================
+
+* Product: SIDAMAS - Sistem Informasi Pemberdayaan Masyarakat
+* Created by: Iotekno
+* Copyright Iotekno (https://iotekno.net)
+
+=========================================================      -->
+<html lang="id" class="light-style layout-menu-fixed layout-compact layout-menu-collapsed" dir="ltr" data-theme="theme-semi-dark" data-assets-path="{% static 'assets/dashboard/' %}"
+data-template="vertical-menu-template-semi-dark">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport"
+        content="width=device-width, initial-scale=1.0, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0" />
+
+    <title>
+        {% if user.profile.satker.level == 1 %}
+            BNNK {{ user.profile.satker.level }}
+        {% elif user.profile.satker.level == 0 %}
+            BNNP
+        {% elif user.profile.satker.level == 2 %}
+            PUSAT
+        {% endif %}
+        - {% block title %} {{ title }} {% endblock title %} - Sistem Informasi Deputi Bidang Pemberdayaan Masyarakat
+        (SIDAMAS)</title>
+
+    <meta name="description" content="Sistem Informasi Pemberdayaan Masyarakat" />
+    <meta name="keywords" content="Sistem Informasi Pemberdayaan Masyarakat, DAYAMAS, SIDAMAS, DAYATIF, PSM" />
+
+    <!-- Favicon -->
+    <link rel="icon" type="image/x-icon" href="{% static 'assets/images/bnn.png' %}" />
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+        href="https://fonts.googleapis.com/css2?family=Public+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400;1,500;1,600;1,700&ampdisplay=swap"
+        rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+
+    <!-- Icons -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/fonts/fontawesome.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/fonts/tabler-icons.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/fonts/flag-icons.css' %}" />
+
+    <!-- Core CSS -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/css/rtl/core.css' %}"
+        class="template-customizer-core-css" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/css/demo.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/css/rtl/theme-semi-dark.css' %}"
+        class="template-customizer-theme-css" />
+
+        <!-- Custom CSS -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/custom/css/custom.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/css/colors.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/custom/css/animation.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/custom/css/components.css' %}" />
+
+    <!-- Start of Dynamic CSS -->
+    {% if user.is_superuser %}
+    <link rel="stylesheet" href="{% static 'assets/dashboard/custom/css/superadmin.css' %}" />
+    {% else %}
+    {% if user.profile.role == 'dayatif' %}
+    <link rel="stylesheet" href="{% static 'assets/dashboard/custom/css/dayatif.css' %}" />
+    {% else %}
+    <link rel="stylesheet" href="{% static 'assets/dashboard/custom/css/psm.css' %}" />
+    {% endif %}
+    {% endif %}
+
+    <!-- Vendors CSS -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/node-waves/node-waves.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/perfect-scrollbar/perfect-scrollbar.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/typeahead-js/typeahead.css' %}" />
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/css/pages/cards-advance.css' %}" />
+
+    <!-- Swal -->
+    <script src="{% static 'assets/home/plugins/sweet-alert/all.min.js' %}"></script>
+    <link href="{% static 'assets/home/plugins/sweet-alert/all.min.css' %}" rel="stylesheet" />
+
+    <!-- Tagify -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/tagify/tagify.css' %}" />
+
+    <!-- Toastr -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/toastr/toastr.css' %}" />
+
+    {% if '/kegiatan/' not in request.path %}
+    <!-- Datatable -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables.bootstrap5.css' %}" />
+
+    <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.1/css/buttons.dataTables.min.css">
+    <link rel="stylesheet" href="https://cdn.datatables.net/select/2.0.0/css/select.dataTables.min.css">
+
+	<link href="https://cdn.datatables.net/searchpanes/2.3.0/css/searchPanes.dataTables.min.css" rel="stylesheet">
+
+	<link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/datatables-responsive-bs5/responsive.bootstrap5.css' %}" />
+    <link rel="stylesheet"href="{% static 'assets/dashboard/vendor/libs/datatables-checkboxes-jquery/datatables.checkboxes.css' %}" />
+    {% endif %}
+
+    <!-- Select 2 -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/select2/select2.css' %}" />
+
+    <!-- Picker -->
+    <link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.css' %}" />
+
+    <!-- Jquery -->
+    <script src="{% static 'assets/dashboard/vendor/libs/jquery/jquery.min.js' %}"></script>
+
+    <!-- Alpine Js -->
+    <script src="//unpkg.com/alpinejs" defer></script>
+
+    {% block vue %}
+    <!-- Vue Js -->
+    <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+
+    <!-- Pinia -->
+    <script src="https://unpkg.com/vue-demi"></script>
+    <script src="https://unpkg.com/pinia"></script>
+
+    <!-- Lodash -->
+    <script src="{% static 'assets/plugins/lodash/lodash-clonedeep.js' %}"></script>
+    <script src="{% static 'assets/plugins/lodash/lodash-debouncer.js' %}"></script>
+    {% endblock vue %}
+
+    <!-- Leaflet -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+    <!-- !! Default !! -->
+    <script src="{% static 'assets/dashboard/vendor/js/helpers.js' %}"></script>
+    <script src="{% static 'assets/dashboard/js/bawaan/config.js' %}"></script>
+
+    <!-- Page CSS -->
+    {% block css_tambahan %}
+
+    {% endblock %}
+</head>
+
+<body>
+    <!-- Layout wrapper -->
+    <div class="layout-wrapper layout-content-navbar">
+        <div class="layout-container">
+            <!-- Sidebar -->
+            {% if user.profile.role and user.profile.satker and user.profile.is_verified %}
+            {% include 'dashboard/partials/sidebar.html' %}
+            {% else %}
+            <style>
+                #layout-container {
+                    padding-left: 1rem;
+                }
+            </style>
+            {% endif %}
+            <!-- / Sidebar -->
+
+            <!-- Layout container -->
+            <div class="layout-page" id="layout-container">
+                <!-- Header -->
+                {% include 'dashboard/partials/header.html' %}
+                <!-- / Header -->
+
+                <div id="app">
+                    <!-- Content wrapper -->
+                    <div class="content-wrapper">
+                        <!-- Content -->
+                        <div id="main-content" class="container-fluid flex-grow-1 container-p-y">
+                            {% block content %}
+
+                            {% endblock %}
+                        </div>
+                        <!--/ Content -->
+
+                        <!-- Footer -->
+                        {% include 'dashboard/partials/footer.html' %}
+                        <!--/ Footer -->
+
+                        <div class="content-backdrop fade"></div>
+                    </div>
+                    <!--/ Content wrapper -->
+
+                    <!-- Modal -->
+                    <section id="additional_modal">
+                        {% include 'dashboard/partials/modal.html' %}
+                        {% block modal_tambahan %}
+                        {% endblock %}
+                    </section>
+                    <!--/ Modal -->
+                </div>
+            </div>
+            <!--/ Layout page -->
+        </div>
+
+        <!-- Overlay -->
+        <div class="layout-overlay layout-menu-toggle"></div>
+
+        <!-- Drag Target Area To SlideIn Menu On Small Screens -->
+        <div class="drag-target"></div>
+    </div>
+    <!--/ Layout wrapper -->
+
+    <!-- Core JS -->
+    <!-- build:js assets/dashboard/vendor/js/core.js -->
+    <script src="{% static 'assets/dashboard/vendor/libs/popper/popper.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/js/bootstrap.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/libs/node-waves/node-waves.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/libs/perfect-scrollbar/perfect-scrollbar.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/libs/hammer/hammer.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/libs/i18n/i18n.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/libs/typeahead-js/typeahead.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/js/menu.js' %}"></script>
+    <!-- endbuild -->
+
+    <!-- Vendors JS -->
+    <script src="{% static 'assets/dashboard/vendor/libs/swiper/swiper.js' %}"></script>
+
+    <!-- Block UI -->
+    <script src="{% static 'assets/dashboard/vendor/libs/block-ui/block-ui.js' %}"></script>
+
+    <!-- Select2 -->
+    <script src="{% static 'assets/dashboard/vendor/libs/select2/select2.js' %}"></script>
+
+    <!-- Tagify -->
+    <script src="{% static 'assets/dashboard/vendor/libs/tagify/tagify.js' %}"></script>
+
+    <!-- Toastr -->
+    <script src="{% static 'assets/dashboard/vendor/libs/toastr/toastr.js' %}"></script>
+
+    {% if '/kegiatan/' not in request.path %}
+    <!-- Datatable -->
+    <script src="{% static 'assets/dashboard/vendor/libs/datatables-bs5/datatables-bootstrap5.js' %}"></script>
+    {% endif %}
+
+    <!-- Axios -->
+    <script src="{% static 'assets/dashboard/vendor/libs/axios/axios.min.js' %}"></script>
+
+    <!-- Clipboard Js -->
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+
+    <!-- Cleave Js -->
+    <script src="{% static 'assets/dashboard/vendor/libs/cleave/dist/cleave.min.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/libs/cleave/dist/addons/cleave-phone.id.js' %}"></script>
+
+    <!-- Jquery Input Mask Js -->
+    <script src="{% static 'assets/plugins/jquery/input-masks/input-masks.min.js' %}"></script>
+    <script src="{% static 'assets/plugins/jquery/input-masks/input-masks.binding.js' %}"></script>
+
+    <!-- Bootstrap Max Length Js -->
+    <script src="{% static 'assets/dashboard/vendor/libs/bootstrap-maxlength/bootstrap-maxlength.js' %}"></script>
+
+    <!-- Pure Counter Js -->
+    <script src="{% static 'assets/plugins/pure-counter/pure-counter.min.js' %}"></script>
+
+    <!-- Moment Js -->
+    <script src="{% static 'assets/dashboard/vendor/libs/moment/moment.js' %}"></script>
+    <script src="{% static 'assets/dashboard/vendor/libs/moment/moment-with-locales.js' %}"></script>
+
+    <!-- Picker -->
+    <script src="{% static 'assets/dashboard/vendor/libs/bootstrap-daterangepicker/bootstrap-daterangepicker.js' %}"></script>
+
+    <!-- XLSX -->
+    <script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+
+    <!-- Main JS (Bawaan Tema) -->
+    <script src="{% static 'assets/dashboard/js/bawaan/main.js' %}"></script>
+    <script src="{% static 'assets/dashboard/js/bawaan/ui-popover.js' %}"></script>
+
+    <!-- Helpers -->
+    <script src="{% static 'assets/js/fix/select2_fix.js' %}"></script>
+    <script src="{% static 'assets/js/helpers/utils_helpers.js' %}"></script>
+    <script src="{% static 'assets/js/helpers/ajax_helpers.js' %}"></script>
+    <script src="{% static 'assets/js/helpers/alert_helpers.js' %}"></script>
+    <script src="{% static 'assets/js/helpers/datatable_helpers.js' %}"></script>
+    <script src="{% static 'assets/js/helpers/form_helpers.js' %}"></script>
+
+    <!-- Custom JS (Override default theme behavior) -->
+    <script src="{% static 'assets/dashboard/custom/js/main.js' %}"></script>
+
+    <!-- Initialization plugins (can be accessible with just classses) -->
+    <script src="{% static 'assets/js/initialize/select2_dashboard.js' %}"></script>
+    <script src="{% static 'assets/js/initialize/tagify_dashboard.js' %}"></script>
+
+    {% block helpers_tambahan %} {% endblock %}
+
+    <!-- Page JS -->
+    {% block js_tambahan %} {% endblock %}
+
+    {% if '/kegiatan/' in request.path %}
+    <script src="{% static 'assets/dashboard/custom/js/kegiatan_helpers.js' %}"></script>
+    {% endif %}
+</body>
+
+</html>

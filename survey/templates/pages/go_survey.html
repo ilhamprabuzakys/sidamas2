@@ -1,0 +1,98 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block css_tambahan %}
+<!--link href="/static/css/modern.css" type="text/css" rel="stylesheet"/-->
+<link href="https://unpkg.com/survey-core@1.9.126/defaultV2.min.css" type="text/css" rel="stylesheet" />
+<script src="https://unpkg.com/survey-core@1.9.126/survey.core.min.js"></script>
+<link href="https://unpkg.com/bootstrap-material-design@4.1.1/dist/css/bootstrap-material-design.min.css"
+    type="text/css" rel="stylesheet" />
+
+<script src="https://unpkg.com/survey-core@1.9.126/themes/sharp-light.min.js"></script>
+<script src="/static/js/knockout.min.js"></script>
+<script src="https://unpkg.com/survey-knockout-ui@1.9.126/survey-knockout-ui.min.js"></script>
+<script src="https://unpkg.com/bootstrap-material-design@4.1.1/dist/js/bootstrap-material-design.js"></script>
+<script src="https://unpkg.com/survey-core@1.9.126/plugins/bootstrap-material-integration.js"></script>
+<!--script src="/static/js/survey-ko.min.js"></script-->
+{% endblock css_tambahan %}
+{% block title %} {{ survey_title }} {% endblock title %}
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <!-- <div class="col"><span id="demo"></span></div> -->
+        <div class="col" align="center"><span id="countdown"></span></div>
+    </div>
+    <survey params="survey: model"></survey>
+</div>
+<div id="surveyResult"></div>
+
+{% endblock content %}
+{% block script %}
+
+<script>
+    Survey.surveyLocalization.defaultLocale = "id";
+    var json = {{ survey_source| safe }};
+    var utcSeconds = 1705563059;
+    var d = new Date(0); // The 0 there is the key, which sets the date to the epoch
+    d.setUTCSeconds(utcSeconds);
+    var countDownDate = d.getTime();
+    var shortcode = "{{ shortcode }}";
+    var position = { lon: 0, lat: 0 };
+    survey = new Survey.Model(json);
+    Survey.StylesManager.applyTheme("bootstrapmaterial");
+    survey.clearInvisibleValues = "none";
+
+    survey
+        .onComplete
+        .add(function (sender) {
+            axios.post('/survey/save/' + shortcode, JSON.stringify({ location: position, data: btoa(JSON.stringify(sender.data)) }), {
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                withCredentials: true
+            })
+                .then(function (result) {
+                    if (result.errors) {
+                        Swal.fire("Error", result.errors[0].message, "error");
+                    }
+                    if (result.data) {
+                        if (result.data.insert_survey) {
+                            var retval = result.data.insert_survey.returning[0].id;
+                            var refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=';
+                            window.history.pushState({ path: refresh + retval }, '', refresh + retval);
+                            Swal.fire("Sukses", 'Berhasil insert', "success");
+                        }
+                        if (result.data.update_survey) {
+                            if (result.data.update_survey.returning[0])
+                                Swal.fire("Sukses", 'Berhasil update', "success");
+                            else
+                                Swal.fire("Error", 'Update tidak berhasil karena form bukan milik Anda', "error");
+                        }
+                    }
+                })
+                .catch(function (error) {
+                    console.log(error);
+                }
+                );
+        });
+
+    survey.render("surveyElement");
+
+    function getLocation() {
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        } else {
+            console.log("Geolocation is not supported by this browser.");
+        }
+    }
+    function showPosition(p) {
+        position = { lat: p.coords.latitude, lon: p.coords.longitude };
+        //console.log(position);
+    }
+    getLocation();
+    document.addEventListener("DOMContentLoaded", function () {
+        ko.applyBindings({
+            model: survey
+        });
+    });
+</script>
+{% endblock script %}

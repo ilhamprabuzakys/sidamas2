@@ -1,0 +1,56 @@
+<div class="modal fade" id="editDataUserModal" aria-labelledby="modalEdit" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalEdit">
+                    Edit Data Pengguna <b><span id="headline-edit-data-modal-tanggal"></span></b></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <form action="" id="formEdit">
+
+                <div class="modal-body">
+                    <section>
+                        <!-- nama pengguna -->
+                        <!-- <label for="namaPengguna" class="col-form-label required">Nama Pengguna:</label>
+                        <div class="input-group mb-3">
+                            <input type="text" class="form-control" placeholder="Nama Pengguna" id="nama_pengguna" required>
+                        </div> -->
+
+                        <!-- pilih satker -->
+                        <label for="satker" class="col-form-label required">Pilih Satuan Kerja:</label>
+                        <div class="input-group mb-3">
+                            <select id="satker" class="select2 form-select" required>
+                                <option value="" selected disabled>Pilih Satuan Kerja</option>
+                                {% for satker_item in daftar_satker %}
+                                    <option value="{{ satker_item.id }}" :selected="'{{ satker_item }}' == satker">{{ satker_item }}</option>
+                                {% endfor %}>
+                            </select>
+                            {% if user.profile.satker is None %}
+                                <small class="text-danger">Tolong pilih satuan kerja anda</small>
+                            {% endif %}
+                        </div>
+
+                        <!-- status -->
+                        <label for="status" class="col-form-label required">Pilih Status:</label>
+                        <div class="input-group mb-3">
+                            <select id="status" class="select2 form-select">
+                                <option value="" selected disabled>Pilih Status</option>
+                                <option value="1">Verifikasi</option>
+                                <option value="2">Nonaktifkan</option>
+                            </select>
+                        </div>
+
+                    </section>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary" id="saveEditButton">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan</button>
+                </div>
+
+            </form>
+        </div>
+    </div>
+</div>

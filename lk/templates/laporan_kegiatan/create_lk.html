@@ -1,0 +1,79 @@
+<div class="modal fade" id="tambahData" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambah">Tambah Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section id="formTambah">
+                    <div class="row">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="tanggal" class="col-form-label required">Tanggal Kegiatan:</label>
+                                <input type="date" id="tanggal" class="form-control" value="" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="sprin_kegiatan" class="col-form-label d-block mb-2 required">Sprin:</label>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" id="tanpa_sprin" name="sprin" class="form-check-input"
+                                        value="tanpa_sprin" />
+                                    <label class="form-check-label" for="tanpa_sprin">Tanpa Sprin</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input type="radio" id="dengan_sprin" name="sprin" class="form-check-input"
+                                        value="dengan_sprin" />
+                                    <label class="form-check-label" for="dengan_sprin">Dengan Sprin</label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="kuantitas" class="col-form-label required">Kuantitas/Output:</label>
+                                <input type="number" id="kuantitas" class="form-control" value="" />
+                            </div>
+                        </div>
+
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="satuan" class="col-form-label required">Satuan:</label>
+                                <select class="form-control select2" name="satuan" id="satuan">
+                                    <option value="" selected disabled>Pilih Satuan</option>
+                                    {% for item in daftar_satuan %}
+                                    <option value="{{ item.value }}">{{ item.label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="kegiatan" class="col-form-label required">Kegiatan:</label>
+                                <!-- <textarea class="form-control" name="kegiatan" id="kegiatan"></textarea> -->
+                                <div id="kegiatan"></div>
+
+                            </div>
+                        </div>
+                        <div class="col-12">
+                            <div class="mb-3">
+                                <label for="lampiran" class="col-form-label required">Lampiran:</label>
+                                <input type="file" class="form-control" name="lampiran" id="lampiran"></input>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>Tutup</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>

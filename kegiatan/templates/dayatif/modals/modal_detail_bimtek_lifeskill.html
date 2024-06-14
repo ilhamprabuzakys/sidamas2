@@ -1,0 +1,72 @@
+<div class="modal fade" id="detailModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitleId">Detail Pelaksanaan untuk Satuan Kerja
+                    <b>{{ user.profile.satker }}</b></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead class="bg-soft-blue">
+                            <tr>
+                                <th colspan="2" rowspan="1">Pelaksanaan</th>
+                                <th colspan="4" rowspan="1">Kawasan Yang Diintervensi</th>
+                                <th rowspan="3">Jumlah Peserta</th>
+                            </tr>
+                            <tr>
+                                <th scope="col" rowspan="2">No</th>
+                                <th scope="col" rowspan="2">Tanggal</th>
+                                <th scope="col" rowspan="2">Nama Kawasan</th>
+                                <th scope="col" rowspan="2">Jenis Pelatihan</th>
+                                <th colspan="2" rowspan="1" class="text-center">Peserta</th>
+                            </tr>
+                            <tr>
+                                <th scope="col" rowspan="1">Pria</th>
+                                <th scope="col" rowspan="1">Wanita</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr class="">
+                                <td rowspan="1">1</td>
+                                <td rowspan="1">28 Agustus s/d 29 September 2022</td>
+                                <td rowspan="1">BNN RI Melakukan Supervisi Ke BNNP/BNNK/Lingkungan Di Wilayah BNNP Dan
+                                    BNNK</td>
+                                <td rowspan="1">Edukasi Kesehatan Mental</td>
+                                <td rowspan="1">
+                                    <span class="text-primary">8</span>
+                                </td>
+                                <td rowspan="1">
+                                    <span class="text-danger">10</span>
+                                </td>
+                                <td rowspan="1">1</td>
+                            </tr>
+                            <tr class="">
+                                <td rowspan="1">2</td>
+                                <td rowspan="1">12 November s/d 05 Januari 2023</td>
+                                <td rowspan="1">BNN RI Melakukan Supervisi Ke BNNP/BNNK/Lingkungan Di Wilayah BNNP Dan
+                                    BNNK</td>
+                                <td rowspan="1">Olahraga</td>
+                                <td rowspan="1">
+                                    <span class="text-primary">12</span>
+                                </td>
+                                <td rowspan="1">
+                                    <span class="text-danger">23</span>
+                                </td>
+                                <td rowspan="1">35</td>
+                            </tr>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

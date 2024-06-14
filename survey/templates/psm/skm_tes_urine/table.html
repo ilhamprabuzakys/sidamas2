@@ -1,0 +1,116 @@
+<table class="table table-bordered" id="__table">
+    <thead class="bg-soft-green">
+        <tr>
+            <th>No.</th>
+            <th>Tanggal Survei</th>
+            <th>Waktu Berlakunya Survei</th>
+            <th class="text-center">Status</th>
+            <th class="text-center">Batas Responden</th>
+            <th class="text-center">Jumlah Responden</th>
+            <th class="bg-soft-danger">Daftar Responden</th>
+            <th>
+                AKSI<i class="fas fa-edit ms-2"></i>
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for item in list_survei %}
+
+        <tr class="align-td-middle">
+            <td scope="row">{{ forloop.counter }}</td>
+            <td>{{ item.tanggal|date:"d F Y" }}</td>
+            <td>{{ item.jam_awal|time:"H:i:s" }} - {{ item.jam_akhir|time:"H:i:s" }}</td>
+
+            <td class="text-center">
+                {% if item.get_status_keberlangsungan == 'Belum dibuka' %}
+                <a href="javascript:;" class="badge rounded-pill bg-secondary text-white">
+                    {{ item.get_status_keberlangsungan }}
+                </a>
+                {% elif item.get_status_keberlangsungan == 'Berlangsung' %}
+                <a href="javascript:;" class="badge rounded-pill bg-primary text-white">
+                    {{ item.get_status_keberlangsungan }}
+                </a>
+                {% elif item.get_status_keberlangsungan == 'Berakhir' %}
+                <a href="javascript:;" class="badge rounded-pill bg-danger text-white">
+                    {{ item.get_status_keberlangsungan }}
+                </a>
+                {% endif %}
+            </td>
+
+            <td class="text-center">{{ item.batas_responden }} orang</td>
+            <td class="text-center">
+                {% if item.get_jumlah_responden %}
+                    {{ item.get_jumlah_responden }} orang
+                {% else %}
+                Belum ada responden
+                {% endif %}
+            </td>
+            <td>
+                {% if item.get_status_keberlangsungan != 'Belum dibuka' %}
+                    <span class="d-none">{{ item.get_jumlah_responden }}</span>
+                    {% if item.get_jumlah_responden %}
+                    <a href="javascript:;" class="badge rounded bg-primary text-white"
+                        onclick="getDaftarResponden('{{ item.pk }}', '{{ item.tanggal|date:"d F Y" }}')">
+                        <i class="fas fa-eye me-2"></i>
+                        Lihat daftar responden
+                    </a>
+                    {% else %}
+                    <a href="javascript:;" class="badge rounded bg-secondary text-white">
+                        <i class="fas fa-eye me-2"></i>
+                        Lihat daftar responden
+                    </a>
+                    {% endif %}
+                {% else %}
+                <a href="javascript:;" class="badge rounded bg-secondary pointer-none text-white">
+                    <i class="fas fa-eye me-2"></i>
+                    Lihat daftar responden
+                </a>
+                {% endif %}
+            </td>
+            <td class="__action_button">
+                <div class="list-button gx-3 text-uppercase">
+                    <div>
+                        {% if item.get_status_keberlangsungan != 'Belum dibuka' %}
+                        <a href="javascript:;" onclick="kirimHasil('{{ item.pk }}', '{{ item.tanggal|date:"d F Y" }}')"
+                            class="badge bg-primary text-white text-decoration-none mb-1">
+                            <i class="fas fa-plane me-2"></i>Kirim Hasil</a>
+                        {% else %}
+                        <a href="javascript:;"
+                            class="badge bg-secondary pointer-none text-white text-decoration-none mb-1"><i
+                                class="fas fa-plane me-2"></i>Kirim Hasil</a>
+                        {% endif %}
+
+                    </div>
+                    <div>
+                        {% if item.get_status_keberlangsungan == 'Berakhir' %}
+                        <a href="javascript:;" class="badge bg-secondary pointer-none text-white text-decoration-none mb-1"><i
+                                class="fas fa-print me-2"></i>Cetak Link</a>
+                        {% else %}
+                            {% if item.get_status_responden == 'Sudah penuh' %}
+                            <a href="javascript:;"  class="badge bg-secondary pointer-none text-white text-decoration-none mb-1"><i
+                                    class="fas fa-print me-2"></i>Cetak Link</a>
+                            {% else %}
+                            <a href="javascript:;" onclick="getLink('{{ item.kode }}')"
+                                class="badge bg-warning text-white text-decoration-none mb-1"><i
+                                    class="fas fa-print me-2"></i>Cetak Link</a>
+                            {% endif %}
+                        
+                        {% endif %}
+                    </div>
+                    <div>
+                        <a href="javascript:;"
+                            onclick="editDataSurvei('{{ item.pk }}', '{{ forloop.counter }}', '{{ item.tanggal|date:"d F Y" }}')"
+                            class="badge bg-success text-white text-decoration-none mb-1"><i
+                                class="fas fa-pen-to-square me-2"></i>Edit</a>
+                    </div>
+                    <div>
+                        <a href="javascript:;" class="badge bg-danger text-white text-decoration-none mb-1"
+                            onclick="hapusDataSurvei('{{ item.pk }}', '{{ item.tanggal|date:"d F Y" }}')"><i
+                                class="fas fa-trash-alt me-2"></i>Hapus</a>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>

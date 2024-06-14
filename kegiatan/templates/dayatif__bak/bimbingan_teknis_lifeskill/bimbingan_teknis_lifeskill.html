@@ -1,0 +1,973 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Bimbingan Teknis Lifeskill {% endblock %}
+
+{% block modal_tambahan %}
+{% include 'dayatif/bimbingan_teknis_lifeskill/modals/create_modal.html' %}
+{% include 'dayatif/bimbingan_teknis_lifeskill/modals/edit_modal.html' %}
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Bimbingan Teknis Lifeskill</h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Kegiatan /</span>
+            <span class="ms-1 fw-medium">Bimbingan Teknis Lifeskill</span>
+        </span>
+    </div>
+</div>
+
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">
+                    REKAPITULASI KEGIATAN BIMBINGAN TEKNIS STAKEHOLDER/PENDAMPING <br>
+                    <span id="currentYear"></span>
+                </h3>
+                <hr>
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-between mb-3">
+                    <div id="filter__btn_container" class="d-flex align-items-center gap-2">
+                        <v-generic-filter :satker="{ id: satkerPK, level: satkerLevel }" :data="tableData" @update="(data) => filteredPage = data"></v-generic-filter>
+                    </div>
+
+                    <v-page-action-button :satker="{ id: satkerPK, level: satkerLevel }"></v-page-action-button>
+                </div>
+            </div>
+
+            <v-table-basic-filter :item="{ columns : ['nama_satker', 'tanggal', 'jumlah_kegiatan', 'nama_provinsi', 'nama_kabupaten', 'nama_kecamatan', 'nama_desa', 'keterampilan', 'tempat', 'hasil_skm_nilai', 'hasil_skm_kategori', 'jumlah_peserta', 'anggaran', 'kendala', 'kesimpulan', 'tindak_lanjut'], tableData, totalDefault: 10 }" @set-page="(page) => currentPage = page" @set-data="(data) => filteredPage = data" @set-perpage="(page) => perPage = page">
+            </v-table-basic-filter>
+
+
+            <div id="__table_container" class="table-responsive">
+                <v-table :item="{ pagedData }" :pagination="{ currentPage, totalPage, perPage, total: filteredPage?.length }" @go-pagination="(page) => currentPage = page">
+                    <template #thead>
+                        <tr>
+                            <th class="bg-soft-success text-center cursor-pointer" rowspan="2" @click="handleSort('no')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>No.</span>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="2">Satuan Kerja Pelaksana</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Pelaksanaan</th>
+                            <th class="bg-soft-success" rowspan="2">Kawasan Yang Diintervensi</th>
+                            <th class="bg-soft-success" rowspan="2">Keterampilan Yang Diberikan</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Peserta</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Sinergi</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Hasil SKM</th>
+                            <th class="bg-soft-success" rowspan="2">Anggaran</th>
+                            <th class="bg-soft-success" rowspan="2">Hambatan/Kendala</th>
+                            <th class="bg-soft-success" rowspan="2">Kesimpulan</th>
+                            <th class="bg-soft-success" rowspan="2">Tindak Lanjut</th>
+                            <th class="bg-soft-success" rowspan="2">Dokumentasi</th>
+                            <th class="bg-soft-success text-center" rowspan="2" style="max-width: 150px">Aksi <i class="fas fa-edit ms-2"></i>
+                            </th>
+                        </tr>
+                        <tr>
+                            <!-- Pelaksanaan -->
+                            <th class="bg-soft-success cursor-pointer" rowspan="1" @click="handleSort('tanggal')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>Tanggal</span>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="1">Tempat</th>
+                            <!--/ Pelaksanaan -->
+                            <!-- Peserta -->
+                            <th class="bg-soft-success" rowspan="1">Daftar Peserta</th>
+                            <th class="bg-soft-success" rowspan="1">Jumlah Peserta</th>
+                            <!--/ Peserta -->
+                            <!-- Sinergi -->
+                            <th class="bg-soft-success" rowspan="1">Desa Bersinar</th>
+                            <th class="bg-soft-success" rowspan="1">IBM</th>
+                            <!--/ Sinergi -->
+                            <!-- Hasil SKM -->
+                            <th class="bg-soft-success" rowspan="1">Nilai (1,00 - 4,00)</th>
+                            <th class="bg-soft-success" rowspan="1">Kategori</th>
+                            <!--/ Hasil SKM -->
+                        </tr>
+                    </template>
+                    <template #tbody>
+                        <template v-for="(item, index) in pagedData" :key="index">
+                            <tr :class="item.class">
+                                <td class="text-center" v-text="item.index"></td>
+                                <td :colspan="item.hide_satker ? 0 : 17">
+                                    <template v-if="!item.hide_satker">
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan"></v-item-header>
+                                    </template>
+                                    <template v-else>
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan" :fade="true" :index="item.index"></v-item-header>
+                                    </template>
+                                </td>
+                                <template v-if="item.hide_satker">
+                                    <!-- Pelaksanaan -->
+                                    <td>
+                                        <v-item-tanggal :awal="item.tanggal_awal" :akhir="item.tanggal_akhir"></v-item-tanggal>
+                                    </td>
+                                    <td>
+                                        <span v-text="item.tempat"></span>
+                                    </td>
+                                    <!--/ Pelaksanaan -->
+                                    <td>
+                                        <v-lokasi :lokasi="item.lokasi"></v-lokasi>
+                                    </td>
+                                    <td>
+                                        <span v-text="item.keterampilan"></span>
+                                    </td>
+                                    <!-- Peserta -->
+                                    <td>
+                                        <v-daftar-peserta :id="index" :data="item.peserta" :satker="item.satker.nama_satker"></v-daftar-peserta>
+                                    </td>
+                                    <td>
+                                        <span v-text="`${item.jumlah_peserta} orang`"></span>
+                                    </td>
+                                    <!--/ Peserta -->
+                                    <!-- Sinergi -->
+                                    <td>
+                                        { item.sinergi_desa == 'Tidak' ? 'Tidak' : 'Ya' }
+                                    </td>
+                                    <td>
+                                        { item.sinergi_ibm == 'Tidak' ? 'Tidak' : 'Ya' }
+                                    </td>
+                                    <!--/ Sinergi -->
+                                    <!-- Hasil SKM -->
+                                    <td>
+                                        { parseFloat(item.hasil_skm_nilai).toFixed(2) }
+                                    </td>
+                                    <td>
+                                        <span v-text="item.hasil_skm_kategori"></span>
+                                    </td>
+                                    <!--/ Hasil SKM -->
+                                    <td>
+                                        <v-item-text :text="item.anggaran"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.kendala"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.kesimpulan"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.tindak_lanjut"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-dokumentasi :information="{ satker: item.satker.nama_satker, tanggal: item.tanggal }" :file="item.dokumentasi" :image="item.gambar || item.file" :id="index"></v-item-dokumentasi>
+                                    </td>
+                                    <td>
+                                        <v-action-button :item="{ id: item.id, nama: item.satker.nama_satker, level: item.satker.level, status: item.status }" :level="satkerLevel" :url="'bimbingan_teknis_lifeskill'" @update="refreshData()" @edit="(id) => handleEdit(id)"></v-action-button>
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </template>
+                    <template #not-found>
+                        <v-result-not-found colspan="17" text="Hasil pencarian tidak ditemukan"></v-result-not-found>
+                    </template>
+                </v-table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+
+<!-- Jquery Form Reapeater Js -->
+<script src="{% static 'assets/dashboard/vendor/libs/jquery-repeater/jquery-repeater.js' %}"></script>
+<script src="{% static 'assets/js/initialize/form_repeater_dashboard.js' %}"></script>
+
+<script>
+    const { createApp, watch, reactive, ref, onMounted, computed } = Vue;
+
+    const useFormStore = defineStore('form', () => {
+        const base = {
+            lokasi: { provinsi: '', kabupaten: '', kecamatan: '', desa: '' },
+            kendala: { showKeterangan: false },
+            keterampilan : {
+                showKeterangan: false,
+                select: null,
+                keterangan: '',
+            },
+            skm: { nilai: 1 },
+            image: { url: '' },
+        };
+
+        const lokasi = ref({ ...base.lokasi });
+        const kendala = ref({ ...base.kendala });
+        const keterampilan = ref({ ...base.keterampilan });
+        const skm = ref({ ...base.skm });
+        const image = ref({ ...base.image });
+
+        const getKeterampilan = computed(() => `${keterampilan.value.select}, ${keterampilan.value.keterangan}`);
+
+        const getSKMKategori = computed(() => {
+            const nilai = parseFloat(skm.value.nilai).toFixed(2);
+
+            /*
+                const checkingState = {
+                    'Nilai': nilai,
+                    'Kriteria 1 (1.00 - 1.74)': nilai >= 1.00 && nilai <= 1.74,
+                    'Kriteria 2 (1.75 - 2.50)': nilai >= 1.75 && nilai <= 2.50,
+                    'Kriteria 3 (2.51 - 3.25)': nilai >= 2.51 && nilai <= 3.25,
+                    'Kriteria 4 (3.26 - 4.00)': nilai >= 3.26 && nilai <= 4.00
+                };
+
+                console.log(checkingState);
+            */
+
+            let text = '';
+
+            if (nilai >= 1.00 && nilai <= 1.74) {
+                text = 'Buruk';
+            } else if (nilai >= 1.75 && nilai <= 2.50) {
+                text = 'Cukup';
+            } else if (nilai >= 2.51 && nilai <= 3.25) {
+                text = 'Baik';
+            } else if (nilai >= 3.26 && nilai <= 4.00) {
+                text = 'Sangat Baik';
+            } else {
+                text = 'Nilai tidak valid';
+            }
+
+            return text;
+        });
+
+        const checkedState = (name) => {
+            const value = keterampilan.value.select;
+            return value && value.includes(name)
+        }
+
+        const checkVisibility = (name) => keterampilan.value.showKeterangan && checkedState(name);
+
+        return { lokasi, kendala, keterampilan, skm, image, getKeterampilan, getSKMKategori, checkVisibility, checkedState };
+    });
+</script>
+
+{% include "dayatif/partials/components.html" %}
+
+<script>
+    const app = createApp({
+        delimiters,
+        components,
+        setup() {
+            const store = useFormStore()
+
+            const title = ref('Bimbingan Teknis Lifeskill');
+
+            const satkerPK = ref(parseInt('{{ user.profile.satker.pk }}'));
+            const satkerNama = ref('{{ user.profile.satker.nama_satker }}');
+            const satkerLevel = ref(parseInt('{{ user.profile.satker.level }}'));
+
+            const tableData = ref(null);
+            const filteredPage = ref(null);
+
+            const apiURL = `/kegiatan/api/v1/dayatif/bimbingan_teknis_lifeskill/list/${satkerLevel.value === 1 ? 'bnnk/' : ''}?format=datatables`;
+
+            const getHasilSKMKategori = (value) => {
+                const dataMap = {
+                    'buruk': 'Buruk',
+                    'cukup': 'Cukup',
+                    'baik': 'Baik',
+                    'sangat_baik': 'Sangat Baik',
+                };
+
+                return dataMap[value] || 'cukup';
+            }
+
+            const loadData = async () => {
+                setIsLoading(true);
+
+                const tableContent = [];
+                const response = await axios.get(apiURL);
+
+                console.log(response);
+                const data = response.data.data;
+
+                const getClass = (level) => {
+                    const classMap = {
+                        2: 'bg-soft-danger',
+                        0: 'bg-soft-primary',
+                        1: 'bg-soft-warning',
+                    }
+
+                    return classMap[level];
+                }
+
+                let key, value, key2, value2, key3, value3, key4, value4;
+
+                for ([key, value] of Object.entries(data)) {
+                    const baris = {
+                        class: getClass(value.satker.level),
+                        id: value.id,
+                        status: value.status,
+                        hide_satker: false,
+                        index: parseInt(key) + 1,
+                        jumlah_kegiatan: value.data.length,
+                        satker: value.satker,
+
+                        tempat: "",
+                        lokasi: {},
+
+                        keterampilan: "",
+                        sinergi_desa: "",
+                        sinergi_ibm: "",
+
+                        hasil_skm_nilai: "",
+                        hasil_skm_kategori: "",
+
+                        tanggal: "",
+                        tanggal_awal: "",
+                        tanggal_akhir: "",
+
+                        stakeholders: null,
+                        jumlah_peserta: "",
+                        peserta: "",
+
+                        anggaran: "",
+                        kendala: "",
+                        kesimpulan: "",
+                        tindak_lanjut: "",
+                        dokumentasi: "",
+                        gambar: "",
+                    };
+
+                    tableContent.push(baris);
+
+                    for ([key2, value2] of Object.entries(value.data)) {
+                        const indexKey = `${parseInt(key) +1}.${parseInt(key2) + 1}`;
+                        const lokasi = { provinsi: value2.nama_provinsi, kabupaten: value2.nama_kabupaten, kecamatan: value2.nama_kecamatan, desa: value2.nama_desa };
+
+                        const baris = {
+                            class: "bg-soft-light",
+                            id: value2.id,
+                            status: value2.status,
+                            hide_satker: true,
+                            index: indexKey,
+                            satker: value2.satker,
+                            jumlah_kegiatan: value.data.length,
+
+                            tempat: value2.tempat,
+                            lokasi,
+
+                            keterampilan: value2.keterampilan,
+                            sinergi_desa: value2.sinergi_desa ? 'Sinergi Desa' : 'Tidak',
+                            sinergi_ibm: value2.sinergi_ibm ? 'Sinergi IBM' : 'Tidak',
+
+                            hasil_skm_nilai: value2.hasil_skm_nilai,
+                            hasil_skm_kategori: getHasilSKMKategori(value2.hasil_skm_kategori),
+
+                            tanggal: getTanggalKegiatan(value2.tanggal_awal, value2.tanggal_akhir),
+                            tanggal_awal: value2.tanggal_awal,
+                            tanggal_akhir: value2.tanggal_akhir,
+
+                            stakeholders: value2.stakeholders,
+                            jumlah_peserta: value2.jumlah_peserta,
+                            peserta: value2.peserta,
+
+                            anggaran: value2.anggaran,
+                            kendala: value2.kendala,
+                            kesimpulan: value2.kesimpulan,
+                            tindak_lanjut: value2.tindak_lanjut,
+                            dokumentasi: value2.dokumentasi,
+                            gambar: value2.gambar,
+                        };
+
+                        tableContent.push(baris);
+                    }
+
+                    if (value?.detail?.length > 0) {
+                        for ([key3, value3] of Object.entries(value.detail)) {
+                            const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}`;
+
+                            const baris = {
+                                class: "bg-soft-warning",
+                                id: value3.id,
+                                status: value3.status,
+                                hide_satker: false,
+                                index: indexKey,
+                                jumlah_kegiatan: value3.data.length,
+                                satker: value3.satker,
+
+                                tempat: "",
+                                lokasi: {},
+                                provinsi: "",
+                                kabupaten: "",
+                                kecamatan: "",
+                                desa: "",
+
+                                nama_provinsi: "",
+                                nama_kabupaten: "",
+                                nama_kecamatan: "",
+                                nama_desa: "",
+
+                                keterampilan: "",
+                                sinergi_desa: "",
+                                sinergi_ibm: "",
+
+                                hasil_skm_nilai: "",
+                                hasil_skm_kategori: "",
+
+                                tanggal: "",
+                                tanggal_awal: "",
+                                tanggal_akhir: "",
+
+                                stakeholders: null,
+                                jumlah_peserta: "",
+                                peserta: "",
+
+                                anggaran: "",
+                                kendala: "",
+                                kesimpulan: "",
+                                tindak_lanjut: "",
+                                dokumentasi: "",
+                                gambar: "",
+                            };
+
+                            tableContent.push(baris);
+
+                            for ([key4, value4] of Object.entries(value3.data)) {
+                                const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}.${parseInt(key4) + 1}`;
+                                const lokasi = { provinsi: value4.nama_provinsi, kabupaten: value4.nama_kabupaten, kecamatan: value4.nama_kecamatan, desa: value4.nama_desa };
+
+                                const baris = {
+                                    class: "bg-soft-light",
+                                    id: value4.id,
+                                    status: value4.status,
+                                    hide_satker: true,
+                                    index: indexKey,
+                                    jumlah_kegiatan: value3.data.length,
+                                    satker: value4.satker,
+
+                                    tempat: value4.tempat,
+                                    lokasi,
+
+                                    keterampilan: value4.keterampilan,
+                                    sinergi_desa: value4.sinergi_desa ? 'Sinergi Desa' : 'Tidak',
+                                    sinergi_ibm: value4.sinergi_ibm ? 'Sinergi IBM' : 'Tidak',
+
+                                    hasil_skm_nilai: value4.hasil_skm_nilai,
+                                    hasil_skm_kategori: getHasilSKMKategori(value4.hasil_skm_kategori),
+
+                                    tanggal: getTanggalKegiatan(value4.tanggal_awal, value4.tanggal_akhir),
+                                    tanggal_awal: value4.tanggal_awal,
+                                    tanggal_akhir: value4.tanggal_akhir,
+
+                                    jumlah_peserta: value4.jumlah_peserta,
+                                    peserta: value4.peserta,
+
+                                    anggaran: value4.anggaran,
+                                    kendala: value4.kendala,
+                                    kesimpulan: value4.kesimpulan,
+                                    tindak_lanjut: value4.tindak_lanjut,
+                                    dokumentasi: value4.dokumentasi,
+                                    gambar: value4.gambar,
+                                };
+                                tableContent.push(baris);
+                            }
+                        }
+                    }
+                }
+
+                tableData.value = tableContent;
+                filteredPage.value = tableData.value;
+
+                setIsLoading(false);
+            }
+
+            const post = ref({});
+            const edit = ref({});
+
+            const handlePost = async () => {
+                showSwalLoading();
+
+                const modal = $('#createModal');
+
+                const $repeaterValues = $('#create__peserta').repeaterVal();
+                const dataPeserta = $repeaterValues.create_peserta_group;
+
+                const { tanggal_awal, tanggal_akhir, tempat, provinsi, kabupaten, kecamatan, desa, nama_provinsi, nama_kabupaten, nama_kecamatan, nama_desa, keterampilan, sinergi_desa, sinergi_ibm, hasil_skm_nilai, hasil_skm_kategori, anggaran, kendala, kesimpulan, tindak_lanjut, dokumentasi, gambar } = post.value;
+
+                const satker = satkerPK.value
+
+                const jumlah_peserta = dataPeserta.length;
+                const peserta = JSON.stringify(dataPeserta);
+
+                const data_sinergi_desa = sinergi_desa ?? false;
+                const data_sinergi_ibm = sinergi_ibm ?? false;
+
+                const payload = {
+                    satker,
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    tempat,
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    keterampilan,
+                    jumlah_peserta,
+                    sinergi_desa: data_sinergi_desa,
+                    sinergi_ibm: data_sinergi_ibm,
+                    hasil_skm_nilai: parseFloat(hasil_skm_nilai).toFixed(2),
+                    hasil_skm_kategori: getHasilSKMKategori(hasil_skm_kategori),
+                    anggaran,
+                    kendala,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(gambar && {
+                        gambar
+                    }),
+                    dokumentasi,
+                    peserta
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                try {
+                    await axios.post('/kegiatan/api/v1/dayatif/bimbingan_teknis_lifeskill/',
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> ditambahkan!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    refreshData();
+
+                    store.$reset();
+                    post.value = {
+                        provinsi: '',
+                        kabupaten: '',
+                        kecamatan: '',
+                        desa: ''
+                    };
+                }
+            }
+
+            const handleEdit = async (id) => {
+                try {
+                    const response = await axios.get(`/kegiatan/api/v1/dayatif/bimbingan_teknis_lifeskill/${id}/`);
+
+                    const data = response.data;
+
+                    console.log('Data:', data);
+
+                    const modal = $('#editModal');
+                    const form = $('#editForm');
+
+                    form.find('#edit__info').text(data.satker.nama_satker);
+                    form.find('#edit__satker').val(data.satker.id).trigger('change');
+
+                    // Kawasan Yang Diintervensi
+                    store.lokasi = {
+                        provinsi: data.nama_provinsi,
+                        kabupaten: data.nama_kabupaten,
+                        kecamatan: data.nama_kecamatan,
+                        desa: data.nama_desa,
+                    };
+
+                    // Kendala
+                    store.kendala.showKeterangan = data.kendala.startsWith('Ada');
+
+                    // Keterampilan
+                    // Mengandung 'Kerajinan Tangan', 'Pengolahan Makanan', 'Lainnya'
+                    if (data.keterampilan.includes('Kerajinan Tangan') || data.keterampilan.includes('Pengolahan Makanan') || data.keterampilan.includes('Lainnya')) {
+                        store.keterampilan.showKeterangan = true;
+                    }
+
+                    store.keterampilan.select = data.keterampilan;
+
+                    // Hasil SKM Nilai
+                    const dataNilaiSKM = parseFloat(data.hasil_skm_nilai).toFixed(2);
+                    form.find('#edit__hasil_skm_nilai').val(dataNilaiSKM);
+                    store.skm.nilai = dataNilaiSKM;
+
+                    edit.value = {
+                        provinsi: data.provinsi,
+                        kabupaten: data.kabupaten,
+                        kecamatan: data.kecamatan,
+                        desa: data.desa,
+                        ...data
+                    };
+
+                    // Reset files
+                    edit.value.dokumentasi = null;
+
+                    // Gambar
+                    store.image.url = data.gambar;
+
+                    // Stakeholders (Repeater)
+                    const $formRepeater = $('#edit__peserta');
+
+                    $formRepeater.repeater(getRepeaterConfig());
+
+                    const list = [];
+
+                    data.peserta.forEach(function (item) {
+                        list.push({
+                            'nama': item.nama,
+                            'alamat': item.alamat,
+                            'notelp': item.notelp,
+                            'jenis_kelamin': item.jenis_kelamin,
+                            'status': item.status,
+                        });
+                    });
+
+                    $formRepeater.setList(list);
+
+                    form.find('#edit__peserta_info').text(`${data.peserta.length} Peserta`);
+
+                    modal.modal('show');
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                }
+            }
+
+            const handleUpdate = async (id) => {
+                showSwalLoading();
+
+                const modal = $('#editModal');
+
+                const $repeaterValues = $('#edit__peserta').repeaterVal();
+                const dataPeserta = $repeaterValues.edit_peserta_group;
+
+                const { tanggal_awal, tanggal_akhir, tempat, provinsi, kabupaten, kecamatan, desa, nama_provinsi, nama_kabupaten, nama_kecamatan, nama_desa, keterampilan, sinergi_desa, sinergi_ibm, hasil_skm_nilai, hasil_skm_kategori, anggaran, kendala, kesimpulan, tindak_lanjut, dokumentasi, gambar } = edit.value;
+
+                const jumlah_peserta = dataPeserta.length;
+                const peserta = JSON.stringify(dataPeserta);
+
+                const data_sinergi_desa = sinergi_desa ?? false;
+                const data_sinergi_ibm = sinergi_ibm ?? false;
+
+                let delete_gambar = false;
+                let fileGambar = null;
+
+                if (gambar && gambar.size) {
+                    fileGambar = gambar;
+                } else if (!gambar) {
+                    delete_gambar = true;
+                }
+
+                const payload = {
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    tempat,
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    keterampilan,
+                    jumlah_peserta,
+                    sinergi_desa: data_sinergi_desa,
+                    sinergi_ibm: data_sinergi_ibm,
+                    hasil_skm_nilai: parseFloat(hasil_skm_nilai),
+                    hasil_skm_kategori: getHasilSKMKategori(hasil_skm_kategori),
+                    anggaran,
+                    kendala,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(dokumentasi && {
+                        dokumentasi
+                    }),
+                    ...(fileGambar && {
+                        gambar: fileGambar
+                    }),
+                    ...(delete_gambar && { delete_gambar }),
+                    peserta
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                //Swal.close(); return;
+
+                try {
+                    const response = await axios.patch(`/kegiatan/api/v1/dayatif/bimbingan_teknis_lifeskill/${edit.value.id}/`,
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> diperbarui!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    refreshData();
+                    store.$reset();
+                    edit.value = {
+                        provinsi: '',
+                        kabupaten: '',
+                        kecamatan: '',
+                        desa: ''
+                    }
+                }
+            }
+
+            const inputTargets = ['provinsi', 'kabupaten', 'kecamatan', 'desa'];
+
+            const handleChange = (type, name, event) => {
+                const text = $(`#${type}__${name}`).find(':selected').text();
+                const value = event.target.value;
+
+                if (type === 'create') {
+                    post.value[name] = value;
+                    post.value[`nama_${name}`] = text;
+                } else {
+                    edit.value[name] = value;
+                    edit.value[`nama_${name}`] = text;
+                }
+            };
+
+            const getUserInfo = () => {
+                const roles = { 0: 'BNNP', 1: 'BNNK', 2: 'PUSAT' };
+                console.log('[INFO] Logged in Satker Level :', satkerLevel.value, `- ${roles[satkerLevel.value]}`);
+            };
+
+            onMounted(async () => {
+                await loadData();
+
+                getUserInfo();
+
+                $('#editModal, #createModal').on('hidden.bs.modal', () => store.$reset());
+
+                inputTargets.forEach(name => {
+                    ['create', 'edit'].forEach(type => {
+                        $(`#${type}__${name}`).on('change', (event) => handleChange(type, name, event));
+                    });
+                });
+
+                // ******** INPUT FORMS ********
+                $('.hasil_skm_nilai').inputmask({
+                    mask: ["9,99"],
+                    greedy: false,
+                    numericInput: false,
+                    rightAlign: false,
+                }).on('input', function() {
+                    const value = parseFloat($(this).val().replace(',', '.'));
+                    const checkingState = isNaN(value) || value < 1 || value > 4;
+
+                    if (!checkingState) return;
+
+                    if (value > 4) {
+                        $(this).val('4,00');
+                    } else if (value < 1) {
+                        $(this).val('1,00');
+                    } else {
+                        $(this).val('');
+                    }
+                });
+
+                const getValueAndStoreNilai = (rawValue) => {
+                    const value = rawValue.replace(',', '.');
+                    store.skm.nilai = parseFloat(value).toFixed(2);
+                }
+
+                $('#create__hasil_skm_nilai').on('input', function(e) {
+                    getValueAndStoreNilai(e.target.value);
+                    post.value.hasil_skm_nilai = store.skm.nilai;
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.skm.nilai = e.target.value;
+                    post.value.hasil_skm_nilai = e.target.value;
+                });
+
+                $('#edit__hasil_skm_nilai').on('input', function(e) {
+                    getValueAndStoreNilai(e.target.value);
+                    edit.value.hasil_skm_nilai = store.skm.nilai;
+                }).on('blur', function(e) {
+                    const value = e.target.value;
+                    const checkingState = value === '' || parseFloat(value) < 1.00;
+
+                    if (!checkingState) return;
+
+                    e.target.value = '1,00';
+                    store.skm.nilai = e.target.value;
+                    edit.value.hasil_skm_nilai = e.target.value;
+                });
+
+                await sleep(1000);
+
+                console.log('[INFO] Paged data :', pagedData.value);
+            });
+
+            /* ========================================
+                  !! GENERIC TABLE CONFIGURATION !!
+            =========================================== */
+
+            /* -----------------------------------------
+             * Pagination
+            -----------------------------------------*/
+            const getPage = () => {
+                const params = new URLSearchParams(window.location.search);
+                let page = parseInt(params.get('page'));
+
+                if (isNaN(page) || page <= 0) {
+                    removeParams('page');
+                    page = 1;
+                }
+
+                return page;
+            }
+
+            const perPage = ref(10); // Placeholder
+            const currentPage = ref(getPage());
+            const totalPage = computed(() => filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0);
+
+            watch(totalPage, () => {
+                // console.log({'TotalPage': totalPage.value, 'perPage': perPage.value, 'currentPage': currentPage.value});
+                const checkingState = totalPage.value != 0 && (currentPage.value > totalPage.value);
+                if (!checkingState) return;
+
+                const message = `Kembali ke halaman <b>1</b> dikarenakan Data pada halaman <b>${currentPage.value}</b> tidak ditemukan`;
+                toastr['warning'](message, "Terjadi kesalahan");
+                currentPage.value = 1;
+                removeParams('page');
+            })
+
+            const pagedData = computed(() => {
+                if (!filteredPage.value) return [];
+                const startIndex = (currentPage.value - 1) * perPage.value;
+                const endIndex = currentPage.value * perPage.value;
+                return filteredPage.value.slice(startIndex, endIndex);
+            });
+
+            /**-----------------------------------------
+             * Sorting
+            -----------------------------------------*/
+            const sortColumn = ref('no')
+            const sortDirection = ref('asc')
+
+            const handleSort = (column) => {
+                currentPage.value = 1;
+                removeParams('page');
+                sortColumn.value = column;
+
+                sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+
+                if (column === 'no') {
+                    filteredPage.value.sort((a, b) => {
+                        const dataA = `${a.index}`;
+                        const dataB = `${b.index}`;
+
+                        const indexA = dataA.split('.').map(Number);
+                        const indexB = dataB.split('.').map(Number);
+
+                        for (let i = 0; i < Math.max(indexA.length, indexB.length); i++) {
+                            const numA = indexA[i] || 0;
+                            const numB = indexB[i] || 0;
+
+                            if (numA !== numB) {
+                                return sortDirection.value === 'asc' ? (numA - numB) : (numB - numA);
+                            }
+                        }
+                        return 0;
+                    });
+                } else if (column === 'tanggal') {
+                    filteredPage.value.sort((a, b) => {
+                        const dateA = new Date(a.tanggal_awal);
+                        const dateB = new Date(b.tanggal_awal);
+                        return sortDirection.value === 'asc' ? (dateA - dateB) : (dateB - dateA);
+                    });
+                }
+            }
+
+            /**-----------------------------------------
+             * Websocket
+            -----------------------------------------*/
+            // const basePathName = window.location.pathname.split('/');
+            // const slug = basePathName[basePathName.length - 2];
+            // const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            // const wsEndpoint = `${wsProtocol}://${window.location.host}/ws/${slug}/`;
+            // const socket = new WebSocket(wsEndpoint);
+
+            // socket.onmessage = async (e) => await loadData();
+
+            // const refreshData = () => socket.send(JSON.stringify({ message: 'Data updated ...', sender: satkerNama.value }));
+
+            const refreshData = async () => await loadData();
+
+            return {
+                // Preparation
+                store,
+                satkerLevel,
+                satkerPK,
+                satkerNama,
+                title,
+
+                // Action
+                post,
+                handlePost,
+
+                edit,
+                handleEdit,
+                handleUpdate,
+
+                // Data
+                loadData,
+                tableData,
+                refreshData,
+
+                // Pagination
+                perPage,
+                currentPage,
+                filteredPage,
+                totalPage,
+                pagedData,
+
+                // Sorting
+                sortColumn,
+                sortDirection,
+                handleSort,
+            }
+        },
+    })
+
+    app.use(pinia)
+    app.mount('#app');
+</script>
+
+<script src="{% static 'dayatif/fetch-lokasi.js' %}"></script>
+{% endblock %}

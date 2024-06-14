@@ -1,0 +1,64 @@
+<div class="modal fade" id="editData" aria-labelledby="modalEdit" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+
+        <div class="modal-header">
+          <h5 class="modal-title" id="createModal">Update Data <b>KEGIATAN LAINNYA</b></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body" x-data="create">
+
+          <div class="mb-3">
+              <label for="edit__kode_kegiatan" class="col-form-label required">Kode Kegiatan:</label>
+              <select class="form-control select2" id="edit__kode_kegiatan" required>
+                  <option value="" selected disabled>Pilih Kode Kegiatan</option>
+                  {% for item in kegiatan_akun %}
+                    <option value="{{ item.pk }}">{{ item.no_unit }} - {{ item.akun_kegiatan }}</option>
+                  {% endfor %}
+              </select>
+          </div>
+
+          <div class="mb-3">
+              <label for="edit__uraian_kegiatan" class="col-form-label required">No Uraian Kegiatan:</label>
+              <select class="form-control select2" id="edit__uraian_kegiatan" required>
+                  <option value="" selected disabled>Pilih Uraian Kegiatan</option>
+              </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__metode" class="col-form-label required">Metode Kegiatan:</label>
+            <input type="text" class="form-control" id="edit__metode" required placeholder="Metode Kegiatan"></input>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__tempat" class="col-form-label required">Tempat Pelaksanaan:</label>
+            <input type="text" class="form-control" id="edit__tempat" required placeholder="Tempat Pelaksanaan"></input>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__waktu" class="col-form-label required">Waktu Kegiatan:</label>
+            <input type="text" class="form-control" id="edit__waktu" required placeholder="Waktu Kegiatan"></input>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__jumlah_peserta" class="col-form-label required">Jumlah Peserta:</label>
+            <input type="number" class="form-control" id="edit__jumlah_peserta" required placeholder="Jumlah Peserta"></input>
+          </div>
+
+          <div class="mb-3">
+            <label for="edit__keterangan" class="col-form-label required">Keterangan Kegiatan:</label>
+            <textarea class="form-control" id="edit__keterangan" required placeholder="Keterangan Kegiatan"></textarea>
+          </div>
+      </div>
+
+          <div class="modal-footer">
+              <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                  <i class="fas fa-xmark me-2"></i>Tutup</button>
+              <button type="button" class="btn btn-primary" id="editButton">
+                  <i class="fas fa-save me-2"></i>
+                  Simpan</button>
+          </div>
+      </div>
+  </div>
+</div>

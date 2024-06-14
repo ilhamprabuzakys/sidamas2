@@ -1,0 +1,185 @@
+/* Styling Untuk Interaktif Survei */
+/* Version : 0.1 */
+
+main {
+    background-image: url("../images/bg-survei.png");
+    background-size: cover;
+    /* atau contain, sesuai kebutuhan */
+    background-repeat: no-repeat;
+    height: 100vh;
+    /* Sesuaikan dengan tinggi yang diinginkan */
+ }
+ 
+ /* #survei-container {
+    position: relative;
+    display: block;
+ } */
+ 
+ /* Blok Pertanyaan */
+ #pertanyaan .card {
+    background-color: #f1f1f1 !important;
+    border: 0;
+    height: 130px;
+ }
+ 
+ #pertanyaan .card .card-body {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3rem;
+ }
+ 
+ /* Daftar Pilihan */
+ #daftar-pilihan .row {
+    align-items: end;
+    height: 320px;
+ }
+ 
+ #daftar-pilihan .card .card-title {
+    text-align: center;
+    margin-bottom: 8px;
+ }
+ 
+ #daftar-pilihan .card {
+    position: relative;
+    color: #fff;
+    height: 300px !important;
+    cursor: pointer;
+    transition: background-color .3s ease-in-out, margin-bottom .3s ease-in-out;
+    /* Tambahkan transition di sini */
+ }
+ 
+ #daftar-pilihan .pilihan .card:hover {
+    transition: .5 s ease-in-out;
+    margin-bottom: 10px;
+ }
+ 
+ #daftar-pilihan .pilihan:hover::after {
+    transition: .5 s ease-in-out;
+ }
+ 
+ #daftar-pilihan .card .card-body {
+    position: relative;
+    color: #fff;
+    height: 282px !important;
+    cursor: pointer;
+    transition: background-color .3s ease-in-out, margin-bottom .3s ease-in-out;
+ }
+ 
+ #daftar-pilihan .card .card-body img {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+ }
+ 
+ #daftar-pilihan .card.level-4 .card-body img {
+    top: 54%;
+    width: 160px;
+ }
+ 
+ #daftar-pilihan .pilihan:hover {
+    margin-bottom: 10px;
+    transition: .10s ease-in-out;
+ }
+ 
+ #daftar-pilihan .pilihan:hover::after {
+    transition: .10s ease-in-out;
+ }
+ 
+ #daftar-pilihan .card .card-body img {
+    align-self: flex-end;
+    /* Tambahkan ini untuk posisi gambar di bagian bawah */
+ }
+ 
+ #daftar-pilihan .card.level-1 {
+    background-color: #FF7E0A;
+ }
+ 
+ #daftar-pilihan .card.level-1 {
+    background-color: #FF7E0A;
+ }
+ 
+ #daftar-pilihan .card.level-1:hover {
+    background-color: #aa5408;
+ }
+ 
+ #daftar-pilihan .card.level-2 {
+    background-color: #EBBD86;
+ }
+ 
+ #daftar-pilihan .card.level-2:hover {
+    background-color: #b18958;
+ }
+ 
+ #daftar-pilihan .card.level-3 {
+    background-color: #9BD8DC;
+ }
+ 
+ #daftar-pilihan .card.level-3:hover {
+    background-color: #5f9da1;
+ }
+ 
+ #daftar-pilihan .card.level-4 {
+    background-color: #99EA59;
+ }
+ 
+ #daftar-pilihan .card.level-4:hover {
+    background-color: #63a035;
+ }
+ 
+ /* Effect */
+ .fade-in-out {
+    opacity: 1;
+    transition: opacity 0.2s ease-in-out;
+ }
+ 
+ .fade-out {
+    opacity: 0.7;
+ }
+ 
+ /* Container */
+ #mulai-container {
+    /* margin: 5rem 0 6rem 0; */
+    margin: 5rem 0;
+ }
+ 
+ #masukan-container {
+    /* margin: 5rem 0 6rem 0; */
+    margin: 10rem 0;
+ }
+ 
+ #masukan-container .btn-mulai {
+    /* margin: 5rem 0 6rem 0; */
+    width: 58%;
+ }
+ 
+ .btn-mulai {
+    background-color: #5AD65F !important;
+    border-radius: 25px;
+    color: white !important;
+    height: 2.7rem;
+    font-size: 1.2rem;
+    width: 60%;
+ }
+ 
+ .btn-mulai:hover {
+    background-color: #359738 !important;
+ }
+ 
+ .btn-mulai:active {
+    background-color: #359738 !important;
+ }
+ 
+ .btn-mulai:focus {
+    background-color: #359738 !important;
+ }
+ 
+ .text-mulai {
+    font-size: 2.2rem;
+ }
+ 
+ #selesai-container {
+    margin: 8rem 0;
+ }

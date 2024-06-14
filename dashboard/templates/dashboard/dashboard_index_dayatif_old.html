@@ -1,0 +1,224 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block content %}
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Beranda</h3>
+    </div>
+</div>
+<div class="row">
+    <div class="col-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <div class="row justify-content-between">
+                    <div class="col-8">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0">Laporan Kegiatan</h5>
+                        </div>
+                    </div>
+                    <div class="col-4 d-flex justify-content-end">
+                        <div>
+                            <a href="javascript:;" class="badge bg-primary text-white">Total laporan : 940</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody class="table-border-bottom-0">
+                            <tr>
+                                <td class="w-50 ps-0">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <h6 class="mb-0 fw-normal">Laporan kegiatan terbaru ku</h6>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <span class="fw-medium">16/01/2024</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-50 ps-0">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <h6 class="mb-0 fw-normal">Laporan kegiatan kedua</h6>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <span class="fw-medium">15/01/2024</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-50 ps-0">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <h6 class="mb-0 fw-normal">Laporan kegiatan ketiga</h6>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <span class="fw-medium">14/01/2024</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <div class="row justify-content-between">
+                    <div class="col-8">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0">Survei</h5>
+                        </div>
+                    </div>
+                    <div class="col-4 d-flex justify-content-end">
+                        <div>
+                            <a href="javascript:;" class="badge bg-primary text-white">Total survei : 42</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table">
+                        <tbody class="table-border-bottom-0">
+                            <tr>
+                                <td class="w-50 ps-0">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <h6 class="mb-0 fw-normal">Survei ku yang terbaru</h6>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <span class="fw-medium">16/01/2024</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-50 ps-0">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <h6 class="mb-0 fw-normal">Survei ku yang kedua</h6>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <span class="fw-medium">15/01/2024</span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="w-50 ps-0">
+                                    <div class="d-flex justify-content-start align-items-center">
+                                        <h6 class="mb-0 fw-normal">Survei ku yang ketiga</h6>
+                                    </div>
+                                </td>
+                                <td class="text-end pe-0">
+                                    <span class="fw-medium">14/01/2024</span>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-12 mb-3">
+        <div class="card h-100">
+            <div class="card-header">
+                <div class="row justify-content-between">
+                    <div class="col-8">
+                        <div class="card-title mb-0">
+                            <h5 class="m-0">Pelaporan</h5>
+                        </div>
+                    </div>
+                    <div class="col-4 d-flex justify-content-end">
+                        <div>
+                            <a href="javascript:;" class="badge bg-success text-white">Ekspor Data <i
+                                    class="fas fa-file-export ms-2"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="mb-3 col-7">
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="bar-chart" style="height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-5">
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="pie-chart" style="height: 300px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mb-3 col-12">
+                        <div class="card">
+                            <div class="card-body">
+                                <canvas id="line-chart" style="height: 400px;"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    window.addEventListener('load', () => {
+        // Bar Chart
+        const ctxBar = document.getElementById('bar-chart');
+        const barChart = new Chart(ctxBar, {
+            type: 'bar',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'Bar Chart',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    data: [10, 25, 18, 30, 22],
+                }]
+            },
+        });
+
+        // Pie Chart
+        const ctxPie = document.getElementById('pie-chart');
+        const pieChart = new Chart(ctxPie, {
+            type: 'pie',
+            data: {
+                labels: ['Category A', 'Category B', 'Category C'],
+                datasets: [{
+                    data: [30, 40, 30],
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56']
+                }]
+            }
+        })
+
+        // Line Chart
+        const ctxLine = document.getElementById('line-chart');
+        const lineChart = new Chart(ctxLine, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May'],
+                datasets: [{
+                    label: 'Kegiatan',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 2,
+                    data: [10, 25, 18, 30, 22]
+                }]
+            }
+        });
+    });
+</script>
+
+{% endblock %}

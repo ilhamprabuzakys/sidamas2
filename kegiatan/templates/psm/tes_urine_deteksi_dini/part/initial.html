@@ -1,0 +1,66 @@
+<script>
+
+    const Pagination = {
+        name: 'Pagination',
+        props: ['item'],
+        delimiters: ['{', '}'],
+        data() {
+            return {
+                currentPage: this.item.currentPage // Inisialisasi currentPage dengan nilai dari props item
+            };
+        },
+        mounted() {
+            // console.log(`Pagination mounted with totalPage: ${this.item.totalPage} and currentPage: ${this.currentPage}`);
+        },
+        computed: {
+            totalPage() {
+                return this.item.totalPage;
+            }
+        },
+        template: `
+                <nav id="__table_pagination" class="mt-3">
+                    <ul class="pagination justify-content-end">
+                        <li class="page-item prev">
+                            <button :disabled='currentPage <= 1' class="page-link" @click="currentPage--">
+                                <i class="ti ti-chevron-left ti-xs"></i>
+                            </button>
+                        </li>
+                        <template v-for="page in totalPage" :key="page">
+                            <li :class="{ 'page-item': true, 'active': currentPage === page }">
+                                <button class="page-link" @click="currentPage=page">{ page }</button>
+                            </li>
+                        </template>
+                        <li class="page-item">
+                            <button :disabled='currentPage => totalPage' class="page-link" @click="currentPage++">
+                                <i class="ti ti-chevron-right ti-xs"></i>
+                            </button>
+                        </li>
+                    </ul>
+                </nav>
+            `
+    };
+    
+    const Lokasi = {
+        name: 'Lokasi',
+        props: ['provinsi', 'kabupaten', 'kecamatan', 'desa'],
+        delimiters: ['{', '}'],
+        template: `
+            <ul class="location__list">
+                <li><span class="location__label">Provinsi</span>:<span class="location__value">{ provinsi }</span></li>
+                <li><span class="location__label">Kabupaten/Kota</span>:<span class="location__value">{ kabupaten }</span></li>
+                <li><span class="location__label">Kecamatan</span>:<span class="location__value">{ kecamatan }</span></li>
+                <li><span class="location__label">Desa/Kelurahan</span>:<span class="location__value">{ desa }</span></li>
+            </ul>
+        `
+    };
+    
+    const SectionHeader = {
+        name: 'SectionHeader',
+        props: ['satker', 'jumlah'],
+        delimiters: ['{', '}'],
+        template: `
+            <span class="text-center"><span class="fw-bold me-2">{ satker }</span> ({ jumlah } kegiatan)</span>
+        `
+    };
+    
+</script>

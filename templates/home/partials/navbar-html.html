@@ -1,0 +1,61 @@
+{% load static %}
+
+<nav class="navbar navbar-expand-sm navbar-dark">
+  <div class="container-fluid">
+    <a class="navbar-brand ms-5" href="javascript:;" onclick="toggleFullscreen()"><img src="{% static 'assets/images/logo_baru.png' %}" alt="Logo Website" class="me-2" style="width: 45px;" />SIDAMAS</a>
+    <button class="navbar-toggler d-lg-none" type="button" data-bs-toggle="collapse" data-bs-target="#navbarMenu" aria-controls="navbarMenu" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div class="collapse navbar-collapse" id="navbarMenu">
+      <ul class="navbar-nav ms-auto mt-2 mt-lg-0 me-3">
+        <li class="nav-item">
+          <a class="nav-link {% if request.path == '/' %}active{% endif %}" href="/" target="_self">Beranda</a>
+        </li>
+        <!-- <li class="nav-item">
+          <a class="nav-link {% if request.path == '/media-sosial/' %}active{% endif %}" href="{% url 'home:media_sosial' %}" target="_self">Media Sosial</a>
+        </li> -->
+        <li class="nav-item">
+          <a class="nav-link" href="https://sipenggiatp4gn.bnn.go.id/" target="_blank">SI PENGGIAT</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if '/pengisian-survei/' in request.path %}active{% endif %}" href="{% url 'home:survei' %}" target="_self">Survei</a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link {% if '/literasi/' in request.path %}active{% endif %}" href="{% url 'home:literasi' %}" target="_self">Literasi</a>
+        </li>
+        {% if user.is_authenticated %}
+        <!-- <li class="nav-item">
+            <a class="nav-link {% if '/beranda-kegiatan/' in request.path %}active{% endif %}" href="{% url 'home:beranda_kegiatan' %}" target="_self">Beranda Kegiatan</a>
+          </li> -->
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle" href="javascript:;" role="button" data-bs-toggle="dropdown" aria-expanded="false"><img src="{% static 'assets/images/avatar.png' %}" alt="" class="avatar rounded-circle mx-2" style="width: 30px; height: 30px;" /> {{ user.username }}</a>
+            <ul class="dropdown-menu">
+              <li>
+                {% if user.profile.satker is not None %}
+                    <a class="dropdown-item" href="{% url 'dashboard:index' %}">
+                        <i class="fa-solid fa-home me-1 align-center"></i>
+                        Kembali ke dashboard
+                    </a>
+                {% endif %}
+                <a class="dropdown-item" href="{% url 'dashboard:profile' %}">
+                    <i class="fa-solid fa-user me-2 align-center"></i>
+                    Profil Saya
+                </a>
+              </li>
+              <li><hr class="dropdown-divider"></li>
+              <li>
+                <a class="dropdown-item" href="javascript:;" onclick="handleLogoutConfirmation()"
+                ><i class="fa-solid fa-right-from-bracket me-2 align-center"></i> Keluar</a>
+              </li>
+            </ul>
+          </li>
+        {% else %}
+        <li class="nav-item">
+            <a class="nav-link {% if '/accounts/' in request.path and 'logout' not in request.path %}active{% endif %}" href="{% url 'login' %}" target="_self">Masuk</a>
+          </li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>

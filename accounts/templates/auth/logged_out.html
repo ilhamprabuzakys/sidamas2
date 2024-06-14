@@ -1,0 +1,57 @@
+{% extends 'home/home_base.html' %}
+{% load static %}
+
+{% block title %}
+  Sampai jumpa!
+{% endblock %}
+
+{% block content %}
+  <section id="logged-out-message" class="mt-5">
+    <div class="row justify-content-center">
+      <div class="col-8 text-center">
+        <div id="goodbye-heading" class="p-3">
+          <h3 class="card-text text-muted">Sampai jumpa lagi!</h3>
+          <p class="card-text p-2 text-muted">Anda telah berhasil keluar dari aplikasi Sistem Informasi DAYAMAS</p>
+        </div>
+        <div id="goodbye-image">
+          <img src="{% static 'assets/home/images/auth/logout.jpg' %}" alt="Bye bye image" class="logged-out-image text-center" />
+        </div>
+
+        <div id="login-again" class="mt-3">
+            <a class="btn-login-kembali" href="{% url 'login' %}">
+                <i class="fas fa-sign-in-alt me-2"></i>
+                Masuk kembali
+              </a>
+        </div>
+      </div>
+    </div>
+  </section>
+{% endblock %}
+
+{% block css_tambahan %}
+  <style>
+
+    main {
+      min-height: 77dvh;
+    }
+    img.logged-out-image {
+      width: 300px;
+    }
+
+    .btn-login-kembali {
+        color: white;
+        padding: 10px 18px;
+        border-radius: 10px;
+        background-color: #2ca8dc;
+        cursor: pointer;
+        text-decoration: none;
+
+    }
+    
+    .btn-login-kembali:hover, .btn-login-kembali:active, .btn-login-kembali:focus {
+        transition: .3s;
+        background-color: #3281a3;
+        color: white;
+    }
+  </style>
+{% endblock %}

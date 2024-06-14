@@ -1,0 +1,343 @@
+<!-- Pelaporan Kegiatan -->
+<div class="row">
+    <!-- Header -->
+    <div class="col-md-12 mb-2">
+        <div class="card h-100">
+            <div class="card-header d-flex align-items-center justify-content-between py-3">
+                <div class="card-title mb-0">
+                    <h5 class="m-0 me-2">Pelaporan Kegiatan 🚀</h5>
+                    <small class="text-muted">Data statistik pelaporan kegiatan direktorat <b>PSM</b></small>
+                </div>
+                <div class="d-none">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <input type="date" class="form-control" style="width: 11rem" />
+                        <span class="text-muted mx-3">/</span>
+                        <input type="date" class="form-control" style="width: 11rem" />
+                        <button class="btn btn-primary ms-2 px-3 py-2" type="button">
+                            <i class="fas fa-save"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- /Header -->
+    <!-- Statistic Card -->
+    <div class="col-md-5 mb-3">
+        <div class="card h-100" id="kegiatan_kartu_statistik">
+            <div class="card-header d-flex align-items-center justify-content-between pb-3">
+                <div class="card-title mb-0">
+                    <h5 class="m-0 me-2">Kartu Statistik</h5>
+                    <small class="text-muted">Data dibawah dalam kisaran filter <b><span
+                                id="kegiatan_info_currentyeaer">2024</span> - <span
+                                id="kegiatan_info_currentmonth">Januari</span></b></small>
+                </div>
+                <div>
+                    <button class="btn p-0" type="button" onclick="generatePDF('kegiatan_kartu_statistik')">
+                        <i class="fas fa-print"></i>
+                    </button>
+                </div>
+            </div>
+            <div class="card-header pt-0 pb-1">
+                <div class="py-3 border-top border-bottom">
+                    <div class="mb-3 w-100 d-none">
+                        <label for="filter_kartu_satker" class="form-label">Satker</label>
+                        <select id="filter_kartu_satker" class="selectpicker w-100 form-select">
+                            <option value="" disabled>--Pilih satker--</option>
+                            <option value="semua" selected>Semua</option>
+                            {% for item in satker %}
+                            <option value="{{ item.pk }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <label for="filter_kartu_tahun" class="form-label">Tahun</label>
+                            <select id="filter_kartu_tahun" class="selectpicker w-100 form-select"
+                                data-style="btn-default">
+                                <option value="" disabled>--Pilih tahun--</option>
+                                <option value="2024" selected>2024</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="filter_kegiatan_kartu_bulan" class="form-label">Bulan</label>
+                            <select id="filter_kegiatan_kartu_bulan" class="selectpicker"
+                                data-style="btn-default" onchange="handleFilterKegiatanMonthCard(event.target.value)">
+                                <option value="1">Januari</option>
+                                <option value="2">Februari</option>
+                                <option value="3">Maret</option>
+                                <option value="4">April</option>
+                                <option value="5">Mei</option>
+                                <option value="6">Juni</option>
+                                <option value="7">July</option>
+                                <option value="8">Agustus</option>
+                                <option value="9">September</option>
+                                <option value="10">Oktober</option>
+                                <option value="11">November</option>
+                                <option value="12">Desember</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body" style="padding-right: 10px;height: 20rem;overflow: hidden;overflow-y: scroll;">
+                <ul class="p-0 m-0">
+                    <li class="rakernis d-flex pt-2" onclick="window.open('/kegiatan/psm/rakernis/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-danger"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Rapat Kerja Teknis</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="binaan_teknis d-flex" onclick="window.open('/kegiatan/psm/bintek/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-primary"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Binaan Teknis</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="rakor_pemetaan d-flex" onclick="window.open('/kegiatan/psm/rakor_pemetaan/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-warning"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Rakor Pemetaan</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="audiensi d-flex" onclick="window.open('/kegiatan/psm/audiensi/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-success"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Audiensi</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="konsolidasi_kebijakan d-flex"
+                        onclick="window.open('/kegiatan/psm/konsolidasi_kebijakan/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-danger"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Konsolidasi Kebijakan</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="workshop_penggiat d-flex"
+                        onclick="window.open('/kegiatan/psm/workshop_penggiat/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-primary"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Workshop Penggiat</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="bimtek_p4gn d-flex"
+                        onclick="window.open('/kegiatan/psm/bimtek_penggiat_p4gn/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-warning"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Bimbingan Teknis Penggiat P4GN</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="sinkronasi_kebijakan d-flex"
+                        onclick="window.open('/kegiatan/psm/sinkronasi_kebijakan/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-success"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Sinkronasi Kebijakan</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="workshop_tematik d-flex pt-2"
+                        onclick="window.open('/kegiatan/psm/workshop_tematik/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-danger"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Workshop Tematik</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="asistensi d-flex pt-2" onclick="window.open('/kegiatan/psm/asistensi/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-primary"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Asistensi</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="tes_urine_deteksi_dini d-flex pt-2"
+                        onclick="window.open('/kegiatan/psm/tes_urine/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-warning"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Tes Urine Deteksi Dini</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="monev_supervisi_kegiatan_kotan d-flex pt-2"
+                        onclick="window.open('/kegiatan/psm/monev_supervisi_kegiatan_kotan/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-success"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Monitoring dan Evaluasi Supervisi Kegiatan Kotan</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="pengumpulan_data_ikotan d-flex pt-2"
+                        onclick="window.open('/kegiatan/psm/pengumpulan_data_ikotan/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-danger"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Pengumpulan Data Ikotan</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="dukungan_data_stakeholder d-flex pt-2"
+                        onclick="window.open('/kegiatan/psm/dukungan_stakeholder/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-primary"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Dukungan Data Stakeholder</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                    <li class="kegiatan_lainnya d-flex pt-2"
+                        onclick="window.open('/kegiatan/psm/kegiatan_lainnya/', '_blank')">
+                        <div class="avatar flex-shrink-0 me-3">
+                            <span class="avatar-initial rounded bg-label-warning"><i
+                                    class="ti ti-info-circle"></i></span>
+                        </div>
+                        <div class="d-flex w-100 flex-wrap align-items-center justify-content-between gap-2">
+                            <div class="me-2">
+                                <h6 class="mb-0 fw-normal">Kegiatan Lainnya</h6>
+                            </div>
+                            <div class="user-progress">
+                                <h6 class="mb-0">0</h6>
+                            </div>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+    <!-- /Statistic Card -->
+    <!-- Chart Card -->
+    <div class="col-md-7 mb-3">
+        <!-- Chart -->
+        <div class="card h-100" id="kegiatan_diagram_statistik">
+            <div class="card-header d-flex align-items-center justify-content-between">
+                <div class="card-title mb-0">
+                    <h5 class="m-0 me-2">Diagram Statistik Pelaporan Kegiatan</h5>
+                    <small class="text-muted"> Data dibawah dalam kisaran filter <b>2024 - Sekarang</b></small>
+                </div>
+                <div class="d-flex align-items-center" x-data="{ isClicked: false }">
+                    <div>
+                        <button class="badge text-white border-0 me-2"
+                            :class="isClicked ? 'bg-secondary' : 'bg-primary'" type="button" id="toggleSemuaKegiatan"
+                            @click="isClicked = !isClicked">
+                            Semua kegiatan
+                            <i :class="isClicked ? 'fas fa-eye-slash ms-2' : 'fas fa-eye ms-2'"></i>
+                        </button>
+                    </div>
+                    <div>
+                        <button class="btn p-0 h-100" type="button" onclick="generatePDF('kegiatan_diagram_statistik')">
+                            <i class="fas fa-print"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body d-flex align-items-center">
+                <canvas id="kegiatanLineChart" style="width: fit-content; height: fit-content;"></canvas>
+            </div>
+        </div>
+        <!-- / Chart -->
+    </div>
+    <!-- /Chart Card -->
+</div>
+<!-- /Pelaporan Kegiatan -->

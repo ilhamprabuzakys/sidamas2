@@ -1,0 +1,37 @@
+
+{% extends "base.html" %}
+{% block content %}
+<div>
+    <table id="example" class="display">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Age</th>
+                <th>City</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>John Doe</td>
+                <td>30</td>
+                <td>New York</td>
+            </tr>
+            <tr>
+                <td>Jane Smith</td>
+                <td>25</td>
+                <td>Los Angeles</td>
+            </tr>
+            <!-- Add more rows as needed -->
+        </tbody>
+    </table>
+</div>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    $(document).ready(function() {
+        console.log("asdasda");
+        $('#example').DataTable();
+    });
+</script>
+{% endblock %}

@@ -1,0 +1,56 @@
+{% load static %}
+<aside id="layout-menu" class="layout-menu menu-vertical menu bg-menu-theme">
+   <div class="app-brand demo">
+      <a href="{% url 'home:index' %}" class="app-brand-link">
+         <img src="{% static 'assets/images/bnn.png' %}" alt="Sidebar Logo">
+         <span class="app-brand-text demo menu-text fw-bold">SIDAMAS</span>
+      </a>
+   </div>
+   <!-- <div class="menu-inner-shadow"></div> -->
+   <ul class="menu-inner py-1">
+
+      <li class="menu-header small text-uppercase">
+         <span class="menu-header-text" data-i18n="Menu">Menu</span>
+      </li>
+
+      <!--
+         Modul dinamis tergantung dari tipe akun dari User yang sedang logged in.
+      -->
+
+      <li class="menu-item {% if request.resolver_match.url_name == 'dashboard' %} active {% endif %}">
+         <a href="{% url 'dashboard:index' %}" class="menu-link">
+            <i class="menu-icon tf-icons ti ti-home"></i>
+            <div data-i18n="Beranda">Beranda</div>
+         </a>
+      </li>
+      
+      {% if user.is_superuser %}
+            {% include "dashboard/partials/sidebar/superadmin.html" %}
+            {% else %}
+                {% if user.profile.role == 'dayatif' %}
+                    {% if user.is_staff %}
+                        {% include "dashboard/partials/sidebar/admin-dayatif.html" %}
+                    {% else %}
+                        {% include "dashboard/partials/sidebar/pegawai-dayatif.html" %}
+                    {% endif %}
+                {% else %}
+                    {% if user.is_staff %}
+                        {% include "dashboard/partials/sidebar/admin-psm.html" %}
+                    {% else %}
+                        {% include "dashboard/partials/sidebar/pegawai-psm.html" %}
+                    {% endif %}
+                {% endif %}
+      {% endif %}
+   </ul>
+
+   <ul class="menu-inner menu-inner-logout">
+      <li class="menu-item mt-auto">
+         <hr class="mb-2">
+         <a href="javascript:void(0);" onclick="handleLogout()" class="menu-link mb-2">
+            <i class="menu-icon tf-icons ti ti-logout"></i>
+            <div data-i18n="Keluar">Keluar</div>
+         </a>
+      </li>
+   </ul>
+   
+</aside>

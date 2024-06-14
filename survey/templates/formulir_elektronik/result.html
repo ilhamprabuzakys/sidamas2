@@ -1,0 +1,111 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Formulir Elektronik {% endblock title %}
+
+{% block content %}
+<div class="breadcrumb">
+	<div class="row">
+		<h3 class="heading mb-2">
+			Formulir Elektronik
+		</h3>
+		<span class="mb-0">
+			<span class="text-muted fw-light">Survei /</span>
+			<a class="text-muted fw-light" href="{% url 'formulir_elektronik' %}">Formulir Elektronik /</a>
+			<span class="ms-1 fw-medium">Hasil Formulir</span>
+		</span>
+	</div>
+</div>
+
+<section id="__data">
+	<div class="card">
+		<div class="card-body">
+			<div id="headline" class="mb-3">
+				<h3 class="text-center">HASIL FORM <span id="form_title">{{survey_title}}</span></h3>
+				<hr>
+			</div>
+			<!-- <div class="action-button">
+				<div class="d-flex justify-content-end mb-3 gap-2">
+					<button class="btn btn-success" onclick="handleExport()">
+						<i class="fas fa-file-export me-2"></i>Ekspor Data
+					</button>
+				</div>
+			</div> -->
+			<div class="my-2 px-2 py-3 text-primary">
+				Untuk mengekspor data ke format tertentu silahkan klik <b>tombol</b> yang bersangkutan. Terdapat opsi : <b>PDF</b>, <b>Excel</b>, dan <b>CSV</b>
+			</div>
+			<div id="surveyDataTable"></div>
+			<!-- <div class="table-responsive">
+                <table class="table table-bordered" id="__table">
+                    <div id="survey-result-json" style="display: none;"></div>
+                    <thead class="text-center" style="background-color: #2ca8dc;" style="color: white;">
+                        <tr id="question"></tr>
+                    </thead>
+                    <tbody class="text-center">
+                        <tr id="answer"></tr>
+                    </tbody>
+                </table>
+            </div> -->
+		</div>
+	</div>
+</section>
+{% endblock %}
+
+{% block css_tambahan %}
+<script type="text/javascript" src="https://unpkg.com/knockout/build/output/knockout-latest.js"></script>
+<script type="text/javascript" src="https://unpkg.com/survey-core/survey.core.min.js"></script>
+<!-- jsPDF for export to PDF -->
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
+<script type="text/javascript"
+	src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.0.10/jspdf.plugin.autotable.min.js"></script>
+<!-- SheetJS for export to Excel -->
+<script type="text/javascript" src="https://oss.sheetjs.com/sheetjs/xlsx.full.min.js"></script>
+<!-- Tabulator -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.7.2/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript"
+	src="https://cdnjs.cloudflare.com/ajax/libs/tabulator/4.7.2/js/tabulator.min.js"></script>
+<!-- SurveyJS plugin for Tabulator -->
+<link href="https://unpkg.com/survey-analytics/survey.analytics.tabulator.min.css" rel="stylesheet">
+<script src="https://unpkg.com/survey-analytics/survey.analytics.tabulator.min.js"></script>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+	let survey_source = {{ survey_source | safe}};
+	let survey_result = '{{survey_result | escapejs}}'
+
+	const survey = new Survey.Model(survey_source.pages[0]);
+	function randomIntFromInterval(min, max) {
+		return Math.floor(Math.random() * (max - min + 1) + min);
+	}
+
+	function generateData() {
+		const data = [];
+		let result = JSON.parse(survey_result);
+		for (let item of result) {
+			let hasil = JSON.parse(item.hasil);
+			let obj = {};
+			for (let key in hasil) {
+				if (hasil.hasOwnProperty(key)) {
+					obj[key] = hasil[key];
+				}
+			}
+			data.push(obj);
+		}
+		return data;
+	}
+
+	const surveyDataTable = new SurveyAnalyticsTabulator.Tabulator(
+		survey,
+		generateData()
+	);
+
+	document.addEventListener("DOMContentLoaded", function () {
+		surveyDataTable.render("surveyDataTable");
+	});
+
+	/* $(document).ready(function () {
+		$('.sa-commercial').addClass('d-none');
+	}) */
+
+</script>
+{% endblock %}

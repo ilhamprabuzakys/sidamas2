@@ -1,0 +1,124 @@
+<!-- Pencarian -->
+<div class="row d-flex justify-content-start align-items-center mt-4 mb-2">
+    <div class="col-lg-3 col-md-4 col-sm-4 mb-3">
+        <label for="filter__date" class="form-label">Rentang Tanggal</label>
+
+        <div class="input-group input-group-merge">
+            <input type="text" id="filter__date" class="form-control" v-model="filter.date"
+                placeholder="Pilih Rentang Tanggal" />
+            <span class="input-group-text cursor-pointer text-danger"
+                @click="filter.date = ''; filteredPage = tableData;"><i class="fas fa-xmark"></i></span>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-4 mb-3">
+        <label for="filter__kegiatan" class="form-label">Rentang Kegiatan</label>
+
+        <select class="form-select form-select-md" id="filter__kegiatan" w-model="filter.kegiatan" @change="handleFilterKegiatan($event.target.value)">
+            <option selected disabled>--Pilih rentang kegiatan--</option>
+            <option value="">Semua</option>
+            <option value="1-10">1-10</option>
+            <option value="11-20">11-20</option>
+            <option value="21-50">21-50</option>
+            <option value="51-100">51-100</option>
+        </select>
+    </div>
+    <!-- <div class="col-lg-4 d-flex justify-content-lg-end justify-content-sm-end gap-3 my-sm-3 my-lg-0">
+        <div class="btn-group dropstart" data-bs-toggle="tooltip" data-bs-placement="top"
+            data-bs-custom-class="tooltip-dark" data-bs-original-title="Klik disini untuk memfilter data.">
+                <button type="button" class="btn btn-label-success rounded-pill dropdown-toggle hide-arrow"
+                data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20" data-bs-auto-close="outside"><i
+                    class="fas fa-filter me-2"></i>Filter</button>
+            <ul class="dropdown-menu w-px-500">
+                <li>
+                    <h5 class="dropdown-header text-uppercase">Filter Data</h5>
+                </li>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <div class="pt-0 pb-3 px-3" id="filter_form">
+                    <div class="mb-2">
+                        <label for="filter__kecamatan" class="form-label">Kecamatan</label>
+                        <select id="filter__kecamatan" class="form-select select2 no-placeholder" required>
+                            <option disabled value="">-- Pilih Kecamatan --</option>
+                            <option selected value="">-- Semua --</option>
+    
+                            <option value="117101">Baiturrahman</option>
+    
+                            <option value="117102">Kuta Alam</option>
+    
+                            <option value="117103">Meuraxa</option>
+    
+                            <option value="117104">Syiah Kuala</option>
+    
+                            <option value="117105">Lueng Bata</option>
+    
+                            <option value="117106">Kuta Raja</option>
+    
+                            <option value="117107">Banda Raya</option>
+    
+                            <option value="117108">Jaya Baru</option>
+    
+                            <option value="117109">Ulee Kareng</option>
+    
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filter__status" class="form-label">Status</label>
+                        <select id="filter__status" class="form-select" required>
+                            <option disabled value="">-- Pilih Status --</option>
+                            <option selected value="">-- Semua --</option>
+                            <option value="KOSONG">Kosong</option>
+                            <option value="SUDAH">Sudah terlaporkan</option>
+    
+                            <option value="BAHAYA">Bahaya</option>
+    
+                            <option value="WASPADA">Waspada</option>
+    
+                            <option value="SIAGA">Siaga</option>
+    
+                            <option value="AMAN">Aman</option>
+    
+                        </select>
+                    </div>
+                    <div class="mb-2">
+                        <label for="filter__tahun" class="form-label">Tahun</label>
+                        <select id="filter__tahun" class="form-select" required>
+                            <option disabled value="">-- Pilih Tahun --</option>
+    
+                            <option value="2023" selected>
+                                2023
+                            </option>
+    
+                            <option value="2022">
+                                2022
+                            </option>
+    
+                            <option value="2021">
+                                2021
+                            </option>
+    
+                        </select>
+                    </div>
+                </div>
+                <li>
+                    <hr class="dropdown-divider">
+                </li>
+                <div class="d-flex justify-content-end px-3 py-2">
+                    <button type="button" class="btn btn-label-secondary fw-semibold me-2 px-6" id="resetFilter"
+                        onclick="handleResetFilter()"><i class="fas fa-xmark me-2"></i>Reset</button>
+    
+                    <button type="button" class="btn btn-primary fw-semibold px-6" onclick="handleApplyFilter()"
+                        id="applyFilter"><i class="fas fa-save me-2"></i>
+                        Terapkan</button>
+                </div>
+            </ul>
+        </div>
+    </div> -->
+    <div class="col-lg-6 col-md-4 col-sm-4 mb-3 d-flex justify-content-end">
+        <div style="width: 300px;">
+            <label for="filter__search" class="form-label">Pencarian</label>
+            <input type="search" id="filter__search" class="form-control" v-model="filter.search" @input="handleSearch()"
+                placeholder="Ketikkan pencarian disini ..." />
+        </div>
+    </div>
+</div>

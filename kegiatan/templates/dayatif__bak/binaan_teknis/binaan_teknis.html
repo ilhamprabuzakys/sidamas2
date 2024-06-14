@@ -1,0 +1,683 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Rekapitulasi Pembinaan Teknis {% endblock %}
+
+{% block modal_tambahan %}
+{% include 'dayatif/binaan_teknis/modals/create_modal.html' %}
+{% include 'dayatif/binaan_teknis/modals/edit_modal.html'  %}
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Rekapitulasi Pembinaan Teknis</h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Kegiatan /</span>
+            <span class="ms-1 fw-medium">Rekapitulasi Pembinaan Teknis</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">
+                    Rekapitulasi Pembinaan Teknis <b>BNNP</b> &amp; <b>BNNK</b> <br />
+                    <span id="currentYear"></span>
+                </h3>
+                <hr />
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-between mb-3">
+                    <div id="filter__btn_container" class="d-flex align-items-center gap-2">
+                        <v-generic-filter :satker="{ id: satkerPK, level: satkerLevel }" :data="tableData" @update="(data) => filteredPage = data"></v-generic-filter>
+                    </div>
+                
+                    <v-page-action-button :satker="{ id: satkerPK, level: satkerLevel }" @reload="loadData"></v-page-action-button>
+                </div>
+            </div>
+            
+            <v-table-basic-filter :item="{ columns : ['nama_satker', 'deskripsi', 'tanggal', 'jumlah_kegiatan', 'jumlah_hari_pelaksanaan', 'satker_target', 'jumlah_peserta', 'tujuan', 'kendala', 'kesimpulan', 'tindak_lanjut'], tableData, totalDefault: 10 }" @set-page="(page) => currentPage = page" @set-data="(data) => filteredPage = data" @set-perpage="(page) => perPage = page">
+            </v-table-basic-filter>
+
+
+            <div class="table-responsive" id="__table_container">
+                <v-table :item="{ pagedData }" :pagination="{ currentPage, totalPage, perPage, total: filteredPage?.length }" @go-pagination="(page) => currentPage = page">
+                    <template #thead>
+                        <tr>
+                            <th class="bg-soft-success text-center cursor-pointer" rowspan="2" @click="handleSort('no')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>No.</span>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="2">Satuan Kerja Pelaksana</th>
+                            <th class="bg-soft-success cursor-pointer" rowspan="2" @click="handleSort('tanggal')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>Tanggal</span>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="2">Jumlah Hari Pelaksanaan Kerja</th>
+                            <th class="bg-soft-success" rowspan="2">Satuan Kerja Target</th>
+                            <th class="bg-soft-success" rowspan="2">Jumlah peserta</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="3">Rincian Hasil Pelaksanaan Program Pemberdayaan Alternatif Pada Satker Target</th>
+                            <th class="bg-soft-success" rowspan="2">Tindak Lanjut</th>
+                            <th class="bg-soft-success" rowspan="2">Dokumentasi</th>
+                            <th class="bg-soft-success text-center" rowspan="2" style="max-width: 150px">Aksi <i class="fas fa-edit ms-2"></i>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="bg-soft-success" rowspan="1">Tujuan</th>
+                            <th class="bg-soft-success" rowspan="1">Hambatan/Kendala</th>
+                            <th class="bg-soft-success" rowspan="1">Kesimpulan</th>
+                        </tr>
+                    </template>
+                    <template #tbody>
+                        <template v-for="(item, index) in pagedData" :key="index">
+                            <tr :class="item.class">
+                                <td class='text-center' v-text="item.index"></td>
+                                <td :colspan="item.hide_satker ? 0 : 11">
+                                    <template v-if="!item.hide_satker">
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan"></v-item-header>
+                                    </template>
+                                    <template v-else>
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan" :fade="true" :index="item.index"></v-item-header>
+                                    </template>
+                                </td>
+                                <template v-if="item.hide_satker">
+                                    <td>
+                                        <v-item-tanggal :awal="item.tanggal_awal" :akhir="item.tanggal_akhir"></v-item-tanggal>
+                                    </td>
+                                    <td>
+                                        <span v-text="item.jumlah_hari_pelaksanaan"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="item.satker_target"></span>
+                                    </td>
+                                    <td>
+                                        <span v-text="item.jumlah_peserta"></span>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.tujuan"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.kendala"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.kesimpulan"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.tindak_lanjut"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-dokumentasi :url="item.dokumentasi"></v-item-dokumentasi>
+                                    </td>
+                                    <td>
+                                        <v-action-button :item="{ id: item.id, nama: item.satker.nama_satker, level: item.satker.level, status: item.status }" :level="satkerLevel" :url="'binaan_teknis'" @update="loadData()" @edit="(id) => handleEdit(id)"></v-action-button>
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </template>
+                    <template #not-found>
+                        <v-result-not-found colspan="12" text="Hasil pencarian tidak ditemukan"></v-result-not-found>
+                    </template>
+                </v-table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    const { createApp, watch, reactive, ref, onMounted, computed } = Vue;
+
+    const useFormStore = defineStore('form', () => {
+        const base = {
+            tanggal: { awal: '', akhir: '' },
+            tindakLanjut: {
+                yes: {
+                    showKeterangan: false
+                },
+                no: {
+                    showContainer: false,
+                    showContainer2: false, // C. Lainnya
+                }
+            },
+            kendala: { showKeterangan: false },
+        };
+
+        const tanggal = ref({ ...base.tanggal });
+        const tindakLanjut = ref({ ...base.tindakLanjut });
+        const kendala = ref({ ...base.kendala });
+
+        const getJumlahHari = computed(() => {
+            const { awal, akhir } = tanggal.value;
+            if (awal === '' && akhir === '') return 0;
+
+            const tanggal_awal = new Date(awal);
+            const tanggal_akhir = new Date(akhir);
+            const diffTime = Math.abs(tanggal_akhir - tanggal_awal);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            return isNaN(diffDays) ? 1 : diffDays + 1;
+        });
+
+        return { tanggal, tindakLanjut, kendala, getJumlahHari };
+    });
+</script>
+
+{% include "dayatif/partials/components.html" %}
+
+<script>
+    const app = createApp({
+        delimiters,
+        components,
+        setup() {
+            const store = useFormStore()
+            
+            const title = ref('Binaan Teknis');
+
+            const satkerPK = ref(parseInt('{{ user.profile.satker.pk }}'));
+            const satkerLevel = ref(parseInt('{{ user.profile.satker.level }}'));
+
+            const tableData = ref(null);
+            const filteredPage = ref(null);
+
+            const apiURL = '/kegiatan/api/v1/dayatif/binaan_teknis/list/?format=datatables';
+            
+            const loadData = async () => {
+                block($('#__table'));
+                const tableContent = [];
+                const response = await axios.get(apiURL);
+                const data = response.data.data;
+
+                const getClass = (level) => {
+                    const classMap = {
+                        2: 'bg-soft-danger',
+                        0: 'bg-soft-primary',
+                        1: 'bg-soft-warning',
+                    }
+
+                    return classMap[level];
+                }
+                
+                let key, value, key2, value2, key3, value3, key4, value4;
+
+                for ([key, value] of Object.entries(data)) {
+                    const baris = {
+                        class: getClass(value.satker.level),
+                        id: value.id,
+                        status: value.status,
+                        hide_satker: false,
+                        index: parseInt(key) + 1,
+                        jumlah_kegiatan: value.data.length,
+                        satker: value.satker,
+
+                        tanggal: "",
+                        tanggal_awal: "",
+                        tanggal_akhir: "",
+
+                        jumlah_hari_pelaksanaan: "",
+                        satker_target: "",
+                        jumlah_peserta: "",
+                        
+                        tujuan: "",
+                        kendala: "",
+                        kesimpulan: "",
+                        tindak_lanjut: "",
+                        dokumentasi: "",
+                    };
+
+                    tableContent.push(baris);
+
+                    for ([key2, value2] of Object.entries(value.data)) {
+                        const indexKey = `${parseInt(key) +1}.${parseInt(key2) + 1}`;
+                        const baris = {
+                            class: "bg-soft-light",
+                            id: value2.id,
+                            status: value2.status,
+                            hide_satker: true,
+                            index: indexKey,
+                            satker: value2.satker,
+                            jumlah_kegiatan: value.data.length,
+
+                            tanggal: getTanggalKegiatan(value2.tanggal_awal, value2.tanggal_akhir),
+                            tanggal_awal: value2.tanggal_awal,
+                            tanggal_akhir: value2.tanggal_akhir,
+
+                            jumlah_hari_pelaksanaan: `${value2.jumlah_hari_pelaksanaan} hari`,
+                            satker_target: value2.satker_target.nama_satker,
+                            jumlah_peserta: `${value2.jumlah_peserta} orang`,
+
+                            tujuan: value2.tujuan,
+                            kendala: value2.kendala,
+                            kesimpulan: value2.kesimpulan,
+                            tindak_lanjut: value2.tindak_lanjut,
+                            dokumentasi: value2.dokumentasi,
+                        };
+
+                        tableContent.push(baris);
+                    }
+
+                    if (value?.detail.length > 0) {
+                        for ([key3, value3] of Object.entries(value.detail)) {
+                            const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}`;
+
+                            const baris = {
+                                class: "bg-soft-warning",
+                                id: value3.id,
+                                status: value3.status,
+                                hide_satker: false,
+                                index: indexKey,
+                                jumlah_kegiatan: value3.data.length,
+                                satker: value3.satker,
+
+                                tanggal: "",
+                                tanggal_awal: "",
+                                tanggal_akhir: "",
+
+                                jumlah_hari_pelaksanaan: "",
+                                satker_target: "",
+                                jumlah_peserta: "",
+                                
+                                tujuan: "",
+                                kendala: "",
+                                kesimpulan: "",
+                                tindak_lanjut: "",
+                                dokumentasi: "",
+                            };
+
+                            tableContent.push(baris);
+
+                            for ([key4, value4] of Object.entries(value3.data)) {
+                                const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}.${parseInt(key4) + 1}`;
+
+                                const baris = {
+                                    class: "bg-soft-light",
+                                    id: value4.id,
+                                    status: value4.status,
+                                    hide_satker: true,
+                                    index: indexKey,
+                                    jumlah_kegiatan: value3.data.length,
+                                    satker: value4.satker,
+
+                                    tanggal: getTanggalKegiatan(value4.tanggal_awal, value4.tanggal_akhir),
+                                    tanggal_awal: value4.tanggal_awal,
+                                    tanggal_akhir: value4.tanggal_akhir,
+                                    
+                                    satker_target: value4.satker_target.nama_satker,
+                                    jumlah_hari_pelaksanaan: `${value4.jumlah_hari_pelaksanaan} hari`,
+                                    jumlah_peserta: `${value4.jumlah_peserta} orang`,
+
+                                    tujuan: value4.tujuan,
+                                    kendala: value4.kendala,
+                                    kesimpulan: value4.kesimpulan,
+                                    tindak_lanjut: value4.tindak_lanjut,
+                                    dokumentasi: value4.dokumentasi,
+                                };
+                                tableContent.push(baris);
+                            }
+                        }
+                    }
+                }
+
+                tableData.value = tableContent;
+                filteredPage.value = tableData.value;
+                unblock($('#__table'));
+            }
+            
+            const post = ref({});
+
+            const handlePost = async () => {
+                showSwalLoading();
+                
+                const modal = $('#createModal');
+
+                const { tanggal_awal, tanggal_akhir, jumlah_hari_pelaksanaan, satker_target, jumlah_peserta, tujuan, kendala, kesimpulan, tindak_lanjut, dokumentasi } = post.value;
+
+                const satker = satkerPK.value
+
+                const payload = {
+                    satker,
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    jumlah_hari_pelaksanaan,
+                    satker_target,
+                    jumlah_peserta,
+                    tujuan,
+                    kendala,
+                    kesimpulan,
+                    tindak_lanjut,
+                    dokumentasi
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                try {
+                    const response = await axios.post(`/kegiatan/api/v1/dayatif/binaan_teknis/`,
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> ditambahkan!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    await loadData();
+                    store.$reset();
+                    post.value = {};
+                }
+            }
+
+            const edit = ref({});
+
+            const handleEdit = async (id) => {
+                try {
+                    const response = await axios.get(`/kegiatan/api/v1/dayatif/binaan_teknis/${id}/`);
+                    
+                    const data = response.data;
+
+                    console.log('Data:', data);
+
+                    const modal = $('#editModal');
+                    const form = $('#editForm');
+
+                    form.find('#edit__info').text(data.satker.nama_satker);
+
+                    // Tanggal
+                    store.tanggal.awal = data.tanggal_awal;
+                    store.tanggal.akhir = data.tanggal_akhir;
+
+                    // Kendala
+                    store.kendala.showKeterangan = data.kendala.startsWith('Ada');
+
+                    // Tindak Lanjut
+                    /*
+                    if (data.tindak_lanjut.startsWith('Ada')) {
+                        store.tindakLanjut.yes.showKeterangan = true;
+                        store.tindakLanjut.no.showContainer = false;
+                    } else if (data.tindak_lanjut.startsWith('Tidak')) {
+                        store.tindakLanjut.yes.showKeterangan = false;
+                        store.tindakLanjut.no.showContainer = true;
+                        if (data.tindak_lanjut.includes('Pemblokiran')) {
+                            store.tindakLanjut.no.showContainer2 = false;
+                        } else if (data.tindak_lanjut.includes('Anggaran tidak ada alokasi kegiatan')) {
+                            store.tindakLanjut.no.showContainer2 = false;
+                        } else {
+                            store.tindakLanjut.no.showContainer2 = true;
+                        }
+                    }
+                    */
+
+                    edit.value = { ...data };
+
+                    edit.value.dokumentasi = null;
+                    // edit.value.satker = data.satker.id;
+                    // edit.value.satker_target = data.satker_target.id;
+                    
+                    edit.value.satker = data.satker;
+                    edit.value.satker_target = data.satker_target;
+
+                    console.log('Edit value diakhir:', edit.value)
+
+                    modal.modal('show');
+                    
+                    form.find('#edit__satker').val(data.satker).trigger('change');
+                    form.find('#edit__satker_target').val(data.satker_target).trigger('change');
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                }
+            }
+
+            const handleUpdate = async (id) => {
+                showSwalLoading();
+
+                const { tanggal_awal, tanggal_akhir, jumlah_hari_pelaksanaan, satker_target, jumlah_peserta, tujuan, kendala, kesimpulan, tindak_lanjut, dokumentasi } = edit.value;
+
+                const modal = $('#editModal');
+
+                const payload = {
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    jumlah_hari_pelaksanaan,
+                    satker_target : parseInt(satker_target),
+                    jumlah_peserta,
+                    tujuan,
+                    kendala,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(dokumentasi && {
+                        dokumentasi
+                    }),
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                try {
+                    const response = await axios.patch(
+                        `/kegiatan/api/v1/dayatif/binaan_teknis/${edit.value.id}/`,
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> diperbarui!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    await loadData();
+                    store.$reset();
+                    edit.value = {};
+                }
+            }
+            
+            const inputTargets = ['satker_target'];
+
+            const handleChange = (type, name, event) => {
+                const text = $(`#${type}__${name}`).find(':selected').text();
+                const value = event.target.value;
+                
+                if (type === 'create') {
+                    post.value[name] = value;
+                } else {
+                    edit.value[name] = value;
+                }
+            };
+
+            const getUserInfo = () => {
+                const roles = { 0: 'BNNP', 1: 'BNNK', 2: 'PUSAT' };
+                console.log('[INFO] Logged in Satker Level :', satkerLevel.value, `- ${roles[satkerLevel.value]}`);
+            };
+
+            onMounted(async () => {
+                await loadData();
+
+                getUserInfo()
+
+                inputTargets.forEach(name => {
+                    ['create', 'edit'].forEach(type => {
+                        $(`#${type}__${name}`).on('change', (event) => handleChange(type, name, event));
+                    });
+                });
+
+                await sleep(1000);
+
+                console.log('[INFO] Paged data :', pagedData.value);
+
+                $('#editModal, #createModal').on('hidden.bs.modal', () => store.$reset());
+            });
+
+            // ******** GENERIC TABLE CONFIGURATION ********
+            const getPage = () => {
+                const params = new URLSearchParams(window.location.search);
+                let page = parseInt(params.get('page'));
+
+                if (isNaN(page) || page <= 0) {
+                    removeParams('page');
+                    page = 1;
+                }
+
+                return page;
+            }
+            const perPage = ref(10); // Placeholder
+
+            const currentPage = ref(getPage());
+            const totalPage = computed(() => filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0);
+
+            watch(totalPage, () => {
+                // console.log({'TotalPage': totalPage.value, 'perPage': perPage.value, 'currentPage': currentPage.value});
+
+                if (totalPage.value != 0 && (currentPage.value > totalPage.value)) {
+                    toastr['warning'](`Kembali ke halaman <b>1</b> dikarenakan Data pada halaman <b>${currentPage.value}</b> tidak ditemukan`, "Terjadi kesalahan");
+                    currentPage.value = 1;
+                    removeParams('page');
+                }
+            })
+
+            const pagedData = computed(() => {
+                if (!filteredPage.value) return [];
+                const startIndex = (currentPage.value - 1) * perPage.value;
+                const endIndex = currentPage.value * perPage.value;
+                return filteredPage.value.slice(startIndex, endIndex);
+            });
+
+            const sortColumn = ref('no')
+            const sortDirection = ref('asc')
+
+            const handleSort = (column) => {
+                currentPage.value = 1;
+                removeParams('page');
+                sortColumn.value = column;
+                
+                sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+
+                if (column === 'no') {
+                    filteredPage.value.sort((a, b) => {
+                        const dataA = `${a.index}`;
+                        const dataB = `${b.index}`;
+
+                        const indexA = dataA.split('.').map(Number);
+                        const indexB = dataB.split('.').map(Number);
+
+                        for (let i = 0; i < Math.max(indexA.length, indexB.length); i++) {
+                            const numA = indexA[i] || 0;
+                            const numB = indexB[i] || 0;
+
+                            if (numA !== numB) {
+                                return sortDirection.value === 'asc' ? (numA - numB) : (numB - numA);
+                            }
+                        }
+                        return 0;
+                    });
+                } else if (column === 'tanggal') {
+                    filteredPage.value.sort((a, b) => {
+                        const dateA = new Date(a.tanggal_awal);
+                        const dateB = new Date(b.tanggal_awal);
+                        return sortDirection.value === 'asc' ? (dateA - dateB) : (dateB - dateA);
+                    });
+                }
+            }
+
+            return {
+                // Preparation
+                store,
+                satkerLevel,
+                satkerPK,
+                title,
+
+                // Action
+                post,
+                handlePost,
+
+                edit,
+                handleEdit,
+                handleUpdate,
+
+                // Data
+                loadData,
+                tableData,
+                
+                perPage,
+                currentPage,
+                filteredPage,
+                totalPage,
+                pagedData,
+                
+                sortColumn,
+                sortDirection,
+                handleSort,
+            }
+        },
+    })
+
+    app.use(pinia)
+    app.mount('#app');
+</script>
+
+{% endblock %}
+
+{% block css_tambahan %}
+
+<style>
+    #detail__lokasi {
+        width: 250px
+    }
+
+    #detail__lokasi .detail__value {
+        padding-left: 10px;
+    }
+
+    #edit__selected_lokasi li span {
+        padding-left: 10px;
+    }
+
+    #edit__selected_lokasi .edit__selected_lokasi_label {
+        width: 150px;
+        display: inline-block;
+    }
+
+    ul.location__list {
+        text-align: left;
+    }
+
+    ul.location__list .location__label {
+        width: 150px;
+        display: inline-block;
+        font-weight: bold;
+    }
+
+    ul.location__list .location__value {
+        display: inline-block;
+        padding-left: 5px;
+    }
+</style>
+
+{% endblock css_tambahan %}

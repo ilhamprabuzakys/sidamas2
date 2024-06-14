@@ -1,0 +1,142 @@
+{% extends 'dashboard/empty_base.html' %}
+
+{% block js_tambahan %}
+<script>
+    document.addEventListener('alpine:init', () => {
+        Alpine.data('data', () => {
+			const base = '/media/applications/ikrn';
+
+            const getApp = (type) => {
+                const listApp = {
+                    'Windows': `/desktop/survei-ikrn.exe`,
+                    'MacOS': `/desktop/survei-ikrn.dmg`,
+                    'Linux': `/desktop/linux/survei-ikrn.deb`,
+                    'AppImage': `/desktop/linux/survei-ikrn.AppImage`,
+                    'Debian': `/desktop/linux/survei-ikrn.deb`,
+                    'Snap': `/desktop/linux/survei-ikrn.snap`,
+					'Android': `/mobile/survei-ikrn.apk`,
+					'iOS': `/mobile/survei-ikrn.ipa`,
+                };
+
+                const path = base + listApp[type];
+
+                window.open(path, '_blank');
+            };
+
+            return {
+                getApp
+            }
+        });
+    });
+</script>
+{% endblock js_tambahan %}
+
+{% block content %}
+<!-- UNDUH: Start -->
+<section class="section-py" x-data="data">
+    <div class="container">
+        <h3 class="text-center fw-bold mb-4">UNDUH SURVEI IKRN 🎉 </h3>
+        <div class="row border-top pt-3">
+			<div class="col-lg-10 mx-auto mb-4">
+				<div class="row">
+					<h5 class="text-start mb-4">DESKTOP</h5>
+                    <div class="col-md-4 mb-md-0 mb-4">
+                        <div class="card border shadow-none">
+                            <div class="card-body text-center">
+
+								<i class="fab fa-windows text-primary me-2" style="font-size: 50px"></i>
+
+                                <h5 class="my-2">Windows</h5>
+                                <a class="btn btn-sm btn-label-success w-100 mt-3" href="javascript:void(0);" @click="getApp('Windows')">
+									<i class="fas fa-arrow-down me-2"></i>
+									Unduh</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-md-0 mb-4 d-none">
+                        <div class="card border shadow-none">
+                            <div class="card-body text-center">
+
+								<i class="fab fa-apple text-secondary me-2" style="font-size: 50px"></i>
+
+                                <h5 class="my-2">MacOS</h5>
+                                <a class="btn btn-sm btn-label-success w-100 mt-3" href="javascript:void(0);" @click="getApp('MacOS')">
+									<i class="fas fa-arrow-down me-2"></i>
+									Unduh</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-md-0 mb-4">
+                        <div class="card border shadow-none">
+                            <div class="card-body text-center">
+
+								<i class="fab fa-linux text-warning me-2" style="font-size: 50px"></i>
+
+                                <h5 class="my-2">Linux</h5>
+								<div class="btn-group w-100">
+									<button type="button" class="btn btn-sm btn-label-success mt-3 dropdown-toggle"
+										data-bs-toggle="dropdown" aria-expanded="false">
+										<i class="fas fa-arrow-down me-2"></i>
+										Unduh
+									</button>
+									<ul class="dropdown-menu">
+										<li>
+											<a class="dropdown-item" @click="getApp('AppImage')"
+												href="javascript:void(0);">
+												<b class="me-2">.AppImage</b>AppImage
+											</a>
+										</li>
+										<li>
+											<a class="dropdown-item" @click="getApp('Debian')"
+												href="javascript:void(0);">
+												<b class="me-2">.deb</b>Debian
+											</a>
+										</li>
+										<li>
+											<a class="dropdown-item" @click="getApp('Snap')"
+												href="javascript:void(0);">
+												<b class="me-2">.snap</b>
+												Snap
+											</a>
+										</li>
+									</ul>
+								</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+				<div class="row justify-content-center mt-4 d-none">
+					<h5 class="text-start mb-4">MOBILE</h5>
+                    <div class="col-md-4 mb-md-0 mb-4">
+                        <div class="card border shadow-none">
+                            <div class="card-body text-center">
+
+								<i class="fab fa-windows text-success me-2" style="font-size: 50px"></i>
+
+                                <h5 class="my-2">Android</h5>
+                                <a class="btn btn-sm btn-label-success w-100 mt-3" href="javascript:void(0);" @click="getApp('Android')">
+									<i class="fas fa-arrow-down me-2"></i>
+									Unduh</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-md-0 mb-4">
+                        <div class="card border shadow-none">
+                            <div class="card-body text-center">
+
+								<i class="fab fa-apple text-danger me-2" style="font-size: 50px"></i>
+
+                                <h5 class="my-2">iOS</h5>
+                                <a class="btn btn-sm btn-label-success w-100 mt-3" href="javascript:void(0);" @click="getApp('iOS')">
+									<i class="fas fa-arrow-down me-2"></i>
+									Unduh</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- UNDUH: End -->
+{% endblock content %}

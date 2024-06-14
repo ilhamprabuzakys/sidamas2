@@ -1,0 +1,61 @@
+Ruangan Dayatif
+---------------------------------------------------
+
+KKR 3 macam kuisoner.
+
+IKKTT ada dua 2 macam.
+
+Dashboard pimpinan dalam bentuk peta atau tabel.
+
+respondennya dari kuisionernya itu 16 - 64 tahun
+
+Keterangan usia akan ditambahkan.
+
+
+Ruangan
+---------------------------------------------------
+https://sidepe.bnn.go.id/lapgiat/eform/desabersinar
+
+Dayatif yang perlu ditambahin :
+
+Upload kegiatan.
+
+Revisi:
+
+Pelaporan diganti dengan Intervensi atau Kegiatan?
+
+link itu tidak relevan dikarenakan warga di desa tidak memiliki gadget, jadi ganti dengan pendekatan lain saja.
+
+Dikuumpulkannya responden di suatu tempat, dan hasil pengisian akan dikumpulkan oleh petugas.
+
+Yang input petugas manual, tapi resikonya tinggi.
+
+Rekap data mentah.
+
+SIDAMAS - Dikasih dua opsi, kalo bisa online via link, atau rekap manual via scan foto dokumen.
+
+Verifikasi berdasarkan nomor urut responden?
+
+PSM pada bagian Survei ditambahkan sub menu IKP (Indeks Kemandirian Masyarakat)
+
+Kalo dayatif per desa, kalo PSM per kabupaten/kota
+
+SIPAREL ditambahkan NIK pada relawannya di mobile.
+Relawan dan penggiat diberikan unique data berdasarkan NIK.
+
+Data NIK nya di encrypt disensor begitu 3273**8232*88**
+
+Pelaporan diganti ke Kegiatan.
+
+Sub menu nya lebih baik ditambahkan sehingga jadi 2 kata jangan 1 kata.
+
+Penggiat itu responden.
+
+Data penggiat nanti minta ke datin.
+
+
+Lantai 3 Cegah
+--------------------------------------------
+
+
+

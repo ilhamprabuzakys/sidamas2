@@ -1,0 +1,725 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Keberhasilan Kewirausahaan {% endblock title %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.0/xlsx.full.min.js"></script>
+
+
+<style>
+    #myTable tbody tr td:nth-child(1) {
+        background-color: #effff2 !important;
+    }
+
+    #myTable2 tbody tr td:nth-child(1) {
+        background-color: #effff2 !important;
+    }
+
+    #__table_kesimpulan_perhitungan tbody tr th:nth-child(1) {
+        width: 90%;
+    }
+
+    .hi-font {
+        font-size: 17px;
+    }
+
+    .high-font {
+        font-size: 24px;
+    }
+
+    .text-primary {
+        color: #007bff;
+    }
+
+    .text-success {
+        color: #28a745;
+    }
+
+    .text-warning {
+        color: #ffc107;
+    }
+
+    .text-danger {
+        color: #dc3545;
+    }
+
+    #layout-menu {
+        display: none;
+    }
+
+    #layout-container {
+        padding-left: 1rem;
+    }
+
+    .layout-navbar {
+        display: none;
+    }
+
+    .font_height {
+        font-weight: 900;
+    }
+
+    footer {
+        display: none;
+    }
+</style>
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            Keberhasilan Kewirausahaan
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">Keberhasilan
+                Kewirausahaan</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <a class="btn btn-secondary" href="{% url 'dayatif_keberhasilan_kewirausahaan' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Kembali ke daftar survei
+                    </a>
+
+                    <button class="btn btn-primary" onclick="lihat_chart()">
+                        <i class="fas fa-chart-area me-2"></i>Lihat Chart
+                    </button>
+
+                    <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportModal">
+                        <i class="fas fa-file-export me-2"></i>Export Excel
+                    </button>
+                </div>
+            </div>
+
+            <div id="headline" class="my-5 mb-3">
+                <h3 class="text-center fw-bold" id="satker_id">Satuan Kerja</h3>
+                <h3 class="text-center">Hasil Survei Data Keberhasilan Kewirausahaan</h3>
+                <div style="display: flex;flex-wrap: nowrap;flex-direction: row;justify-content: space-between;">
+                    <h4 class="text-center" id="tanggal_awal_id">Tanggal Awal</h4>
+                    <h4 class="text-center" id="tanggal_akhir_id">Tanggal Akhir</h4>
+                </div>
+            </div>
+
+            <div id="headline" class="mb-3">
+            </div>
+
+            <table id="myTable" class="table display table-bordered">
+                <thead>
+                    <th class="bg-soft-green font_height">NO</th>
+                    <th class="font_height">Nama</th>
+                    <th class="font_height">Aspek 1</th>
+                    <th class="font_height">Aspek 2</th>
+                    <th class="font_height">Aspek 3</th>
+                    <th class="font_height">Aspek 4</th>
+                    <th class="font_height">Aspek 5</th>
+                    <th class="font_height">Aspek 6</th>
+                    <th class="font_height">Aspek 7</th>
+                    <th class="font_height">Aspek 8</th>
+                    <th class="font_height">Aspek 9</th>
+                    <th class="font_height">Aspek 10</th>
+                    <th class="font_height">Total</th>
+                    <th class="font_height">Rata-Rata</th>
+                    <th class="font_height">Kategori</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+
+            <br>
+
+            <div class="container-fluid" style="padding: 0px;">
+                <div class="row">
+                    <div class="col">
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;">Mutu Pelayanan :</h5>
+                                <div class="row high-font">
+                                    <div class="col-3 text-danger">
+                                        Nilai 1,00 - 1,74
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        Buruk
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-warning">
+                                        1,75 - 2,50
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        Cukup
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-primary">
+                                        2,51 - 3,25
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        Baik
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-success">
+                                        3,26 - 4,00
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        Sangat Baik
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col">
+                        <div class="card" id="card_keterangan">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;">Kesimpulan :</h5>
+
+                                <form id="kesimpulanForm">
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="exampleFormControlTextarea1"
+                                            name="kesimpulan" rows="3"></textarea>
+                                    </div>
+                                    <div align="right">
+                                        <button type="button" class="btn btn-primary" id="submitBtn">Simpan</button>
+                                        <button type="button" class="btn btn-danger" id="deleteBtn">Hapus</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% include "survei/hasil_survei/modal_export_ls.html" %}
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    // persiapan variable
+    const CSRF_TOKEN = getCookie('csrftoken');
+    var id_number;
+
+    // variable array kosong
+    let nama_responden = [];
+    let g_jawaban;
+    let g_nrr;
+    let g_nrrt;
+    let g_kesimpulan;
+    let g_keterangan;
+
+    $(document).ready(function () {
+        const CSRF_TOKEN = getCookie('csrftoken');
+        var currentUrl = window.location.href;
+        var number_id = getNumberFromUrl(currentUrl);
+        id_number = number_id;
+
+        Swal.fire({
+            title: "Tunggu sebentar",
+            icon: "info",
+            html: "Sedang memuat data !",
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        if (number_id != "kosong") {
+            axios.get('/survei/api/v1/data_survei/' + number_id + '/', {
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then((response) => {
+                    $("#exampleFormControlTextarea1").val(response.data.keterangan);
+                    keterangan = $("#exampleFormControlTextarea1").val();
+                    g_keterangan = keterangan;
+
+                    $('#satker_id').text(response.data.get_satker_name);
+                    $('#tanggal_awal_id').text("Tanggal awal : " + moment(response.data.tanggal_awal).format('DD-MM-YYYY'));
+                    $('#tanggal_akhir_id').text("Tanggal akhir : " + moment(response.data.tanggal_akhir).format('DD-MM-YYYY'));
+
+                    mengolah_data_mentah(response);
+                })
+                .catch((error) => {
+                    console.error('Error performing Axios request:', error);
+                });
+        } else {
+            Swal.close();
+            Swal.fire({
+                title: "Terjadi Kesalahan",
+                text: "ID tidak valid",
+                icon: "error"
+            });
+        }
+
+        $("#submitBtn").click(function () {
+            Swal.fire({
+                title: "Tunggu sebentar",
+                icon: "info",
+                html: "Sedang menyimpan data !",
+                didOpen: () => {
+                    Swal.showLoading();
+                },
+            });
+
+            var keterangan = $("#exampleFormControlTextarea1").val();
+
+            // Construct an object with the desired structure
+            var formData = {
+                keterangan: keterangan
+            };
+
+            axios.put('/survei/api/v1/data_survei/' + number_id + '/', formData, {
+                headers: {
+                    'X-CSRFToken': CSRF_TOKEN,
+                    'Content-Type': 'application/json',
+                }
+            })
+                .then((response) => {
+                    Swal.close();
+                    Swal.fire({
+                        icon: "success",
+                        title: "Kesimpulan tersimpan !",
+                        showConfirmButton: false,
+                        timer: 1500,
+                        timerProgressBar: true
+                    }).then(() => {
+                        // Reload the page after the timer expires
+                        location.reload();
+                    });
+                })
+                .catch((error) => {
+                    console.error('Error performing Axios request:', error);
+                });
+        });
+
+        $("#deleteBtn").click(function () {
+
+            Swal.fire({
+                title: "Menghapus Kesimpulan ?",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#3085d6",
+                cancelButtonColor: "#d33",
+                confirmButtonText: "Hapus",
+                cancelButtonText: "Tidak"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    hapus_kesimpulan();
+                }
+            });
+
+        });
+    });
+
+    function mengolah_data_mentah(res) {
+        let data_isian_mentah = res.data.get_data_isian;
+        let banyak_data = data_isian_mentah.length;
+        let resultArray = [];
+
+        for (let i = 0; i < banyak_data; i++) {
+            let data_mentahan;
+
+            if (isValidJSON(data_isian_mentah[i].data_mentahan)) {
+                var jsonObject = $.parseJSON(data_isian_mentah[i].data_mentahan);
+                data_mentahan = checkArrayAndAddData(jsonObject);
+            } else {
+                data_mentahan = checkArrayAndAddData(data_isian_mentah[i].data_mentahan);
+            }
+
+            nama_responden.push(data_isian_mentah[i].responden__nama);
+
+            let array_sementara = [];
+
+            for (let j = 0; j < data_mentahan.length; j++) {
+                let currentObject = {
+                    ["U" + data_mentahan[j].no]: data_mentahan[j].bobot
+                };
+                array_sementara.push(currentObject);
+            }
+            resultArray.push(array_sementara);
+        }
+
+        implementasi(resultArray.reverse());
+    }
+
+    function implementasi(dataArray) {
+        arr_arr = [];
+
+        for (let i = 0; i < dataArray.length; i++) {
+            let data_mentahan = dataArray[i];
+            arr_record = [];
+
+            for (let j = 0; j < 10; j++) {
+                arr_record.push(parseInt(data_mentahan[j]['U' + (j + 1)]));
+            }
+
+            var res_arr = objectToArray(data_mentahan);
+            var sum = sumArray(res_arr);
+            var divided = removeDec(devideArray(res_arr, res_arr.length));
+            var conclusion = evaluateNilai(divided);
+
+            arr_record.push(sum, divided, conclusion);
+            arr_arr.push(arr_record);
+        }
+
+        perhitungan(arr_arr);
+    }
+
+    function perhitungan(arr_arr) {
+        let rev_responden = nama_responden.reverse();
+        let arr_res = [];
+
+        const sums = Array.from({
+            length: 11
+        }, () => 0);
+        const nrrs = Array.from({
+            length: 11
+        }, () => 0);
+
+        for (let i = 0; i < arr_arr.length; i++) {
+            let element = arr_arr[i];
+            for (let j = 0; j < 11; j++) {
+                const elemental = element[j];
+                sums[j] += elemental;
+                nrrs[j] += elemental / arr_arr.length;
+            }
+        }
+
+        res_arr = [];
+
+        sums.push(removeDec(sums[10] / 10));
+        nrrs.push(removeDec(sums[11] / arr_arr.length));
+        nrrs[10] = nrrs[10] / 10;
+
+        nrrs_rd = removeDecimal(nrrs);
+        kategori = evaluateNilaiArray(nrrs_rd);
+
+        sums.push("");
+        nrrs_rd.push("");
+        kategori.push("");
+
+        sums.unshift("Jumlah");
+        nrrs_rd.unshift("Rata-Rata");
+        kategori.unshift("Kategori");
+
+        for (let index = 0; index < arr_arr.length; index++) {
+            const element = arr_arr[index];
+            element.unshift(rev_responden[index]);
+            arr_res.push(element);
+        }
+
+        tampilkan(arr_res, sums, nrrs_rd, kategori);
+    }
+
+    function tampilkan(arr, sums, nrrs, kategori) {
+        var table = $('#myTable').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false,
+        });
+
+        var lastRowIndex = 0;
+
+        function addRowWithNumber(data, startIndex) {
+            data.forEach(function (row, index) {
+                if (startIndex == "kosong") {
+                    var newRow = [""].concat(row);
+                } else {
+                    var newRow = [startIndex + index].concat(row);
+                }
+                table.row.add(newRow).draw();
+            });
+            lastRowIndex = startIndex + data.length;
+        }
+
+        addRowWithNumber(arr, lastRowIndex + 1);
+        addRowWithNumber([sums], "kosong");
+        addRowWithNumber([nrrs], "kosong");
+        addRowWithNumber([kategori], "kosong");
+
+        g_jawaban = arr;
+        g_nrr = sums;
+        g_nrrt = nrrs;
+        g_kesimpulan = kategori;
+
+        Swal.close();
+    }
+
+    function hapus_kesimpulan() {
+        Swal.fire({
+            title: "Tunggu sebentar",
+            icon: "info",
+            html: "Sedang menghapus data !",
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        var formData = {
+            keterangan: null
+        };
+
+        axios.put('/survei/api/v1/data_survei/' + id_number + '/', formData, {
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN,
+                'Content-Type': 'application/json',
+            }
+        })
+            .then((response) => {
+                Swal.close();
+                Swal.fire({
+                    icon: "success",
+                    title: "Kesimpulan tersimpan !",
+                    showConfirmButton: false,
+                    timer: 1500,
+                    timerProgressBar: true
+                }).then(() => {
+                    // Reload the page after the timer expires
+                    location.reload();
+                });
+            })
+            .catch((error) => {
+                console.error('Error performing Axios request:', error);
+            });
+    }
+
+    // helper
+    function haveSameLength(array1, array2) {
+        return array1.length === array2.length;
+    }
+
+    // function kostum
+    function removeDecimal(arr) {
+        return arr.map(num => parseFloat(num.toFixed(3)));
+    }
+
+    function removeDec(num) {
+        return parseFloat(num.toFixed(3));
+    }
+
+    function getNumberFromUrl(url) {
+        var match = url.match(/\/(\d+)\/$/);
+        if (match) {
+            return match[1];
+        } else {
+            return "kosong";
+        }
+    }
+
+    function isValidJSON(str) {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function convertToCategory(data) {
+        if (data >= 88.31 && data <= 100.00) {
+            return {
+                category: "A (sangat baik)",
+                colorClass: "text-success"
+            };
+        } else if (data >= 76.61 && data <= 88.30) {
+            return {
+                category: "B (baik)",
+                colorClass: "text-primary"
+            };
+        } else if (data >= 65.00 && data <= 76.60) {
+            return {
+                category: "C (kurang baik)",
+                colorClass: "text-warning"
+            };
+        } else if (data >= 25.00 && data <= 64.99) {
+            return {
+                category: "D (tidak baik)",
+                colorClass: "text-danger"
+            };
+        } else {
+            return {
+                category: "Tidak valid",
+                colorClass: ""
+            };
+        }
+    }
+
+    function checkArrayAndAddData(array) {
+        if (array.length !== 9) {
+            var remainingLength = 9 - array.length;
+            for (var i = 0; i < remainingLength; i++) {
+                array.push({
+                    no: array.length + 1,
+                    jawaban: 0,
+                    bobot: '0',
+                    pilihan: 'x'
+                });
+            }
+        }
+        return array;
+    }
+
+    function sumArray(array) {
+        var sum = 0;
+        $.each(array, function (index, value) {
+            sum += value;
+        });
+        return sum;
+    }
+
+    function devideArray(array, array_length) {
+        var sum = 0;
+        $.each(array, function (index, value) {
+            sum += value;
+        });
+        return sum / array_length;
+    }
+
+    function objectToArray(obj) {
+        var arr = [];
+        $.each(obj, function (key, value) {
+            arr.push(parseInt(Object.values(value)[0]));
+        });
+        return arr;
+    }
+
+    function evaluateNilaiArray(nilaiArray) {
+        var evaluations = [];
+        nilaiArray.forEach(function (nilai) {
+            if (nilai >= 1.00 && nilai <= 1.74) {
+                evaluations.push("Buruk");
+            } else if (nilai >= 1.75 && nilai <= 2.50) {
+                evaluations.push("Cukup");
+            } else if (nilai >= 2.51 && nilai <= 3.25) {
+                evaluations.push("Baik");
+            } else if (nilai >= 3.26 && nilai <= 4.00) {
+                evaluations.push("Sangat Baik");
+            } else if (nilai > 4.00) {
+                evaluations.push("Sangat Baik");
+            } else {
+                evaluations.push("Tidak Valid");
+            }
+        });
+        return evaluations;
+    }
+
+    function evaluateNilai(nilai) {
+        var evaluations;
+        if (nilai >= 1.00 && nilai <= 1.74) {
+            evaluations = "Buruk";
+        } else if (nilai >= 1.75 && nilai <= 2.50) {
+            evaluations = "Cukup";
+        } else if (nilai >= 2.51 && nilai <= 3.25) {
+            evaluations = "Baik";
+        } else if (nilai >= 3.26 && nilai <= 4.00) {
+            evaluations = "Sangat Baik";
+
+        } else {
+            evaluations = "Tidak Valid";
+        }
+        return evaluations;
+    }
+    // helper
+
+    function downloadHTMLAsPDF() {
+        $.ajax({
+            url: '/survei/generate_spreadsheet_ls/',
+            type: 'POST',
+            data: JSON.stringify({
+                jawaban: g_jawaban,
+                nrr: g_nrr,
+                nrrt: g_nrrt,
+                kesimpulan: g_kesimpulan,
+                keterangan: g_keterangan
+            }),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-CSRFToken', CSRF_TOKEN);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+            },
+            success: function (response) {
+                // Handle response
+                window.open('/survei/download_ls/');
+            },
+            error: function (xhr, status, error) {
+                // Handle errors
+            }
+        });
+    }
+
+    function lihat_chart() {
+        window.location.href = '/survei/chart_survei_kk/' + id_number + '/';
+    }
+
+    $("#unitPelayananForm").submit(function (event) {
+        event.preventDefault();
+
+        var unitPelayanan = $('#unitPelayanan').val();
+        var alamat = $('#alamat').val();
+
+        $.ajax({
+            url: '/survei/generate_spreadsheet_kk/',
+            type: 'POST',
+            data: JSON.stringify({
+                jawaban: g_jawaban,
+                nrr: g_nrr,
+                nrrt: g_nrrt,
+                kesimpulan: g_kesimpulan,
+                keterangan: g_keterangan,
+                kode: id_number,
+                unitpelayanan: unitPelayanan,
+                alamat: alamat
+            }),
+            beforeSend: function (xhr) {
+                xhr.setRequestHeader('X-CSRFToken', CSRF_TOKEN);
+                xhr.setRequestHeader('Content-Type', 'application/json');
+            },
+            success: function (response) {
+                window.open('/survei/download_kk/');
+                $('.modal').modal('hide');
+                $('#unitPelayanan').val('');
+                $('#alamat').val('');
+            },
+            error: function (xhr, status, error) {
+            }
+        });
+    });
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Ambil semua elemen td pertama di dalam tbody tr pada tabel #myTable
+        var firstColumnCells = document.querySelectorAll('#myTable tbody tr td:nth-child(1)');
+
+        // Tambahkan class 'bg-soft-success' pada setiap elemen
+        firstColumnCells.forEach(function (cell) {
+            cell.classList.add('bg-soft-success');
+        });
+    });
+</script>
+{% endblock js_tambahan %}

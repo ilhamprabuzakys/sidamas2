@@ -1,0 +1,281 @@
+<form id="createForm" @submit.prevent="handlePost()">
+    <div class="modal fade" id="createModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Data <b> {title}</b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Satuan Kerja Pelaksana -->
+                    <div class="mb-3">
+                        <label for="create__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+                        <select class="form-control select2" id="create__satker" disabled>
+                            <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                        </select>
+                    </div>
+                    <!--/ Satuan Kerja Pelaksana -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tanggal Kegiatan -->
+                    <div class="row range_date">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="create__tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                                <input type="date" id="create__tanggal_awal" class="form-control" v-model.trim="post.tanggal_awal" required />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="create__tanggal_akhir" class="col-form-label required">Tanggal Akhir:</label>
+                                <input type="date" id="create__tanggal_akhir" class="form-control" v-model.trim="post.tanggal_akhir" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Tanggal Kegiatan -->
+
+                    <div class="text-important my-2">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</div>
+
+                    <hr class="mx-n4">
+
+                    <!-- Lokasi -->
+                    <div class="mb-3">
+                        <label for="create__lokasi" class="col-form-label required">Lokasi:</label>
+
+                        <div class="row" id="create__lokasi">
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__provinsi" v-model.trim="post.provinsi">
+                                    <option value="" selected>--Pilih provinsi--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__kabupaten" v-model.trim="post.kabupaten">
+                                    <option value="" selected>--Pilih kota/kabupaten--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__kecamatan" v-model.trim="post.kecamatan">
+                                    <option value="" selected>--Pilih kecamatan--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__desa" v-model.trim="post.desa">
+                                    <option value="" selected>--Pilih desa/kelurahan--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Lokasi -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Deskripsi -->
+					<div class="mb-3">
+						<label for="create__deskripsi" class="col-form-label required">Deskripsi Hasil :</label>
+
+                        <hr class="mx-n4">
+
+                        <!-- Potensi SDA -->
+                        <div id="create__potensi__sda_wrapper" class="ps-3">
+                            <label for="create__potensi__sda" class="col-form-label required">1. Potensi SDA:</label>
+
+                            <textarea class="form-control my-3" id="create__potensi__sda" v-model.trim="post.potensi.sda.text" required></textarea>
+
+                            <hr class="mx-n4">
+
+                            <div id="create__potensi__sda_analisis_swot_wrapper" class="ps-3">
+                                <div class="mb-3 row align-items-center">
+                                    <label for="create__potensi__sda_analisis_swot" class="col-md-3 col-form-label required">Analisis SWOT</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="create__potensi__sda_analisis_swot" class="form-control form-control-sm"
+                                        v-model.trim="post.potensi.sda.swot.text" required />
+                                    </div>
+                                </div>
+
+                                <div class="ps-0">
+                                    <div class="swot__kekuatan">
+                                        <label for="create__potensi__sda_analisis_swot_kekuatan" class="col-form-label required">1. Kekuatan :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sda_analisis_swot_kekuatan"
+                                        v-model.trim="post.potensi.sda.swot.kekuatan" required></textarea>
+                                    </div>
+
+                                    <div class="swot__kelemahan mt-2">
+                                        <label for="create__potensi__sda_analisis_swot_kelemahan" class="col-form-label required">2. Kelemahan :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sda_analisis_swot_kelemahan"
+                                        v-model.trim="post.potensi.sda.swot.kelemahan" required></textarea>
+                                    </div>
+
+                                    <div class="swot__peluang mt-2">
+                                        <label for="create__potensi__sda_analisis_swot_peluang" class="col-form-label required">3. Peluang :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sda_analisis_swot_peluang"
+                                        v-model.trim="post.potensi.sda.swot.peluang" required></textarea>
+                                    </div>
+
+                                    <div class="swot__tantangan mt-2">
+                                        <label for="create__potensi__sda_analisis_swot_tantangan" class="col-form-label required">4. Tantangan :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sda_analisis_swot_tantangan"
+                                        v-model.trim="post.potensi.sda.swot.tantangan" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="mx-n4">
+
+                            <div id="create__potensi__sda_kesimpulan_wrapper" class="ps-3">
+                                <label for="create__potensi__sda_kesimpulan" class="col-form-label required">Kesimpulan :</label>
+
+                                <textarea class="form-control my-3" id="create__potensi__sda_kesimpulan"
+                                v-model.trim="post.potensi.sda.kesimpulan" required></textarea>
+                            </div>
+                        </div>
+                        <!--/ Potensi SDA -->
+
+                        <hr class="mx-n4">
+
+                        <!-- Potensi SDM -->
+                        <div id="create__potensi__sdm_wrapper" class="ps-3">
+                            <label for="create__potensi__sdm" class="col-form-label required">2. Potensi SDM:</label>
+
+                            <textarea class="form-control my-3" id="create__potensi__sdm" v-model.trim="post.potensi.sdm.text" required></textarea>
+
+                            <hr class="mx-n4">
+
+                            <div id="create__potensi__sdm_analisis_swot_wrapper" class="ps-3">
+                                <div class="mb-3 row align-items-center">
+                                    <label for="create__potensi__sdm_analisis_swot" class="col-md-3 col-form-label required">Analisis SWOT</label>
+                                    <div class="col-md-9">
+                                        <input type="text" id="create__potensi__sdm_analisis_swot" class="form-control form-control-sm"
+                                        v-model.trim="post.potensi.sdm.swot.text" required />
+                                    </div>
+                                </div>
+
+                                <div class="ps-0">
+                                    <div class="swot__kekuatan">
+                                        <label for="create__potensi__sdm_analisis_swot_kekuatan" class="col-form-label required">1. Kekuatan :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sdm_analisis_swot_kekuatan"
+                                        v-model.trim="post.potensi.sdm.swot.kekuatan" required></textarea>
+                                    </div>
+
+                                    <div class="swot__kelemahan mt-2">
+                                        <label for="create__potensi__sdm_analisis_swot_kelemahan" class="col-form-label required">2. Kelemahan :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sdm_analisis_swot_kelemahan"
+                                        v-model.trim="post.potensi.sdm.swot.kelemahan" required></textarea>
+                                    </div>
+
+                                    <div class="swot__peluang mt-2">
+                                        <label for="create__potensi__sdm_analisis_swot_peluang" class="col-form-label required">3. Peluang :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sdm_analisis_swot_peluang"
+                                        v-model.trim="post.potensi.sdm.swot.peluang" required></textarea>
+                                    </div>
+
+                                    <div class="swot__tantangan mt-2">
+                                        <label for="create__potensi__sdm_analisis_swot_tantangan" class="col-form-label required">4. Tantangan :</label>
+
+                                        <textarea class="form-control my-3" id="create__potensi__sdm_analisis_swot_tantangan"
+                                        v-model.trim="post.potensi.sdm.swot.tantangan" required></textarea>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <hr class="mx-n4">
+
+                            <div id="create__potensi__sdm_kesimpulan_wrapper" class="ps-3">
+                                <label for="create__potensi__sdm_kesimpulan" class="col-form-label required">Kesimpulan :</label>
+
+                                <textarea class="form-control my-3" id="create__potensi__sdm_kesimpulan"
+                                v-model.trim="post.potensi.sdm.kesimpulan" required></textarea>
+                            </div>
+                        </div>
+                        <!--/ Potensi SDM -->
+					</div>
+                    <!--/ Deskripsi -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Hambatan/Kendala -->
+                    <div class="mb-3">
+                        <label for="create__kendala_yes" class="col-form-label required">Hambatan/Kendala:</label>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__kendala_ketersediaan" id="create__kendala_yes" @click="store.kendala.showKeterangan = true; post.kendala = 'Ada'" />
+                            <label class="form-check-label" for="create__kendala_yes">Ada, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" id="create__kendala_yes_keterangan" v-if="store.kendala.showKeterangan"
+                            @change="post.kendala = $event.target.value.includes('Ada') ? $event.target.value : `Ada, ${$event.target.value}`"
+                            :required="store.kendala.showKeterangan"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="create__kendala_no" name="create__kendala_ketersediaan"
+                                @click="store.kendala.showKeterangan = false; post.kendala = 'Tidak ada'" />
+                            <label class="form-check-label" for="create__kendala_no">Tidak ada</label>
+                        </div>
+                    </div>
+                    <!--/ Hambatan/Kendala -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Kesimpulan -->
+					<div class="mb-3">
+						<label for="create__kesimpulan" class="col-form-label required">Kesimpulan:</label>
+
+                        <textarea class="form-control my-3" id="create__kesimpulan" v-model.trim="post.kesimpulan" required></textarea>
+					</div>
+                    <!--/ Kesimpulan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tindak Lanjut -->
+                    <div class="mb-3">
+                        <label for="create__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+
+                        <textarea class="form-control" id="create__tindak_lanjut" v-model.trim="post.tindak_lanjut" required></textarea>
+                    </div>
+                    <!--/ Tindak Lanjut -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Dokumentasi Gambar -->
+                    <div class="mb-3">
+                        <label for="create__dokumentasi_gambar" class="col-form-label optional">Dokumentasi Gambar:</label>
+                        <v-input-image id="create__dokumentasi_gambar" :maxsize="5" v-model.trim="post.gambar"></v-input-image>
+                    </div>
+                    <!--/ Dokumentasi Gambar -->
+
+                    <!-- Dokumentasi -->
+                    <div class="mb-3">
+                        <label for="create__dokumentasi" class="col-form-label required">Dokumentasi:</label>
+                        <input type="file" class="form-control" id="create__dokumentasi" @change="post.dokumentasi = $event.target.files[0]" required />
+                    </div>
+                    <!--/ Dokumentasi -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup
+                    </button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

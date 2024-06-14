@@ -1,0 +1,32 @@
+<!-- Pencarian -->
+<div class="row d-flex justify-content-start align-items-center mt-4 mb-2">
+    <div class="col-lg-3 col-md-4 col-sm-4 mb-3">
+        <label for="filter__date" class="form-label">Rentang Tanggal</label>
+
+        <div class="input-group input-group-merge">
+            <input type="text" id="filter__date" class="form-control" v-model="filter.date"
+                placeholder="Pilih Rentang Tanggal" />
+            <span class="input-group-text cursor-pointer text-danger"
+                @click="filter.date = ''; filteredPage = tableData;"><i class="fas fa-xmark"></i></span>
+        </div>
+    </div>
+    <div class="col-lg-3 col-md-4 col-sm-4 mb-3">
+        <label for="filter__kegiatan" class="form-label">Rentang Kegiatan</label>
+
+        <select class="form-select form-select-md" id="filter__kegiatan" w-model="filter.kegiatan" @change="handleFilterKegiatan($event.target.value)">
+            <option selected disabled>--Pilih rentang kegiatan--</option>
+            <option value="">Semua</option>
+            <option value="1-10">1-10</option>
+            <option value="11-20">11-20</option>
+            <option value="21-50">21-50</option>
+            <option value="51-100">51-100</option>
+        </select>
+    </div>
+    <div class="col-lg-6 col-md-4 col-sm-4 mb-3 d-flex justify-content-end">
+        <div style="width: 300px;">
+            <label for="filter__search" class="form-label">Pencarian</label>
+            <input type="search" id="filter__search" class="form-control" v-model="filter.search" @input="handleSearch()"
+                placeholder="Ketikkan pencarian disini ..." />
+        </div>
+    </div>
+</div>

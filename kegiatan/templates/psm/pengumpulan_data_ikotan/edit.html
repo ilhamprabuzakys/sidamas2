@@ -1,0 +1,35 @@
+<div class="modal fade" id="editPengumpulanDataIkotan" aria-labelledby="edit" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="edit">Edit Data</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form>
+            <div class="mb-3">
+              <label for="edit_satker" class="col-form-label">Satuan Kerja:</label>
+              <select name="edit_satker" id="edit_satker" class="form-control select2">
+                <option value="" selected disabled>Pilih Satuan Kerja</option>
+                {% for item in satker %}
+                  <option value="{{ item.nama_satker }}">{{ item.nama_satker }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="mb-3">
+              <label for="edit_jumlah_kegiatan" class="col-from-label">Jumlah Kegiatan</label>
+              <input type="number" name="edit_jumlah_kegiatan" id="edit_jumlah_kegiatan" value="3" class="form-control">
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-xmark me-2"></i>Tutup</button>
+          <button type="button" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

@@ -1,0 +1,761 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Hasil SKM Tes Urine {% endblock title %}
+
+{% block content %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/0.5.0-beta4/html2canvas.min.js"></script>
+
+<style>
+    #myTable tbody tr td:nth-child(1) {
+        background-color: #effff2 !important;
+    }
+    
+    #myTable2 tbody tr td:nth-child(1) {
+        background-color: #effff2 !important;
+    }
+
+    #__table_kesimpulan_perhitungan tbody tr th:nth-child(1) {
+        width: 90%;
+    }
+
+
+    .hi-font {
+        font-size: 17px;
+    }
+
+    .high-font {
+        font-size: 24px;
+    }
+
+    .text-primary {
+        color: #007bff;
+    }
+
+    .text-success {
+        color: #28a745;
+    }
+
+    .text-warning {
+        color: #ffc107;
+    }
+
+    .text-danger {
+        color: #dc3545;
+    }
+
+    #layout-menu {
+        display: none;
+    }
+
+    #layout-container {
+        padding-left: 1rem;
+    }
+
+    .layout-navbar {
+        display: none;
+    }
+
+    .font_height{
+        font-weight: 900;
+    }
+
+    footer {
+        display: none;
+    }
+</style>
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            Hasil SKM Tes Urine
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">Hasil SKM Tes Urine</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <a class="btn btn-secondary" href="{% url 'psm_skm_tes_urine' %}">
+                        <i class="fas fa-arrow-left me-2"></i>Kembali ke daftar survei
+                    </a>
+                    <button class="btn btn-success" onclick="downloadHTMLAsPDF()">
+                        <i class="fas fa-file-export me-2"></i>Export Pdf
+                    </button>
+
+                    <button class="btn btn-primary" onclick="lihat_chart()">
+                        <i class="fas fa-chart-area me-2"></i>Lihat Chart
+                    </button>
+                </div>
+            </div>
+
+            <div id="headline" class="my-5 mb-3">
+                <h3 class="text-center">Hasil Survei Data SKM Tes Urine 2024</h3>
+            </div>
+
+
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Nilai Unsur Pelayanan</h3>
+            </div>
+
+            
+            <table class="table table-sm table-bordered" id="__table_kesimpulan_perhitungan">
+                <tbody>
+                    <tr>
+                        <th scope="row" class="bg-soft-success" style="font-weight: 900;">Jumlah Responden</th>
+                        <td class="align-middle"><span class="jumlah_responden"></span></td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br>
+
+            <table id="myTableasd" class="table display table-bordered">
+                <thead class="bg-soft-success">
+                    <th style="font-weight: 900;">NO</th>
+                    <th style="font-weight: 900;">Nilai Interval</th>
+                    <th style="font-weight: 900;">Nilai Interval Konversi</th>
+                    <th style="font-weight: 900;">Mutu</th>
+                    <th style="font-weight: 900;">Kinerja Unit Pelayanan</th>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>1</td>
+                        <td>88,31 - 100,00</td>
+                        <td>3,533 - 4,00</td>
+                        <td>A</td>
+                        <td>Sangat Baik</td>
+                    </tr>
+                    <tr>
+                        <td>2</td>
+                        <td>76,61 - 88,30</td>
+                        <td>3,065 - 3,532</td>
+                        <td>B</td>
+                        <td>Baik</td>
+                    </tr>
+                    <tr>
+                        <td>3</td>
+                        <td>65,00 - 76,60</td>
+                        <td>2,600 - 3,064</td>
+                        <td>C</td>
+                        <td>Kurang Baik</td>
+                    </tr>
+                    <tr>
+                        <td>4</td>
+                        <td>25,00 - 64,99</td>
+                        <td>1,000 - 2,599</td>
+                        <td>D</td>
+                        <td>Tidak Baik</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <br>
+
+            <table id="" class="table display table-bordered">
+                <thead class="bg-soft-success">
+                    <th style="font-weight: 900;">NO</th>
+                    <th style="font-weight: 900;">Unsur SKM</th>
+                    <th style="font-weight: 900;">Nilai Ratarata tiap Unsur</th>
+                    <th style="font-weight: 900;">Nilai SKM tiap Unsur (2) x 25</th>
+                    <th style="font-weight: 900;">Mutu Pelayanan (A/B/C/D)</th>
+                    <th style="font-weight: 900;">Kinerja</th>
+                </thead>
+                <tbody id="nilai_indeks_masing_masing">
+                    <tr>
+                        <td></td>
+                        <td>(1)</td>
+                        <td>(2)</td>
+                        <td>(3)</td>
+                        <td>(4)</td>
+                        <td>(5)</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- <table id="" class="table display table-bordered">
+                <tbody id="hasil_indeks">
+                </tbody>
+            </table> -->
+
+            <br>
+
+            <table id="myTable3" class="table display table-bordered d-none">
+                <thead>
+                    <th>Jumlah Responden</th>
+                    <th>Jumlah N</th>
+                </thead>
+                <tbody></tbody>
+            </table>
+<!-- 
+            <div class="container-fluid" style="padding: 0px;">
+                <div class="row">
+                    <div class="col">
+                        <div class="card" id="card_keterangan">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;">Keterangan :</h5>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - U1 s.d U<span class="jumlah_daftar_pertanyaan"></span>
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Unsur-Unsur Pelayanan
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - NRR
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Nilai Rata Rata
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - IKM
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Indeks Kepuasan Masyarakat
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - *)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Jumlah NRR IKM Tertimbang
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - **)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Jumlah NRR Tertimbang x 25
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - NRR Per Unsur
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        Jumlah nilai per unsur dibagi jumlah kusioner yang terisi
+                                    </div>
+                                </div>
+                                <div class="row hi-font">
+                                    <div class="col-4">
+                                        - NRR Tertimbang Per Unsur
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-7">
+                                        NRR perunsur x 0.11
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="card" id="card_hasil_akhir">
+                            <div class="card-body">
+                                <h4 id="ikm" class="card-title" style="margin: 0px; font-weight: bold;"></h4>
+                                <h5 id="akreditas" class="card-title" style="margin: 0px; font-weight: bold;"></h5>
+                            </div>
+                        </div>
+
+                        <br>
+
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title" style="font-weight: bold;">Mutu Pelayanan :</h5>
+                                <div class="row high-font">
+                                    <div class="col-3 text-success">
+                                        A (Sangat Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        88,31 - 100,00
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-primary">
+                                        B (Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        76,61 - 88,30
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-warning">
+                                        C (Kurang Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        65,00 - 76,60
+                                    </div>
+                                </div>
+                                <div class="row high-font">
+                                    <div class="col-3 text-danger">
+                                        D (Tidak Baik)
+                                    </div>
+                                    <div class="col-1">
+                                        =
+                                    </div>
+                                    <div class="col-8">
+                                        25,00 - 64,99
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="col">
+                        <div class="card">
+                            <table class="table">
+                                <thead class="bg-soft-warning">
+                                    <tr>
+                                        <th scope="col">No</th>
+                                        <th scope="col">Unsur Pelayanan</th>
+                                        <th scope="col">Nilai Rata-Rata</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="myTableBody">
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div> -->
+
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    let pertanyaan;
+    let jumlah_responden;
+    var jumlah_daftar_pertanyaan = 0;
+    var id_number;
+
+    const tableKesimpulanPerhitungan = $('#__table_kesimpulan_perhitungan');
+
+    $(document).ready(function () {
+        const CSRF_TOKEN = getCookie('csrftoken');
+        var currentUrl = window.location.href;
+        var number_id = getNumberFromUrl(currentUrl);
+        id_number = number_id;
+
+        Swal.fire({
+            title: "Tunggu sebentar",
+            icon: "info",
+            html: "Sedang memuat data !",
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        if (number_id != "kosong") {
+            axios.get('/survei/api/v1/data_survei/' + number_id + '/', {
+                    headers: {
+                        'X-CSRFToken': CSRF_TOKEN,
+                        'Content-Type': 'application/json',
+                    }
+                })
+                .then((response) => {
+                    mengolah_data_mentah(response);
+                })
+                .catch((error) => {
+                    console.error('Error performing Axios request:', error);
+                });
+        } else {
+            Swal.close();
+            Swal.fire({
+                title: "Terjadi Kesalahan",
+                text: "ID tidak valid",
+                icon: "error"
+            });
+        }
+    });
+
+    function mengolah_data_mentah(res) {
+        let data_isian_mentah = res.data.get_data_isian;
+        pertanyaan = res.data.get_data_tipe[0].daftar_pertanyaan;
+        let banyak_data = data_isian_mentah.length;
+        jumlah_responden = res.data.get_jumlah_responden;
+
+        jumlah_daftar_pertanyaan = pertanyaan.length;
+
+        $('#card_keterangan .jumlah_daftar_pertanyaan').html(jumlah_daftar_pertanyaan);
+
+        let resultArray = [];
+
+        for (let i = 0; i < banyak_data; i++) {
+            let data_mentahan;
+            if (isValidJSON(data_isian_mentah[i].data_mentahan)) {
+                var jsonObject = $.parseJSON(data_isian_mentah[i].data_mentahan);
+                console.log('Mengolah data mentahan dari isian ke-' + i + ': ', jsonObject);
+                data_mentahan = checkArrayAndAddData(jsonObject);
+            } else {
+                data_mentahan = checkArrayAndAddData(data_isian_mentah[i].data_mentahan);
+            }
+
+            let array_sementara = [];
+            for (let j = 0; j < data_mentahan.length; j++) {
+                let currentObject = {
+                    ["U" + data_mentahan[j].no]: data_mentahan[j].bobot
+                };
+                array_sementara.push(currentObject);
+            }
+            resultArray.push(array_sementara);
+        }
+
+        tableKesimpulanPerhitungan.find('tbody tr td span.jumlah_responden').html(jumlah_responden);
+        menampilkan_data_jawaban(resultArray);
+    }
+
+    function perhitungan(dataArray) {
+        const sums = Array.from({
+            length: 10
+        }, () => 0);
+        const nrrs = Array.from({
+            length: 10
+        }, () => 0);
+        const nrrts = Array.from({
+            length: 10
+        }, () => 0);
+
+        for (let i = 0; i < dataArray.length; i++) {
+            let data_mentahan = dataArray[i];
+
+            // ngebuat, sum dari sigma nilai, nilai rata-rata / panjang array
+            for (let j = 0; j < 10; j++) {
+                sums[j] += parseInt(data_mentahan[j]['U' + (j + 1)]);
+                nrrs[j] += parseInt(data_mentahan[j]['U' + (j + 1)]) / dataArray.length;
+            }
+        }
+
+        // Menghitung nilai rata-rata tertimbang * 0.11
+        for (let k = 0; k < 10; k++) {
+            nrrts[k] = nrrs[k] * 0.11;
+        }
+
+        // sum nilai rata-rata tertimbang
+        const sum_nrrt = nrrts.reduce((sum, nrrt) => sum + nrrt, 0);
+        const ikm_unit_pelayanan = sum_nrrt * 25;
+
+        console.log(nrrts);
+
+        implementasi(sums, nrrs, nrrts, sum_nrrt, ikm_unit_pelayanan)
+    }
+
+    function implementasi(sigma_nilai, nrr, nrrt, sum_nrrt, ikm_unit_pelayanan) {
+        const res_nrr = removeDecimal(nrr);
+        const res_nrrt = removeDecimal(nrrt);
+        var table = $('#myTable2').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false,
+        });
+
+        var unsur = ['Persyaratan', 'Sistem, Mekanisme, dan Prosedur', 'Waktu Penyelesaian', 'Biaya/Tarif', 'Pemungutan Liar', 'Produk Spesifikasi Jenis Pelayanan', 'Kompetensi Pelaksana', 'Perilaku Pelaksana', 'Penanganan Pengaduan, Saran dan Masukan', 'Sarana dan Prasarana'];
+
+        for (let index = 0; index < res_nrr.length; index++) {
+            const element = res_nrr[index];
+            var x25 = element * 25;
+            var mutu_pelayanan = calculateGrade(element);
+            var kinerja = getPerformance(x25);
+            
+            var newRow = $(`<tr>
+                <td>${index+1}</td>
+                <td>${unsur[index]}</td>
+                <td>${element}</td>
+                <td>${x25}</td>
+                <td>${mutu_pelayanan}</td>
+                <td>${kinerja}</td>
+            </tr>`);
+            $('#nilai_indeks_masing_masing').append(newRow);
+        }
+
+        var jumlah_n = calculateAverage(res_nrr);
+        var ikm_1 = jumlah_n / res_nrr.length;
+        var ikm_2 = ikm_1 * 25;
+        var ikm_3 = calculateGrade(ikm_1);
+        var ikm_4 = getPerformance(ikm_2);
+
+        var newRow1 = $(`<tr>
+                <td style="width: 80px;"></td>
+                <td style="width: 450px;" class="font_height">Jumlah (N)</td>
+                <td style="width: 300px;">${jumlah_n}</td>
+                <td style="width: 365px; background-color: #d9d9d9;"></td>
+                <td style="width: 340px; background-color: #d9d9d9;"></td>
+                <td style="width: 170px; background-color: #d9d9d9;"></td>
+            </tr>`);
+
+        var newRow2 = $(`<tr>
+                <td></td>
+                <td class="font_height">IKM Unit Kerja</td>
+                <td>${ikm_1}</td>
+                <td>${ikm_2}</td>
+                <td>${ikm_3}</td>
+                <td>${ikm_4}</td>
+            </tr>`);
+
+        $('#nilai_indeks_masing_masing').append(newRow1);
+        $('#nilai_indeks_masing_masing').append(newRow2);
+
+        swal.close();
+        // make_kesimpulan(sum_nrrt, ikm_unit_pelayanan);
+        // tabel_pertanyaan(res_nrr);
+    }
+
+    function menampilkan_data_jawaban(resultArray) {
+        var table = $('#myTable').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false,
+        });
+
+        resultArray.forEach(function (rowData, index) {
+            var row = [index + 1];
+            rowData.forEach(function (cellData) {
+                row.push(cellData[Object.keys(cellData)[0]]);
+            });
+
+            table.row.add(row).draw();
+        });
+
+        console.log(resultArray);
+
+        perhitungan(resultArray);
+    }
+
+    function make_kesimpulan(sum_nrrt, ikm_unit_pelayanan) {
+        let var_nrrt = removeDec(sum_nrrt);
+        let var_ikm = removeDec(ikm_unit_pelayanan);
+
+        var category = convertToCategory(var_ikm);
+
+        let card = $('#card_hasil_akhir');
+        //card.find('#ikm').html(`SKM UNIT PELAYANAN : ${var_ikm}`).addClass(category.colorClass);
+        //card.find('#akreditas').html(`Akreditas          : ${category.category}`).addClass(category.colorClass);
+
+        $('#ikm').text("SKM UNIT PELAYANAN  : " + var_ikm + " " + category.category).addClass(category.colorClass);
+
+        var table = $('#myTable3').DataTable({
+            searching: false,
+            paging: false,
+            ordering: false,
+            info: false,
+        });
+
+        tableKesimpulanPerhitungan.find('tbody tr td span.ikm_unit_pelayanan').html(var_ikm);
+        tableKesimpulanPerhitungan.find('tbody tr td span.nrr_tertimbang').html(var_nrrt);
+
+        table.row.add([jumlah_responden, var_nrrt, var_ikm]).draw(false);
+    }
+
+    function tabel_pertanyaan(nrr) {
+        if (haveSameLength(nrr, pertanyaan)) {
+            for (let index = 0; index < nrr.length; index++) {
+                const element_nrr = nrr[index];
+                const element_pertanyaan = pertanyaan[index];
+                let rowindex = index + 1;
+                var newRow = $(`<tr>
+                    <td>U${rowindex}</td>
+                    <td>${element_pertanyaan.pertanyaan}</td>
+                    <td>${element_nrr.toFixed(3)}</td>
+                </tr>`);
+                $('#myTableBody').append(newRow);
+            }
+        } else {
+            var newRow = $('<tr><td>#</td><td>Terjadi Kesalahan</td><td>Data Tidak Sinkron</td></tr>');
+            $('#myTableBody').append(newRow);
+        }
+        Swal.close();
+    }
+
+    // function kostum
+    function removeDecimal(arr) {
+        return arr.map(num => parseFloat(num.toFixed(3)));
+    }
+
+    function removeDec(num) {
+        return parseFloat(num.toFixed(3));
+    }
+
+    function getNumberFromUrl(url) {
+        var match = url.match(/\/(\d+)\/$/);
+        if (match) {
+            return match[1];
+        } else {
+            return "kosong";
+        }
+    }
+
+    function isValidJSON(str) {
+        try {
+            JSON.parse(str);
+            return true;
+        } catch (e) {
+            return false;
+        }
+    }
+
+    function convertToCategory(data) {
+        if (data >= 88.31 && data <= 100.00) {
+            return {
+                category: "A (sangat baik)",
+                colorClass: "text-success"
+            };
+        } else if (data >= 76.61 && data <= 88.30) {
+            return {
+                category: "B (baik)",
+                colorClass: "text-primary"
+            };
+        } else if (data >= 65.00 && data <= 76.60) {
+            return {
+                category: "C (kurang baik)",
+                colorClass: "text-warning"
+            };
+        } else if (data >= 25.00 && data <= 64.99) {
+            return {
+                category: "D (tidak baik)",
+                colorClass: "text-danger"
+            };
+        } else {
+            return {
+                category: "Tidak valid",
+                colorClass: ""
+            };
+        }
+    }
+
+    function haveSameLength(array1, array2) {
+        return array1.length === array2.length;
+    }
+    
+    function calculateAverage(array) {
+        var sum = 0;
+        for (var i = 0; i < array.length; i++) {
+            sum += array[i];
+        }
+        var average = sum;
+        return average;
+    }
+
+    function calculateGrade(value) {
+        if (value >= 3.533 && value <= 4.00) {
+            return 'A';
+        } else if (value >= 3.065 && value < 3.533) {
+            return 'B';
+        } else if (value >= 2.600 && value < 3.065) {
+            return 'C';
+        } else if (value >= 1.000 && value < 2.600) {
+            return 'D';
+        } else {
+            return 'Unknown'; // If the value doesn't fall into any of the specified ranges
+        }
+    }
+
+    function getPerformance(score) {
+        if (score >= 88.31 && score <= 100.00) {
+            return "Sangat Baik";
+        } else if (score >= 76.61 && score <= 88.30) {
+            return "Baik";
+        } else if (score >= 65.00 && score <= 76.60) {
+            return "Kurang Baik";
+        } else if (score >= 25.00 && score <= 64.99) {
+            return "Tidak Baik";
+        } else {
+            return "Invalid score";
+        }
+    }
+
+    function checkArrayAndAddData(array) {
+        if (array.length !== 10) {
+            var remainingLength = 10 - array.length;
+            for (var i = 0; i < remainingLength; i++) {
+                array.push({
+                    no: array.length +  1,
+                    jawaban: 0,
+                    bobot: '0',
+                    pilihan: 'x'
+                });
+            }
+        }
+        return array;
+    }
+
+    window.jsPDF = window.jspdf.jsPDF
+    window.html2canvas = html2canvas
+
+    function downloadHTMLAsPDF() {
+        $('.breadcrumb').hide();
+        $('.action-button').hide();
+        
+        html2canvas(document.body).then(canvas => {
+            const pdf = new jsPDF();
+
+            const imageData = canvas.toDataURL("image/png");
+            pdf.addImage(imageData, 'PNG', 0, 0, pdf.internal.pageSize.width, pdf.internal.pageSize.height);
+            pdf.save("pdf_perhitungan_survei.pdf");
+            $('.breadcrumb').show();
+            $('.action-button').show();
+        });
+    }
+
+    function lihat_chart() {
+        window.location.href = '/survei/chart_survei/'+id_number+'/';
+    }
+</script>
+
+<script>
+    $(document).ready(function () {
+        // Ambil semua elemen td pertama di dalam tbody tr pada tabel #myTable
+        var firstColumnCells = document.querySelectorAll('#myTable tbody tr td:nth-child(1)');
+
+        // Tambahkan class 'bg-soft-success' pada setiap elemen
+        firstColumnCells.forEach(function (cell) {
+            cell.classList.add('bg-soft-success');
+        });
+    });
+</script>
+{% endblock js_tambahan %}

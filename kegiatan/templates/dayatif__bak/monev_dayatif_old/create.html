@@ -1,0 +1,52 @@
+<div class="modal fade" id="tambahData" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambah">Tambah Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section id="formTambah">
+                    <div class="mb-3">
+                        <label for="satker" class="col-form-label required">Satuan Kerja:</label>
+                        <select class="form-control select2" name="satker" id="satker">
+                            <option value="" selected disabled>Pilih Satuan Kerja</option>
+                            {% for item in satker %}
+                            <option value="{{ item.nama_satker }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jenis_rekapitulasi" class="col-form-label required">Jenis:</label>
+                        <select class="form-control select2" name="jenis_rekapitulasi" id="jenis_rekapitulasi">
+                            <option value="" selected disabled>Pilih Jenis</option>
+                            {% for item in daftar_jenis_rekapitulasi %}
+                            <option value="{{ item.value }}">{{ item.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="periode" class="col-form-label required">Periode:</label>
+                        <select class="form-control select2" name="periode" id="periode">
+                            <option value="" selected disabled>Pilih Periode</option>
+                            {% for item in daftar_periode %}
+                            <option value="{{ item.value }}">{{ item.label }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jumlah_kegiatan" class="col-form-label required">Jumlah Kegiatan:</label>
+                        <input type="number" name="jumlah_kegiatan" class="form-control" id="jumlah_kegiatan" />
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>Tutup</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,86 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %}
+Daftar Berita
+{% endblock %}
+{% block content %}
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Daftar Berita</h3>
+        <span class="mb-0"><span class="text-muted fw-light">Berita /</span><span class="ms-1 fw-medium">Daftar
+                Berita</span></span>
+    </div>
+</div>
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Berita Sistem Pemberdayaan Masyarakat</h3>
+                <hr />
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData"><i
+                            class="fas fa-file-export me-2"></i>Ekspor Data</button>
+                    <a href="{% url 'berita:create' %}" class="btn btn-primary"><i class="fas fa-plus me-2"></i>Tambah
+                        Data</a>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                {% include 'berita/table_berita.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    $(document).ready(function () {
+        $('#__table').DataTable({
+            language: dt_lang_config()
+        });
+
+
+        $('.delete-data').on('click', function () {
+            Swal.fire({
+                title: "Apakah anda yakin?",
+                html: `Data yang <strong>dihapus</strong> tidak dapat dipulihkan kembali.`,
+                icon: "warning",
+                showCancelButton: true,
+                cancelButtonText: "Batalkan",
+                confirmButtonText: "Ya, hapus data ini!",
+                //confirmButtonColor: "#3f858a",
+                //cancelButtonColor: '#d33',
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    console.log('User clicked the confirm button ...');
+
+                    Swal.fire({
+                        title: "Tunggu sebentar",
+                        icon: "info",
+                        html: `Menghapus <b>data</b> yang anda dipilih..`,
+                        timer: 2000,
+                        didOpen: () => {
+                            Swal.showLoading();
+                        },
+                    }).then((result) => {
+                        if (result.dismiss === Swal.DismissReason.timer) {
+                            Swal.fire({
+                                title: "Berhasil",
+                                html: `Data yang dipilih telah <strong>berhasil</strong> dihapus.`,
+                                icon: "success",
+                                confirmButtonText: "OK",
+                                timer: 2000,
+                            });
+                        }
+                    });
+                }
+            })
+        });
+    });
+</script>
+{% endblock %}

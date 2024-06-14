@@ -1,0 +1,430 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+
+{% block title %} Dashboard {% endblock %}
+
+{% block css_tambahan %}
+    <!-- JsPDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js">
+    </script>
+
+    <!-- HTML2Canvas -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js">
+    </script>
+
+    <style>
+        .card ul li {
+            border-bottom: 2px solid #f0f0f0;
+            margin-bottom: 0.5rem;
+            padding-bottom: 0.5rem;
+            cursor: pointer;
+        }
+    </style>
+{% endblock css_tambahan %}
+
+{% block content %}
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Beranda</h3>
+    </div>
+</div>
+
+{% include 'dashboard/dayatif/pelaporan_kegiatan.html' %}
+{% include 'dashboard/dayatif/pelaporan_survei.html' %}
+
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Global scripts -->
+<script>
+    /**
+     * Global variable
+     */
+     const monthNames = [
+        'Januari', 'Februari', 'Maret', 'April', 'Mei', 'Juni',
+        'Juli', 'Agustus', 'September', 'Oktober', 'November', 'Desember'
+    ];
+
+    const currentMonth = new Date().getMonth();
+    const currentMonthLabel = monthNames[currentMonth];
+
+    /**
+     * Generate PDF
+     * @param target
+     */
+    const generatePDF = (target) => {
+        const { jsPDF } = window.jspdf;
+
+        const doc = new jsPDF('l', 'mm', [1500, 1400]);
+        const pdfjs = document.querySelector(`#${target}`);
+
+        doc.html(pdfjs, {
+            callback: function(doc) {
+                doc.save(`${target}.pdf`);
+            },
+            x: 12,
+            y: 12
+        });
+    };
+</script>
+<!-- / Global scripts -->
+
+<!-- Kegiatan -->
+<script>
+    let responseKegiatanData = null;
+
+    /**
+     * Filter month card
+     * @param {month, dataLabel, responseKegiatanData}
+     */
+    const handleFilterKegiatanMonthCard = (month) => {
+        const dataLabel = {
+            binaan_teknis: null,
+            pemetaan_potensi: null,
+            pemetaan_stakeholder: null,
+            rapat_sinergi_stakeholder: null,
+            bimbingan_teknis_stakeholder: null,
+            bimbingan_teknis_lifeskill: null,
+            monitoring_dan_evaluasi: null,
+            dukungan_stakeholder: null,
+        };
+
+        const monthLabel = $('#filter_kegiatan_kartu_bulan option:selected').text();
+
+        // Set currentMonthLabel to DOM
+        $('#kegiatan_info_currentmonth').text(monthLabel);
+
+        // Set data this month
+        Object.keys(dataLabel).forEach(key => {
+            $(`.${key} .user-progress h6`).text(responseKegiatanData[key]['2024'][month]);
+        });
+    };
+
+    /**
+     * Get count kegiatan
+     * @returns Object
+     */
+    const getKegiatanCountData = async () => {
+        const response = await axios.get('/kegiatan/api/v1/dayatif/kegiatan_count/');
+
+        responseKegiatanData = response.data.data;
+
+        /**
+         * Get sliced data according to currentMonth
+         * @params data
+         */
+         const getSlicedData = (data) => {
+            return data.slice(0, currentMonth + 1)
+        }
+
+        // Datasets from API Preparation
+        const data = {
+            binaan_teknis: null,
+            pemetaan_potensi: null,
+            pemetaan_stakeholder: null,
+            rapat_sinergi_stakeholder: null,
+            bimbingan_teknis_stakeholder: null,
+            bimbingan_teknis_lifeskill: null,
+            monitoring_dan_evaluasi: null,
+            dukungan_stakeholder: null,
+        };
+
+        // Fill data
+        Object.keys(data).forEach(key => {
+            data[key] = getSlicedData(Object.keys(responseKegiatanData[key]['2024'])
+                .filter(month => month !== 'total')
+                .map(month => responseKegiatanData[key]['2024'][month]));
+        });
+
+        $('#filter_kegiatan_kartu_bulan').val(currentMonth+1).trigger('change');
+
+        return data;
+    }
+
+    $(async () => {
+        const kegiatanLineChartCTX = document.getElementById('kegiatanLineChart').getContext('2d');
+
+        // Label bulan dinamis
+        const labels = monthNames.slice(0, currentMonth + 1);
+
+        const data = await getKegiatanCountData(currentMonth);
+
+        // Create datasets
+        const datasets = [
+            {
+                label: 'Pembinaan Teknis',
+                data: data.binaan_teknis,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Pemetaan Potensi',
+                data: data.pemetaan_potensi,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Pemetaan Stakeholder',
+                data: data.pemetaan_stakeholder,
+                borderColor: 'rgba(255, 206, 86, 1)',
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Rapat Sinergi Stakeholder',
+                data: data.rapat_sinergi_stakeholder,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Bimbingan Teknis Stakeholder',
+                data: data.bimbingan_teknis_stakeholder,
+                borderColor: 'rgba(153, 102, 255, 1)',
+                backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Bimbingan Teknis Lifeskill',
+                data: data.bimbingan_teknis_lifeskill,
+                borderColor: 'rgba(255, 159, 64, 1)',
+                backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Monitoring dan Evaluasi Dayatif',
+                data: data.monitoring_dan_evaluasi,
+                borderColor: 'rgba(199, 199, 199, 1)',
+                backgroundColor: 'rgba(199, 199, 199, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Dukungan Stakeholder',
+                data: data.dukungan_stakeholder,
+                borderColor: 'rgba(255, 99, 71, 1)',
+                backgroundColor: 'rgba(255, 99, 71, 0.2)',
+                fill: false
+            }
+        ];
+
+        // Calculate accumulated dataset
+        const accumulatedData = datasets[0].data.map((_, i) => {
+            return datasets.reduce((acc, dataset) => acc + dataset.data[i], 0);
+        });
+
+        const accumulatedDataset = {
+            label: "Data Akumulasi Pelaporan Kegiatan",
+            data: accumulatedData,
+            backgroundColor: "#e8e6ff",
+            borderColor: "#7367F0",
+            fill: false,
+        };
+
+        const kegiatanLineChart = new Chart(kegiatanLineChartCTX, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [...datasets]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        onClick: function (e, legendItem) {
+                            const index = legendItem.datasetIndex;
+                            const ci = this.chart;
+                            const meta = ci.getDatasetMeta(index);
+
+                            // Toggle the visibility
+                            meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                            ci.update();
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        document.getElementById('toggleSemuaKegiatan').addEventListener('click', () => {
+            const ci = kegiatanLineChart;
+            if (ci.data.datasets.length === datasets.length) {
+                ci.data.datasets = [accumulatedDataset];
+            } else {
+                ci.data.datasets = [...datasets];
+            }
+            ci.update();
+        });
+    });
+</script>
+<!-- / Kegiatan -->
+
+<!-- Survei -->
+<script>
+    let responseSurveiData = null;
+
+    /**
+     * Filter month card
+     * @param {month, dataLabel, responseSurveiData}
+     */
+    const handleFilterSurveiMonthCard = (month) => {
+        const dataLabel = {
+            formulir_elektronik: null,
+            skm_lifeskill: null,
+            keberhasilan_dan_kewirausahaan: null,
+            survei_ikrn: null,
+        };
+
+        const monthLabel = $('#filter_survei_kartu_bulan option:selected').text();
+
+        // Set currentMonthLabel to DOM
+        $('#survei_info_currentmonth').text(monthLabel);
+
+        // Set data this month
+        Object.keys(dataLabel).forEach(key => {
+            $(`.${key} .user-progress h6`).text(responseSurveiData[key]['2024'][month]);
+        });
+    };
+
+    /**
+     * Get count kegiatan
+     * @params currentMonth
+     */
+    const getSurveiCountData = async () => {
+        const response = await axios.get('/kegiatan/api/v1/dayatif/survei_count/');
+
+        responseSurveiData = response.data.data;
+
+        console.log('Response survei', responseSurveiData);
+
+        /**
+         * Get sliced data according to currentMonth
+         * @params data
+         */
+         const getSlicedData = (data) => {
+            return data.slice(0, currentMonth + 1)
+        }
+
+        // Datasets from API Preparation
+        const data = {
+			formulir_elektronik: null,
+            skm_lifeskill: null,
+            keberhasilan_dan_kewirausahaan: null,
+            survei_ikrn: null,
+        };
+
+        // Fill data
+        Object.keys(data).forEach(key => {
+            data[key] = getSlicedData(Object.keys(responseSurveiData[key]['2024'])
+                .filter(month => month !== 'total')
+                .map(month => responseSurveiData[key]['2024'][month]));
+        });
+
+        $('#filter_survei_kartu_bulan').val(currentMonth+1).trigger('change');
+
+        return data;
+    }
+
+    $(async () => {
+        const surveiLineChartCTX = document.getElementById('surveiLineChart').getContext('2d');
+
+        // Label bulan dinamis
+        const labels = monthNames.slice(0, currentMonth + 1);
+
+        const data = await getSurveiCountData(currentMonth);
+
+        // Create datasets
+        const datasets = [
+            {
+                label: 'Formulir Elektronik',
+                data: data.formulir_elektronik,
+                borderColor: 'rgba(255, 99, 132, 1)',
+                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                fill: false
+            },
+            {
+                label: 'SKM Life Skill',
+                data: data.skm_lifeskill,
+                borderColor: 'rgba(54, 162, 235, 1)',
+                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Keberhasilan dan Kewirausahaan',
+                data: data.keberhasilan_dan_kewirausahaan,
+                borderColor: 'rgba(255, 206, 86, 1)',
+                backgroundColor: 'rgba(255, 206, 86, 0.2)',
+                fill: false
+            },
+            {
+                label: 'Survei IKRN',
+                data: data.survei_ikrn,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                fill: false
+            },
+        ];
+
+        // Calculate accumulated dataset
+        const accumulatedData = datasets[0].data.map((_, i) => {
+            return datasets.reduce((acc, dataset) => acc + dataset.data[i], 0);
+        });
+
+        const accumulatedDataset = {
+            label: "Data Akumulasi Pelaporan Survei",
+            data: accumulatedData,
+            backgroundColor: "#e8e6ff",
+            borderColor: "#7367F0",
+            fill: false,
+        };
+
+        const surveiLineChart = new Chart(surveiLineChartCTX, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [...datasets]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        onClick: function (e, legendItem) {
+                            const index = legendItem.datasetIndex;
+                            const ci = this.chart;
+                            const meta = ci.getDatasetMeta(index);
+
+                            // Toggle the visibility
+                            meta.hidden = meta.hidden === null ? !ci.data.datasets[index].hidden : null;
+                            ci.update();
+                        }
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        document.getElementById('toggleSemuaSurvei').addEventListener('click', () => {
+            const ci = surveiLineChart;
+            if (ci.data.datasets.length === datasets.length) {
+                ci.data.datasets = [accumulatedDataset];
+            } else {
+                ci.data.datasets = [...datasets];
+            }
+            ci.update();
+        });
+    });
+</script>
+<!-- / Survei -->
+{% endblock %}

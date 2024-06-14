@@ -1,0 +1,33 @@
+{% load static %}
+
+<!-- Components -->
+<script src="{% static 'dayatif/components.js' %}"></script>
+
+<!-- Importing -->
+<script>
+    const components = {
+        'v-item-header': ItemHeader,
+        'v-item-dokumentasi': ItemDokumentasi,
+        'v-item-tanggal': ItemTanggal,
+        'v-item-text': ItemText,
+
+        'v-lokasi': Lokasi,
+        'v-potensi': Potensi,
+        'v-daftar-stakeholder': DaftarStakeholder,
+        'v-daftar-peserta': DaftarPeserta,
+
+        'v-action-button': ActionBTN,
+        'v-export-button': ExportBTN,
+        'v-page-action-button': PageActionBTN,
+
+        'v-table': Table,
+        'v-table-basic-filter': TableBasicFilter,
+        'v-result-not-found': ResultNotFound,
+
+        'v-generic-filter': GenericFilter,
+        'v-input-image': InputImage,
+
+    }
+
+    delimiters = ['{', '}'];
+</script>

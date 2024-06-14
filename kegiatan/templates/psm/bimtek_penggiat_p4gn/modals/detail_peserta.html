@@ -1,0 +1,40 @@
+<div class="modal fade" id="detailPeserta">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Daftar Peserta untuk Pelaksanaan dari Satuan Kerja <strong
+                        id="detail__info"></strong>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered">
+                        <thead>
+                            <tr>
+                                <th class="bg-soft-primary text-center">No.</th>
+                                <th class="bg-soft-primary">Nama</th>
+                                <th class="bg-soft-primary">Jabatan</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <template v-if="daftarPeserta && daftarPeserta.length != 0">
+                                <tr v-for="(peserta, index) in daftarPeserta">
+                                    <td>${ ++index }</td>
+                                    <td>${ peserta.nama }</td>
+                                    <td>${ peserta.jabatan }</td>
+                                </tr>
+                            </template>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,49 @@
+<ul class="menu-sub">
+	{% if user.profile.satker.level == 0 or user.profile.satker.level == 2 %}
+	<li class="menu-item {% if '/dayatif/binaan_teknis' in request.path %}active{% endif %}">
+		<a href="{% url 'dayatif_binaan_teknis' %}" class="menu-link">
+			<div data-i18n="Pembinaan Teknis">Pembinaan Teknis</div>
+		</a>
+	</li>
+	{% endif %}
+
+	<li class="menu-item {% if '/dayatif/pemetaan_potensi' in request.path %}active{% endif %}">
+	   <a href="{% url 'dayatif_pemetaan_potensi' %}" class="menu-link">
+		   <div data-i18n="Pemetaan Potensi">Pemetaan Potensi</div>
+	   </a>
+   </li>
+   <li class="menu-item {% if '/kegiatan/dayatif/pemetaan_stakeholder' in request.path %}active{% endif %}">
+	   <a href="{% url 'dayatif_pemetaan_stakeholder' %}" class="menu-link">
+		   <div data-i18n="Pemetaan Stakeholder">Pemetaan Stakeholder</div>
+	   </a>
+   </li>
+   <li class="menu-item {% if '/kegiatan/dayatif/rapat_sinergi_stakeholder' in request.path %}active{% endif %}">
+	   <a href="{% url 'dayatif_rapat_sinergi_stakeholder' %}" class="menu-link">
+		   <div data-i18n="Rapat Sinergi Stakeholder">Rapat Sinergi Stakeholder</div>
+	   </a>
+   </li>
+   <li class="menu-item {% if '/kegiatan/dayatif/bimbingan_teknis_stakeholder' in request.path %}active{% endif %}">
+	   <a href="{% url 'dayatif_bimbingan_teknis_stakeholder' %}" class="menu-link">
+		   <div data-i18n="Bimbingan Teknis Stakeholder">Bimbingan Teknis Stakeholder</div>
+	   </a>
+   </li>
+   <li class="menu-item {% if '/kegiatan/dayatif/bimbingan_teknis_lifeskill' in request.path %}active{% endif %}">
+	   <a href="{% url 'dayatif_bimbingan_teknis_lifeskill' %}" class="menu-link">
+		   <div data-i18n="Bimbingan Teknis Life Skill">Bimbingan Teknis Life Skill</div>
+	   </a>
+   </li>
+   
+   <li class="menu-item {% if '/kegiatan/dayatif/monev_dayatif' in request.path %}active{% endif %}">
+	   <a href="{% url 'dayatif_monev_dayatif' %}" class="menu-link">
+		   <div data-i18n="Monitoring dan Evaluasi Dayatif">Monev Dayatif</div>
+	   </a>
+   </li>
+
+	{% if user.profile.satker.level == 0 or user.profile.satker.level == 2 %}
+	<li class="menu-item {% if '/kegiatan/dayatif/dukungan_stakeholder' in request.path %}active{% endif %}">
+		<a href="{% url 'dayatif_dukungan_stakeholder' %}" class="menu-link">
+			<div data-i18n="Dukungan Stakeholder">Dukungan Stakeholder</div>
+		</a>
+	</li>
+	{% endif %}
+</ul>

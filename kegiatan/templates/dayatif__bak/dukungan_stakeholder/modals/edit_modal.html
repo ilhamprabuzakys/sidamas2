@@ -1,0 +1,137 @@
+<form id="editForm" @submit.prevent="handleUpdate()">
+    <div class="modal fade" id="editModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Data <b> {title}</b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="mb-3">
+                        <label for="edit__satker" class="col-form-label required">Satuan Kerja:</label>
+                        <select class="form-control select2" id="edit__satker" v-model="edit.satker" disabled>
+                            {% if user.profile.satker.level == 2 %}
+                                {% for item in satker %}
+                                <option value="{{ item.pk }}">{{ item.nama_satker }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+
+                    <label for="dukungan" class="col-form-label text-muted">Dukungan yang diberikan:</label>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div>
+                                <label for="dukungan_jenis_edit" class="col-form-label required">Jenis:</label>
+                                <select class="form-control" name="dukungan_jenis_edit" id="dukungan_jenis_edit" onchange="toggleInput('edit')" v-model="edit.jenis">
+                                    <option value="" selected disabled>--Pilih Jenis Dukungan--</option>
+                                    <option value="Dukungan Sarana Produksi" id="DSP">Dukungan Sarana Produksi</option>
+                                    <option value="Dukungan SDM" id="DSSDM">Dukungan SDM</option>
+                                    <option value="Dukungan Lainnya" id="Lainnya">Dukungan Lainnya</option>
+                                </select>
+
+                                <div id="input_lainnya_edit" style="display: none;">
+                                    <label for="dukungan_lainnya" class="col-form-label required">Spesifikasi Dukungan Lainnya:</label>
+                                    <input type="text" class="form-control" name="dukungan_lainnya" id="dukungan_lainnya">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <label for="dukungan_bentuk" class="col-form-label required">Bentuk:</label>
+                                <input type="text" id="dukungan_bentuk" class="form-control" value="" v-model="edit.bentuk"/>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <label for="dukungan_jumlah" class="col-form-label required">Jumlah:</label>
+                                <input type="text" id="dukungan_jumlah" class="form-control" value="" v-model="edit.jumlah"/>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+
+                        <label for="edit__selected_lokasi" class="col-form-label required">Kawasan Yang Diintervensi:</label>
+
+						<ul id="edit__selected_lokasi">
+							<li><b class="edit__selected_lokasi_label">Provinsi</b>:<span id="edit__selected_provinsi"></span></li>
+							<li><b class="edit__selected_lokasi_label">Kabupaten/Kota</b>:<span id="edit__selected_kabupaten"></span></li>
+							<li><b class="edit__selected_lokasi_label">Kecamatan</b>:<span id="edit__selected_kecamatan"></span></li>
+							<li><b class="edit__selected_lokasi_label">Desa/Kelurahan</b>:<span id="edit__selected_desa"></span></li>
+						</ul>
+
+						<div class="my-2">
+                            <span class="text-information">Kosongkan <b>bagian</b> ini jika tidak ingin mengganti lokasi.</span>
+                        </div>
+
+                        <div class="row" id="edit__lokasi">
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__provinsi" v-model="edit.provinsi">
+                                    <option value="" selected >--Pilih provinsi--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__kabupaten" v-model="edit.kabupaten" disabled>
+                                    <option value="" selected >--Pilih kota/kabupaten--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__kecamatan" v-model="edit.kecamatan" disabled>
+                                    <option value="" selected >--Pilih kecamatan--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" id="edit__desa" v-model="edit.desa" disabled>
+                                    <option value="" selected >--Pilih desa/kelurahan--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                        <div class="mb-3">
+                            <label for="jumlah_sasaran" class="col-form-label required">Jumlah Sasaran:</label>
+                            <input type="text" id="jumlah_sasaran" class="form-control" v-model="edit.jumlah_sasaran" />
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="pengaruh_manfaat" class="col-form-label required">Pengaruh/Manfaat:</label>
+                            <textarea class="form-control" name="pengaruh_manfaat" id="pengaruh_manfaat" v-model="edit.pengaruh"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="kesimpulan" class="col-form-label required">Kesimpulan:</label>
+                            <textarea class="form-control" v-model="edit.kesimpulan" id="kesimpulan"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+                            <textarea class="form-control" v-model="edit.tindak_lanjut" id="tindak_lanjut"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="edit__dokumentasi" class="col-form-label">Dokumentasi File:</label>
+                            <input type="file" class="form-control" id="edit__dokumentasi" @change="edit.dokumentasi = $event.target.files[0]"
+                                accept=".csv, .xlsx, .pdf, docx." />
+                        </div>
+                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+

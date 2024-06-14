@@ -1,0 +1,95 @@
+{% load static %}
+<nav class="layout-navbar container-fluid navbar navbar-expand-xl navbar-detached align-items-center bg-navbar-theme"
+   id="layout-navbar">
+   <div class="layout-menu-toggle navbar-nav align-items-xl-center me-3 me-xl-0   d-xl-none ">
+      <a class="nav-item nav-link px-0 me-xl-4" href="javascript:void(0)">
+         <i class="ti ti-menu-2 ti-sm"></i>
+      </a>
+   </div>
+   <div class="navbar-nav-right d-flex align-items-center" id="navbar-collapse"
+        x-data="{ searchInput: '', searchResults: [], isSearchFocused: false }"
+        x-on:click.away="isSearchFocused = false"
+        >
+
+        <ul class="navbar-nav flex-row align-items-center me-3">
+            <div class="layout-menu-toggle d-none d-xl-block">
+                <span style="cursor: pointer;"><i class="toggle-icon tf-icons ti ti-menu-2"></i></span>
+            </div>
+        </ul>
+
+        <!-- Search Input -->
+        <div class="navbar-nav align-items-center me-auto" style="width: 12rem;">
+            <div class="nav-item navbar-search-wrapper mb-0">
+                <a class="nav-item nav-link search-toggler d-flex align-items-center px-0" href="javascript:void(0);">
+                    <div class="input-group input-group-merge">
+                        <span class="input-group-text"><i class="ti ti-search"></i></span>
+                        {% if request.user.is_staff and request.user.is_superuser %}
+                        {% with role="superadmin" %}
+                        <input type="search" class="form-control" id="global_search_input" placeholder="Search..."
+                            aria-label="Search..." data-role="{{ role }}" data-direktorat="{{ request.user.profile.role }}" x-model="searchInput"
+                            x-on:focus='isSearchFocused = true'
+                            x-on:keyup="fetchSearchResults"
+                            />
+                        {% endwith %}
+                        {% elif request.user.is_staff and not request.user.is_superuser %}
+                        {% with role="admin" %}
+                        <input type="search" class="form-control" id="global_search_input" placeholder="Search..."
+                            aria-label="Search..." data-role="{{ role }}" data-direktorat="{{ request.user.profile.role }}" x-model="searchInput"
+                            x-on:focus='isSearchFocused = true'
+                            x-on:keyup="fetchSearchResults"
+                            />
+                        {% endwith %}
+                        {% endif %}
+                    </div>
+                </a>
+            </div>
+        </div>
+        <!--/ Search Input -->
+
+
+        <!-- Search results -->
+        <div id="global_search_results" class="list-group mt-5 position-absolute bg-white" x-cloak x-transition
+            x-show="searchInput && searchInput.length > 0 && isSearchFocused"
+            x-on:results.window="displaySearchResults($event.detail)"
+            style="top: 10px; width: 35%"
+            >
+            <template x-for="result in searchResults" :key="result.url">
+                <a :href="result.url" class="list-group-item list-group-item-action" x-on:click='isSearchFocused = false'>
+                    <i :class="result.icon + ' me-2'"></i>
+                    <span x-text="result.name"></span>
+                </a>
+            </template>
+            <template x-if="searchResults.length === 0">
+                <a href="javascript:void(0);" class="list-group-item list-group-item-action disabled">
+                    Tidak ada hasil ditemukan
+                </a>
+            </template>
+        </div>
+
+      <ul class="navbar-nav flex-row align-items-center">
+         <a href="javascript:;" id="btn-role">
+            {% if user.is_superuser %}
+            Super Admin
+            {% else %}
+                {% if user.profile.role == 'dayatif' %}
+                    {% if user.is_staff %}
+                        Admin DAYATIF
+                    {% else %}
+                        Pemberdayaan Alternatif
+                    {% endif %}
+                {% else %}
+                    {% if user.is_staff %}
+                        Admin PSM
+                    {% else %}
+                        Peran Serta Masyarakat
+                    {% endif %}
+                {% endif %}
+            {% endif %}
+         </a>
+      </ul>
+
+      {% include "dashboard/partials/components/user-dropdown.html" %}
+
+   </div>
+
+</nav>

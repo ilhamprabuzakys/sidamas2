@@ -1,0 +1,58 @@
+<div class="modal fade" id="detailDaftarRespondenModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTitleId">
+                    Detail Daftar Responden <b><span id="headline-responden-modal">00 Januari 0000</span></b>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <table class="table table-sm table-bordered" id="__table_responden">
+                        <thead>
+                            <tr class="bg-soft-success">
+                                <th>No</th>
+                                <th>ID</th>
+                                <th>Jenis Kelamin</th>
+                                <th>Rentang Usia</th>
+                                <th>Pendidikan Terakhir</th>
+                                <th>Timestamp <br><span class="text-muted">(Waktu mengisi)</span></th>
+                                <th style="width: 200px" class="bg-soft-success text-center">AKSI<i class="fas fa-edit ms-2"></i></th>
+                            </tr>
+                        </thead>
+                        <tbody class="align-tr-middle">
+                            <tr>
+                                <td>1</td>
+                                <td>1</td>
+                                <td><span class="text-primary">Laki-Laki</span></td>
+                                <td>26-45 tahun</td>
+                                <td>Sarjana (S1)</td>
+                                <td class="text-center">2024-01-21 23:59:51</td>
+                                <td>
+                                    <div class="list-button mt-2">
+                                        <a href="javascript:;"
+                                            class="badge bg-primary text-white text-decoration-none mb-1">
+                                            <i class="fas fa-eye me-2"></i>LIHAT HASIL PENGISIAN</a>
+                                        {% comment %} <a href="javascript:;"
+                                            class="badge bg-success text-white text-decoration-none mb-1">
+                                            <i class="fas fa-pen-to-square me-2"></i>EDIT</a> {% endcomment %}
+                                        <a href="javascript:;"
+                                            class="badge bg-danger text-white text-decoration-none delete-data mb-1">
+                                            <i class="fas fa-trash-alt me-2"></i>HAPUS</a>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

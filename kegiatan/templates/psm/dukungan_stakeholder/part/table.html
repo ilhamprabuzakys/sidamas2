@@ -1,0 +1,168 @@
+<br>
+
+<div class="col-md-auto ms-auto">
+  <div class="row">
+    <div class="col-4">
+      <div class="dt-search">
+        <label for="dt-search-0">Pencarian:</label>
+        <input type="search" class="form-control form-control-sm" id="dt-search-0" placeholder="Cari data"
+          aria-controls="__table" v-model="searchField" @input="searchData($event)" @blur="searchData($event)">
+      </div>
+    </div>
+  </div>
+</div>
+
+<table class="table table-bordered mt-2" id="__table">
+  <thead class="" style="background-color: #2ca8dc;">
+    <tr>
+      <th rowspan="3" class="putih" style="color: white;">No</th>
+      <th rowspan="3" class="putih" style="color: white;">Satuan Kerja</th>
+      <th rowspan="3" class="putih" style="color: white;">NAMA STAKEHOLDER</th>
+      <th rowspan="3" class="putih" style="color: white;">KEGIATAN YANG DILAKUKAN</th>
+      </th>
+      <th rowspan="1" colspan="6" class="putih" style="text-align: center; color: white;">Pelaksanaan</th>
+      <th rowspan="3" class="putih" style="text-align: center; color: white;">JUMLAH SASARAN (orang) jika ada</th>
+
+      <th rowspan="3" class="putih" style="color: white;">Hasil/Dampak</th>
+      <th rowspan="3" class="putih" style="color: white;">Kesimpulan</th>
+      <th rowspan="3" class="putih" style="color: white;">Tindak Lanjut</th>
+      <th rowspan="1" colspan="2" class="putih" style="text-align: center; color: white;">Anggaran</th>
+      <th rowspan="3" class="putih" style="color: white;">Dokumentasi</th>
+      <th rowspan="3" class="putih" style="color: white;">Aksi <i class="fas fa-edit ms-2"></i></th>
+    </tr>
+    <tr>
+      <th rowspan="2" class="putih" style="color: white;">nasional</th>
+      <th rowspan="2" class="putih" style="color: white;">provinsi</th>
+      <th rowspan="2" class="putih" style="color: white;">kota/kabupaten</th>
+      <th rowspan="2" class="putih" style="color: white;">KECAMATAN</th>
+      <th rowspan="2" class="putih" style="color: white;">KELURAHAN/DESA</th>
+      <th rowspan="2" class="putih" style="color: white;">LINGKUNGAN</th>
+      <th rowspan="2" class="putih" style="color: white;">Perencanaan Anggaran</th>
+      <th rowspan="2" class="putih" style="color: white;">Penyerapan Anggaran</th>
+    </tr>
+  </thead>
+  <tbody class="align-tr-middle text-white">
+    <template v-for="(topLevel, index) in pagedData">
+      <tr :class="topLevel.class">
+        <td style='text-align:right'>${topLevel.index}</td>
+        <td>${topLevel.satker}</td>
+        <td>${topLevel.pemda}</td>
+        <td>${topLevel.kegiatan}</td>
+        <td>${topLevel.nasional}</td>
+        <td>${topLevel.provinsi}</td>
+        <td>${topLevel.kotkab}</td>
+        <td>${topLevel.kec}</td>
+        <td>${topLevel.keldes}</td>
+        <td>${topLevel.lingkungan}</td>
+        <td>${topLevel.jumlah}</td>
+        <td>${topLevel.hasil}</td>
+        <td>${topLevel.kesimpulan}</td>
+        <td>${topLevel.tindak_lanjut}</td>
+
+        <td>${topLevel.anggaran}</td>
+        <td>${topLevel.penyerapan_anggaran}</td>
+        <td>
+          <template v-if="topLevel.type != 'parent'">
+            <div class="list-button gx-3 text-uppercase">
+              <div>
+                <a :href='topLevel.drive_url' target="_blank"
+                  class="badge bg-primary text-white text-decoration-none mb-1">
+                  <i class="fa-brands fa-google-drive me-2"></i>Drive
+                </a>
+              </div>
+              <div>
+                <a :href='topLevel.dokumentasi' target="_blank"
+                  class="badge bg-primary text-white text-decoration-none mb-1"><i
+                    class="fas fa-file me-2"></i>Dokumentasi</a>
+              </div>
+            </div>
+          </template>
+        </td>
+        <td>
+          <template v-if="topLevel.type != 'parent'">
+            <div class="list-button gx-3 text-uppercase">
+              <template v-if="topLevel.kirim">
+                <template v-if="topLevel.type != 'second__child'">
+                  <div>
+                    <a href="javascript:void(0);" style="background-color:#00A0A9;"
+                      @click="handleSend(topLevel.id, topLevel.satker)"
+                      class="badge text-white text-decoration-none mb-1">
+                      <i class="fa-regular fa-paper-plane me-2"></i>Kirim
+                    </a>
+                  </div>
+                </template>
+              </template>
+
+              <template v-if="satkerLevel == 2">
+                <div>
+                  <a href="javascript:void(0);" @click="handleEditModal(topLevel.id)"
+                    class="badge bg-success text-white text-decoration-none mb-1">
+                    <i class="fas fa-pen-to-square me-2"></i>Edit
+                  </a>
+                </div>
+                <div>
+                  <a href="javascript:void(0);" @click="handleDelete(topLevel.id)"
+                    class="badge bg-danger text-white text-decoration-none mb-1"><i
+                      class="fas fa-trash-alt me-2"></i>Hapus</a>
+                </div>
+              </template>
+
+              <template v-else>
+                <template v-if="topLevel.type != 'second__child'">
+                  <template v-if="topLevel.edit">
+                    <div>
+                      <a href="javascript:void(0);" @click="handleEditModal(topLevel.id)"
+                        class="badge bg-success text-white text-decoration-none mb-1">
+                        <i class="fas fa-pen-to-square me-2"></i>Edit
+                      </a>
+                    </div>
+                    <div>
+                      <a href="javascript:void(0);" @click="handleDelete(topLevel.id)"
+                        class="badge bg-danger text-white text-decoration-none mb-1"><i
+                          class="fas fa-trash-alt me-2"></i>Hapus</a>
+                    </div>
+                  </template>
+                  <template v-else>
+                    <div>
+                      <a href="javascript:void(0);" class="badge bg-secondary text-white text-decoration-none mb-1">
+                        <i class="fas fa-pen-to-square me-2"></i>Edit
+                      </a>
+                    </div>
+                    <div>
+                      <a href="javascript:void(0);" class="badge bg-secondary text-white text-decoration-none mb-1"><i
+                          class="fas fa-trash-alt me-2"></i>Hapus</a>
+                    </div>
+                  </template>
+                </template>
+              </template>
+            </div>
+          </template>
+        </td>
+
+      </tr>
+    </template>
+  </tbody>
+</table>
+
+<nav aria-label="Page navigation examples" style="margin-top: 10px;">
+  <ul class="pagination">
+    <li class="page-item">
+      <button :disabled='currentPage <= 1' class="page-link" href="#" aria-label="Previous"
+        @click="goToPreviousPage(currentPage, totalPage)">
+        <span aria-hidden="true">&laquo;</span>
+        <span class="sr-only">Previous</span>
+      </button>
+    </li>
+    <template v-for="p in totalPage">
+      <li class="page-item"><button class="page-link" @click="currentPage=p">${p}</button></li>
+    </template>
+    <li class="page-item">
+      <button :disabled='currentPage > totalPage' class="page-link" aria-label="Next"
+        @click="goToNextPage(currentPage, totalPage)">
+        <!-- <button :disabled='currentPage > totalPage' class="page-link" aria-label="Next" @click="currentPage++"> -->
+        <span aria-hidden="true">&raquo;</span>
+        <span class="sr-only">Next</span>
+      </button>
+    </li>
+  </ul>
+</nav>

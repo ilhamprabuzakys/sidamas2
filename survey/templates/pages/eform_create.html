@@ -1,0 +1,106 @@
+{% extends "base_generic.html" %}
+{% load static %}
+{% block css_tambahan %}
+<script src="/static/js/knockout.min.js"></script>
+<script src="/static/js/survey-ko.min.js"></script>
+<script src="/static/js/survey-creator.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/survey-knockout@1.9.126/survey.css" />
+<link rel="stylesheet" href="https://unpkg.com/survey-creator@1.9.126/survey-creator.css" />
+
+{% endblock css_tambahan %}
+{% block title %} Formulir Elektronik {% endblock title %}
+{% block content %}
+<div class="breadcrumb">
+   <div class="row">
+      <h3 class="heading mb-2">
+         Formulir Elektronik
+      </h3>
+      <span class="mb-0">
+         <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">Formulir Elektronik</span>
+       </span>
+   </div>
+</div>
+
+<section id="__data">
+   <div class="card">
+      <div class="card-body">
+
+        <div id="headline" class="mb-3">
+            <h3 class="text-center">FORMULIR ELEKTRONIK</h3>
+            <hr>
+        </div>
+        <div id="surveyCreatorContainer" style="width:100%;padding:10px;"></div>
+      </div>
+   </div>
+</section>
+{% endblock content %}
+{% block script %}
+<script>
+
+    function getCookie(name) {
+        var cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+            var cookies = document.cookie.split(";");
+            for (var i = 0; i < cookies.length; i++) {
+                var cookie = cookies[i].trim();
+                // Mengecek apakah cookie memiliki nama yang sesuai
+                if (cookie.substring(0, name.length + 1) === name + "=") {
+                    cookieValue = decodeURIComponent(
+                        cookie.substring(name.length + 1)
+                    );
+                    break;
+                }
+            }
+        }
+        return cookieValue;
+    }
+
+    var creator = new SurveyCreator.SurveyCreator("surveyCreatorContainer");
+    SurveyCreator.StylesManager.applyTheme("default");
+    SurveyCreator.localization.currentLocale = "id";
+    creator.haveCommercialLicense = true;
+    //Show toolbox in the right container. It is shown on the left by default
+    creator.showToolbox = "right";
+    //Show property grid in the right container, combined with toolbox
+    creator.showPropertyGrid = "right";
+    //Make toolbox active by default
+    creator.rightContainerActiveItem("toolbox");
+    creator.saveSurveyFunc = function (saveNo, callback) {
+        var url_string = window.location.href;
+        var data = {};
+        var url = new URL(url_string);
+        data = {jsontext:creator.text, judul:creator.survey.title, dibuat_oleh: 1};
+        axios.post('/survey/api/v1/survey_create/',JSON.stringify(data),{
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': getCookie('csrftoken'),
+                },
+                withCredentials: true
+        })
+        .then(function(result) {
+                    console.log(result);
+                    if (result.errors) {
+                        Swal.fire("Error", result.errors[0].message,"error");
+                    }
+                    if (result.data) {
+                        if (result.data.insert_survey) {
+                            var retval = result.data.insert_survey.returning[0].id;
+                            var refresh = window.location.protocol + "//" + window.location.host + window.location.pathname + '?id=';
+                            window.history.pushState({ path: refresh + retval}, '', refresh + retval);
+                            Swal.fire("Sukses", 'Berhasil insert',"success");
+                        }
+                        if (result.data.update_survey) {
+                            if (result.data.update_survey.returning[0])
+                                Swal.fire("Sukses", 'Berhasil update',"success");
+                            else
+                                Swal.fire("Error", 'Update tidak berhasil karena form bukan milik Anda',"error");
+                        }
+                    }
+        })
+        .catch(function(error) {
+                    console.log(error);
+                }
+        );
+    }
+</script>
+{% endblock script %}

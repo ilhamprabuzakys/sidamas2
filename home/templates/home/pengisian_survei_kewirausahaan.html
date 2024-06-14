@@ -1,0 +1,647 @@
+{% extends 'home/home_base.html' %}
+{% load static %}
+{% block title %} Pengisian Survei {% endblock title %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/home/css/pages/survei__backup.css' %}" />
+<script src="https://unpkg.com/jquery/dist/jquery.min.js"></script>
+<script src="https://unpkg.com/survey-jquery@1.9.131/survey.jquery.min.js"></script>
+<script src="https://unpkg.com/survey-jquery@1.9.131/themes/index.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/survey-jquery@1.9.131/defaultV2.min.css" />
+{% endblock %}
+
+{% block container %} container-xl container-fluid {% endblock %}
+
+{% block content %}
+
+<style>
+    .sd-root-modern.sd-root-modern--full-container {
+        width: 100%;
+        height: auto;
+        overflow: auto;
+        position: relative
+    }
+</style>
+
+<section id="survei-app">
+    <div id="surveyElement" style="position: absolute; top: 0; left: 0; right: 0; bottom: 0;"></div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    const id_survei = {{ data_id }}
+    let id_responden = {{ data_responden }}
+    let isi_responden = '{{ data_isi_responden }}' == 'True' ? true : false
+    let is_finished = false
+
+    function beforeUnloadHandler(e) {
+        (e || window.event).returnValue = "still there?";
+    }
+
+    if (!is_finished && !isi_responden) {
+        window.addEventListener("beforeunload", beforeUnloadHandler);
+    }
+
+    // prevenet
+    // if (is_finished == false && !isi_responden ){
+    //     window.addEventListener("beforeunload", function (e) {
+    //         (e || window.event).returnValue = "still there?";
+    //     });
+    // }
+
+    if(isi_responden){
+        Swal.fire({
+            title: "Terjadi Kesalahan",
+            text: "Responden sudah mengisi !",
+            icon: "warning",
+            allowOutsideClick: false,
+            allowEscapeKey: false,
+            confirmButtonText: "OK",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = window.location.origin;
+            }
+        });
+    }
+
+
+    const json = {
+    "title": "Kuisoner Program Dan Kegiatan Kewirausahaan",
+    "completedHtml": "<div class=\"row justify-content-center\"><div class=\"col-12 d-flex justify-content-center\"><img src=\"/static/assets/home/images/survei/check.png\" alt=\"Selesai Survei\" style=\"width: 120px;\"></div><div class=\"col-12 mt-3 d-flex justify-content-center\"><h3>Terimakasih sudah mengisi survei ini.</h3></div></div>",
+    "pages": [{
+        "name": "page2",
+        "elements": [
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan1",
+            "title": "ASPEK KEWIRAUSAHAAN",
+            "description": "Apakah sudah dilaksanakan kegiatan pelatihan kewirausahaan di wilayah ini? (keterangan: pelatihan kewirausahaan meliputi: pelatihan atau lifeskill yang melibatkan BNN, Instruktur, Tokoh masyarakat &peserta)",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan apa bentuk pelatihannya? (waktu, tempat, jumlah peserta, jenis pelatihannya)",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada"
+            },
+            {
+            "value": "2",
+            "text": "Ada, tetapi hanya oleh BNN saja"
+            },
+            {
+            "value": "3",
+            "text": "Ada, dilaksanakan BNN & dilatih oleh instruktur"
+            },
+            {
+            "value": "4",
+            "text": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan2",
+            "title": "ASPEK MANAJEMEN",
+            "description": "Apakah ada bentuk dukungan dan kepedulian pihak pemerintah daerah (Provinsi, Kabupaten/Walikota, Kecamatan, Kelurahan) dalam membantu keberlanjutan program kewirausahaan di wilayah ini?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan bagaimana masyarakat dilibatkan dalam perencanaan, pelaksanaan, monitoring & evaluasi",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Ada, namun hanya perencanaannya saja"
+            },
+            {
+            "value": "2",
+            "text": "Ada, perencanaan dan pelaksanaannya"
+            },
+            {
+            "value": "3",
+            "text": "Ada, perencanaan, pelaksanaan & monitoringnya"
+            },
+            {
+            "value": "4",
+            "text": "Ada, perencanaan, pelaksanaan, monitoring & evaluasi"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan3",
+            "title": "ASPEK JEJARING KERJA",
+            "description": "Apakah ada pihak-pihak lain yang memberikan kepedulian, fasilitasi, dukungan, bantuan, arahan, kunjungan kegiatan kewirausahaan warga? Siapa sajakah mereka?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan pihak mana saja yang memberikan pelatihan?",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada kecuali hanya BNN saja"
+            },
+            {
+            "value": "2",
+            "text": "Ada, BNN & Pemerintah Daerah"
+            },
+            {
+            "value": "3",
+            "text": "Ada, BNN, Pemerintah Daerah & Tokoh Masyarakat"
+            },
+            {
+            "value": "4",
+            "text": "Ada, BNN, Pemerintah Daerah, Tokoh Masyarakat & dunia usaha"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan4",
+            "title": "ASPEK DUKUNGAN PEMERINTAH DAERAH",
+            "description": "Apakah ada bentuk dukungan dan kepedulian pihak pemerintah daerah (Provinsi, Kabupaten/Walikota, Kecamatan, Kelurahan) dalam membantu keberlanjutan program kewirausahaan di wilayah ini?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan apa saja bentuk konkrit dukungan yang diberikan!",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada, kecuali apa yg telah diberikan BNN saja"
+            },
+            {
+            "value": "2",
+            "text": "Ada, regulasi, alokasi program & anggaran dari Pemda"
+            },
+            {
+            "value": "3",
+            "text": "Ada, regulasi,alokasi program, anggaran , bantuan sarpras serta akses pameran"
+            },
+            {
+            "value": "4",
+            "text": "Ada, regulasi, alokasi program, anggaran, bantuan sarpras, pelatihan, pemasaran, permodalan dan akses pameran"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan5",
+            "title": "ASPEK DUKUNGAN DUNIA USAHA",
+            "description": "Apakah ada bentuk dukungan dan kepedulian pihak dunia usaha dalam membantu keberlanjutan program kewirausahaan di wilayah ini?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan apa saja bentuk konkrit dukungan yang diberikan!",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada, kecuali apa yg telah diberikan BNN saja"
+            },
+            {
+            "value": "2",
+            "text": "Ada, pendampingan, pelatihan, pemberian bantuan modal kerja & modal usaha"
+            },
+            {
+            "value": "3",
+            "text": "Ada, pendampingan, pelatihan, pemberian bantuan modal kerja, modal usaha, & penyediaan akses pemasaran"
+            },
+            {
+            "value": "4",
+            "text": "Ada, regulasi, alokasi program, anggaran, bantuan sarpras, pelatihan, pemasaran, permodalan dan akses pameran"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan6",
+            "title": "ASPEK DUKUNGAN PRAKTISI DAN AKADEMISI",
+            "description": "Apakah ada bentuk dukungan dan kepedulian pihak praktisi & akademisi dalam membantu keberlanjutan program kewirausahaan di wilayah ini?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan apa saja bentuk konkrit dukungan yang diberikan!",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada, kecuali apa yg telah diberikan BNN saja"
+            },
+            {
+            "value": "2",
+            "text": "Ada, hanya kunjungan kuliah lapangan & KKN"
+            },
+            {
+            "value": "3",
+            "text": "Ada, kunjungan kuliah lapangan, KKN, memberikan materi, pengalaman & pendampingan di wilayah binaan"
+            },
+            {
+            "value": "4",
+            "text": "Ada, kunjungan kuliah lapangan, KKN, memberikan materi, pengalaman, pendampingan & beasiswa kepada siswa berprestasi"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan7",
+            "title": "ASPEK KEBERLANJUTAN PROGRAM DAN KEGIATAN",
+            "description": "Apakah para peserta masih melanjutkan program dan kegiatan kewirausahaan hingga hari ini?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan berapa jumlah peserta yang masih melanjutkan! (siapa saja)",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada, kecuali selama program berjalan dalam tahun anggaran (dari BNN)"
+            },
+            {
+            "value": "2",
+            "text": "Ada, tetapi kurang dari 25% peserta"
+            },
+            {
+            "value": "3",
+            "text": "Ada, antara 25%-50% peserta"
+            },
+            {
+            "value": "4",
+            "text": "Ada, lebih dari 50% peserta"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan9",
+            "title": "ASPEK PEMBINAAN USAHA",
+            "description": "Apakah program dan kegiatan kewirausahaan masih berlanjut hingga saat ini?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan berapa jumlah peserta yang masih melanjutkan! (siapa saja)",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada, hanya pada saat program dan kegiatan berlangsung (dari BNN)"
+            },
+            {
+            "value": "2",
+            "text": "Ada, sebagian program dan kegiatan kewirausahaan yang masih berjalan"
+            },
+            {
+            "value": "3",
+            "text": "Ada, hampir seluruh program dan kegiatan kewirausahaan masih berjalan"
+            },
+            {
+            "value": "4",
+            "text": "Ada, seluruh program dan kegiatan kewirausahaan masih berjalan dan berkembang dengan memberikan pelatihan kepada masyarakat lain"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan8",
+            "title": "ASPEK MANFAAT (EFEK) PROGRAM DAN KEGIATAN YANG DIRASAKAN MASYARAKAT",
+            "description": "Apakah masyarakat binaan merasakan efek dari program dan kegiatan kewirausahaan?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan bentuk konkrit program dan kegiatan kewirausahaan yang masih bejalan dan berkembang!",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada efeknya"
+            },
+            {
+            "value": "2",
+            "text": "Ada, hanya terhadap peserta menjadi lebih terampil berwirausaha"
+            },
+            {
+            "value": "3",
+            "text": "Ada, terhadap peserta dan masyarakat sekitarnya dalam berwirausaha"
+            },
+            {
+            "value": "4",
+            "text": "Ada, terhadap peserta, masyarakat dan terbentuknya Lembaga Kewirausahaan"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            },
+            {
+            "type": "radiogroup",
+            "name": "pertanyaan10",
+            "title": "ASPEK DAMPAK PROGRAM DAN KEGIATAN TERHADAP LINGKUNGAN BERSIH NARKOBA",
+            "description": "Apakah program dan kegiatan kewirausahaan berdampak terhadap keterpulihan daerah rawan Narkoba di lingkungan ini?",
+            "isRequired": true,
+            "showCommentArea": true,
+            "commentText": "Jelaskan seberapa besar dampak program dan kegiatan kewirausahaan terhadap keterpulihan lingkungan!",
+            "choices": [
+            {
+            "value": "1",
+            "text": "Tidak ada dampak sama sekali"
+            },
+            {
+            "value": "2",
+            "text": "Ada, namun kecil dampaknya, karena masih ditemukan bandar, pengedar, kurir, dan pecandu Narkoba"
+            },
+            {
+            "value": "3",
+            "text": "Ada, cukup besar dampaknya, karena sudah mengurangi jumlah bandar, pengedar, kurir, dan pecandu Narkoba"
+            },
+            {
+            "value": "4",
+            "text": "Sangat besar dampaknya, karena tidak ditemukan bandar, pengedar, kurir, dan pecandu Narkoba"
+            }
+            ],
+            "otherText": "Ada, dilaksanakan BNN, dilatih instruktur & dihadiri Tokoh Masyarakat"
+            }
+        ]}
+    ],
+    // "navigateToUrl": "http://103.210.54.17:8000/pengisian-survei/",
+    "completeText": "Kirim",
+    "widthMode": "responsive",
+    "headerView": "advanced"
+    }
+
+    const themeJson = {
+        "backgroundImageFit": "cover",
+        "backgroundImageAttachment": "scroll",
+        "backgroundOpacity": 1,
+        "header": {
+            "height": 160,
+            "inheritWidthFrom": "container",
+            "textAreaWidth": 512,
+            "overlapEnabled": false,
+            "backgroundImageOpacity": 1,
+            "backgroundImageFit": "cover",
+            "logoPositionX": "right",
+            "logoPositionY": "top",
+            "titlePositionX": "left",
+            "titlePositionY": "bottom",
+            "descriptionPositionX": "left",
+            "descriptionPositionY": "bottom"
+        },
+        "themeName": "plain",
+        "colorPalette": "light",
+        "isPanelless": false,
+        "cssVariables": {
+            "--sjs-general-backcolor": "rgba(255, 255, 255, 1)",
+            "--sjs-general-backcolor-dark": "rgba(248, 248, 248, 1)",
+            "--sjs-general-backcolor-dim": "rgba(255, 255, 255, 1)",
+            "--sjs-general-backcolor-dim-light": "rgba(255, 255, 255, 1)",
+            "--sjs-general-backcolor-dim-dark": "rgba(243, 243, 243, 1)",
+            "--sjs-general-forecolor": "rgba(0, 0, 0, 0.91)",
+            "--sjs-general-forecolor-light": "rgba(0, 0, 0, 0.45)",
+            "--sjs-general-dim-forecolor": "rgba(0, 0, 0, 0.91)",
+            "--sjs-general-dim-forecolor-light": "rgba(0, 0, 0, 0.45)",
+            "--sjs-primary-backcolor": "#25b8eb",
+            "--sjs-primary-backcolor-light": "rgba(37, 184, 235, 0.1)",
+            "--sjs-primary-backcolor-dark": "rgba(34, 168, 215, 1)",
+            "--sjs-primary-forecolor": "rgba(255, 255, 255, 1)",
+            "--sjs-primary-forecolor-light": "rgba(255, 255, 255, 0.25)",
+            "--sjs-base-unit": "8px",
+            "--sjs-corner-radius": "4px",
+            "--sjs-secondary-backcolor": "rgba(255, 152, 20, 1)",
+            "--sjs-secondary-backcolor-light": "rgba(255, 152, 20, 0.1)",
+            "--sjs-secondary-backcolor-semi-light": "rgba(255, 152, 20, 0.25)",
+            "--sjs-secondary-forecolor": "rgba(255, 255, 255, 1)",
+            "--sjs-secondary-forecolor-light": "rgba(255, 255, 255, 0.25)",
+            "--sjs-shadow-small": "0px 0px 0px 1px rgba(0, 0, 0, 0.15)",
+            "--sjs-shadow-small-reset": "0px 0px 0px 0px rgba(0, 0, 0, 0.15)",
+            "--sjs-shadow-medium": "0px 0px 0px 1px rgba(0, 0, 0, 0.1)",
+            "--sjs-shadow-large": "0px 8px 16px 0px rgba(0, 0, 0, 0.05)",
+            "--sjs-shadow-inner": "0px 0px 0px 1px rgba(0, 0, 0, 0.15)",
+            "--sjs-shadow-inner-reset": "0px 0px 0px 0px rgba(0, 0, 0, 0.15)",
+            "--sjs-border-light": "rgba(0, 0, 0, 0.15)",
+            "--sjs-border-default": "rgba(0, 0, 0, 0.15)",
+            "--sjs-border-inside": "rgba(0, 0, 0, 0.16)",
+            "--sjs-special-red": "rgba(229, 10, 62, 1)",
+            "--sjs-special-red-light": "rgba(229, 10, 62, 0.1)",
+            "--sjs-special-red-forecolor": "rgba(255, 255, 255, 1)",
+            "--sjs-special-green": "rgba(25, 179, 148, 1)",
+            "--sjs-special-green-light": "rgba(25, 179, 148, 0.1)",
+            "--sjs-special-green-forecolor": "rgba(255, 255, 255, 1)",
+            "--sjs-special-blue": "rgba(67, 127, 217, 1)",
+            "--sjs-special-blue-light": "rgba(67, 127, 217, 0.1)",
+            "--sjs-special-blue-forecolor": "rgba(255, 255, 255, 1)",
+            "--sjs-special-yellow": "rgba(255, 152, 20, 1)",
+            "--sjs-special-yellow-light": "rgba(255, 152, 20, 0.1)",
+            "--sjs-special-yellow-forecolor": "rgba(255, 255, 255, 1)",
+            "--sjs-article-font-xx-large-textDecoration": "none",
+            "--sjs-article-font-xx-large-fontWeight": "700",
+            "--sjs-article-font-xx-large-fontStyle": "normal",
+            "--sjs-article-font-xx-large-fontStretch": "normal",
+            "--sjs-article-font-xx-large-letterSpacing": "0",
+            "--sjs-article-font-xx-large-lineHeight": "64px",
+            "--sjs-article-font-xx-large-paragraphIndent": "0px",
+            "--sjs-article-font-xx-large-textCase": "none",
+            "--sjs-article-font-x-large-textDecoration": "none",
+            "--sjs-article-font-x-large-fontWeight": "700",
+            "--sjs-article-font-x-large-fontStyle": "normal",
+            "--sjs-article-font-x-large-fontStretch": "normal",
+            "--sjs-article-font-x-large-letterSpacing": "0",
+            "--sjs-article-font-x-large-lineHeight": "56px",
+            "--sjs-article-font-x-large-paragraphIndent": "0px",
+            "--sjs-article-font-x-large-textCase": "none",
+            "--sjs-article-font-large-textDecoration": "none",
+            "--sjs-article-font-large-fontWeight": "700",
+            "--sjs-article-font-large-fontStyle": "normal",
+            "--sjs-article-font-large-fontStretch": "normal",
+            "--sjs-article-font-large-letterSpacing": "0",
+            "--sjs-article-font-large-lineHeight": "40px",
+            "--sjs-article-font-large-paragraphIndent": "0px",
+            "--sjs-article-font-large-textCase": "none",
+            "--sjs-article-font-medium-textDecoration": "none",
+            "--sjs-article-font-medium-fontWeight": "700",
+            "--sjs-article-font-medium-fontStyle": "normal",
+            "--sjs-article-font-medium-fontStretch": "normal",
+            "--sjs-article-font-medium-letterSpacing": "0",
+            "--sjs-article-font-medium-lineHeight": "32px",
+            "--sjs-article-font-medium-paragraphIndent": "0px",
+            "--sjs-article-font-medium-textCase": "none",
+            "--sjs-article-font-default-textDecoration": "none",
+            "--sjs-article-font-default-fontWeight": "400",
+            "--sjs-article-font-default-fontStyle": "normal",
+            "--sjs-article-font-default-fontStretch": "normal",
+            "--sjs-article-font-default-letterSpacing": "0",
+            "--sjs-article-font-default-lineHeight": "28px",
+            "--sjs-article-font-default-paragraphIndent": "0px",
+            "--sjs-article-font-default-textCase": "none"
+        },
+        "headerView": "advanced"
+    }
+
+    const survey = new Survey.Model(json);
+    survey.applyTheme(themeJson);
+    survey.onComplete.add((sender, options) => {
+        let data_mentahan = splitObject(sender.data, null, 3);
+        Swal.fire({
+            title: "Tunggu sebentar",
+            icon: "info",
+            html: "Sedang Mengirim Data !",
+            didOpen: () => {
+                Swal.showLoading();
+            },
+        });
+
+        kirim_responden(data_mentahan);
+    });
+
+    $("#surveyElement").Survey({ model: survey });
+
+    // mengirim responden
+    function kirim_responden(obj){
+        // const CSRF_TOKEN = getCookie('csrftoken');
+        // let data_mandiri = obj.firstObject;
+
+        // const formData = {
+        //     nama: data_mandiri.nama,
+        //     alamat: data_mandiri.alamat,
+        //     pekerjaan: data_mandiri.pekerjaan,
+        //     handphone: data_mandiri.handphone,
+        //     email: data_mandiri.email,
+        //     survei: id_survei
+        // };
+
+        // console.log(formData)
+
+        // axios.post('/survei/api/v1/data_responden_survei/', formData,{
+        //     headers: {
+        //         'X-CSRFToken': CSRF_TOKEN,
+        //         'Content-Type': 'application/json',
+        //     }
+        // })
+        // .then((response) => {
+        //     console.log(response);
+            
+        //     id_responden = response.data.id;
+            
+        kirim_jawaban(obj);
+        // })
+        // .catch((error) => {
+        //     console.error('Error performing Axios request:', error);
+        // });
+    }
+
+    // mengirim jawaban
+    function kirim_jawaban(obj){
+        const CSRF_TOKEN = getCookie('csrftoken');
+        let data_array = extractValues(obj.secondObject);
+        let data_json = convertData(obj.secondObject);
+
+        const formData = {
+            array_nilai_jawaban: data_array,
+            data_mentahan: JSON.stringify(data_json),
+            responden: id_responden,
+            survei: id_survei,
+            sigma_nilai: 0
+        };
+
+        axios.post('/survei/api/v1/data_pengisian_survei/', formData,{
+            headers: {
+                'X-CSRFToken': CSRF_TOKEN,
+                'Content-Type': 'application/json',
+            }
+        })
+        .then((response) => {
+            Swal.close();
+            is_finished = true;
+            window.removeEventListener("beforeunload", beforeUnloadHandler);
+            window.location.href = window.location.origin;
+        })
+        .catch((error) => {
+            Swal.close();
+            console.error('Error performing Axios request:', error);
+        });
+    }
+
+    // helper
+    function convertToJson(inputObject) {
+        var outputArray = [];
+        
+        for (var key in inputObject) {
+            if (key.endsWith("-Comment")) {
+                continue;
+            }
+            
+            var questionNumber = key.replace("pertanyaan", "");
+            var commentKey = "pertanyaan" + questionNumber + "-Comment";
+            
+            var outputObj = {};
+            outputObj["pertanyaan" + questionNumber] = parseInt(inputObject[key]);
+            outputObj["komentar"] = inputObject[commentKey];
+            
+            outputArray.push(outputObj);
+        }
+        
+        return outputArray;
+    }
+
+    function convertData(inputData) {
+        var result = [];
+        for (var i = 1; i <= 10; i++) {
+            var questionKey = "pertanyaan" + i;
+            var commentKey = questionKey + "-Comment";
+            var answer = parseInt(inputData[questionKey]);
+            if (isNaN(answer)) {
+                answer = 0; // Set answer to 0 if it's NaN
+            }
+            var comment = inputData[commentKey];
+            var option = "";
+            switch (answer) {
+                case 1:
+                    option = "a";
+                    break;
+                case 2:
+                    option = "b";
+                    break;
+                case 3:
+                    option = "c";
+                    break;
+                case 4:
+                    option = "d";
+                    break;
+                default:
+                    option = "";
+            }
+            result.push({
+                "no": i,
+                "jawaban": answer,
+                "bobot": String(answer),
+                "pilihan": option,
+                "komentar": comment
+            });
+        }
+        return result;
+    }
+
+    function extractValues(obj) {
+        var values = [];
+        $.each(obj, function(key, value) {
+            if (!key.includes("Comment")) {
+                values.push(value);
+            }
+        });
+        return values.join();
+    }
+
+    function splitObject(inputObject) {
+        const firstObjectKeys = ["nama", "alamat", "pekerjaan", "handphone", "email"];
+        const secondObjectKeys = Object.keys(inputObject).filter(key => !firstObjectKeys.includes(key));
+        
+        const firstObject = {};
+        const secondObject = {};
+        
+        firstObjectKeys.forEach(key => {
+            firstObject[key] = inputObject[key];
+        });
+        
+        secondObjectKeys.forEach(key => {
+            secondObject[key] = inputObject[key];
+        });
+        
+        return { firstObject, secondObject };
+    }
+
+</script>
+{% endblock %}
+
+{% block footer %}
+{% endblock %}

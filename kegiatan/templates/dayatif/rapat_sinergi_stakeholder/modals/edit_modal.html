@@ -1,0 +1,193 @@
+<form id="editForm" class="dont-reset" @submit.prevent="handleUpdate(edit.id)">
+    <div class="modal fade" id="editModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Data <b>Kegiatan</b> untuk Satuan Kerja Pelaksana <b id="edit__info"></b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Satuan Kerja Pelaksana -->
+                    <div class="mb-3">
+                        <label for="edit__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+                        <select class="form-control select2" id="edit__satker" v-model="edit.satker" disabled>
+                            {% if user.profile.satker.level == 2 %}
+                                {% for item in satker %}
+                                <option value="{{ item.pk }}">{{ item.nama_satker }}</option>
+                                {% endfor %}
+                            {% else %}
+                                <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                            {% endif %}
+                        </select>
+                    </div>
+                    <!--/ Satuan Kerja Pelaksana -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tanggal Kegiatan -->
+                    <div class="row range_date edit">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="edit__tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                                <input type="date" id="edit__tanggal_awal" class="form-control" v-model="edit.tanggal_awal" required />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="edit__tanggal_akhir" class="col-form-label optional">Tanggal
+                                    Akhir:</label>
+                                <input type="date" id="edit__tanggal_akhir" class="form-control" v-model="edit.tanggal_akhir"  />
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Tanggal Kegiatan -->
+
+                    <div class="text-important mt-2 mb-4">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</div>
+
+                    <hr class="mx-n4">
+
+                    <!-- Jumlah Peserta -->
+                    <div class="mb-3">
+                        <label for="edit__jumlah_peserta" class="col-form-label required">Jumlah Peserta:</label>
+                        <input type="number" class="form-control" id="edit__jumlah_peserta" v-model="edit.jumlah_peserta" maxlength="3" required />
+                    </div>
+                    <!--/ Jumlah Peserta -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Stakeholders -->
+                    <div id="edit__stakeholders_container">
+                        <label for="edit__stakeholders" class="col-form-label required text-muted">Data Stakeholders :</label>
+                        <div class="text-muted mt-2 mb-3">Saat ini terdapat : <span id="edit__stakeholders_info" class="text-primary"></span></div>
+                        <div id="edit__stakeholders" class="disable-form-repeater px-3">
+                            <div data-repeater-list="data">
+                                <div data-repeater-item>
+                                    <div class="row">
+                                        <div class="mb-3 col-lg-10 col-sm-10 mb-0">
+                                            <label class="form-label required" for="form-repeater-1-1">Nama Stakeholder </label>
+                                            <input type="text" id="form-repeater-1-1" name="nama" class="form-control" required />
+                                        </div>
+
+                                        <div class="mb-3 col-2 d-flex align-items-center mb-0">
+                                            <button class="btn btn-label-danger mt-4" data-repeater-delete type="button"
+                                                value="Delete">
+                                                <i class="ti ti-x ti-xs me-1"></i>
+                                                <span class="align-middle">Hapus</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <hr class="hr-light mx-n4">
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <button class="btn btn-primary" data-repeater-create type="button" value="Add">
+                                    <i class="ti ti-plus me-1"></i>
+                                    <span class="align-middle">Tambah stakeholder</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Stakeholders -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Deskripsi -->
+                    <div class="mb-3">
+                        <label for="edit__deskripsi" class="col-form-label required">Deskripsi Hasil:</label>
+
+                        <textarea class="form-control" id="edit__deskripsi" v-model="edit.deskripsi" required></textarea>
+                    </div>
+                    <!--/ Deskripsi -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Hambatan/Kendala -->
+                    <div class="mb-3">
+                        <label for="edit__kendala" class="col-form-label required">Hambatan/Kendala:</label>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="edit__kendala_ketersediaan" id="edit__kendala_yes"
+                            :checked="store.kendala.showKeterangan"
+                            @click="store.kendala.showKeterangan = true; edit.kendala = ''" />
+                            <label class="form-check-label" for="edit__kendala_yes">Ada, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" id="edit__kendala_yes_keterangan" v-if="store.kendala.showKeterangan"
+                            @change="edit.kendala = $event.target.value.includes('Ada') ? $event.target.value : `Ada, ${$event.target.value}`"
+                            :required="store.kendala.showKeterangan"
+                            :value="edit.kendala"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="edit__kendala_no" name="edit__kendala_ketersediaan"
+                                @click="store.kendala.showKeterangan = false; edit.kendala = 'Tidak ada'" :checked="edit.kendala == 'Tidak ada'" />
+                            <label class="form-check-label" for="edit__kendala_no">Tidak ada</label>
+                        </div>
+                    </div>
+                    <!--/ Hambatan/Kendala -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Kesimpulan -->
+					<div class="mb-3">
+						<label for="edit__kesimpulan" class="col-form-label required">Kesimpulan & Rekomendasi:</label>
+
+                        <div class="ps-0">
+                            <div class="kesimpulan__kesimpulan">
+                                <label for="edit__kesimpulan_kesimpulan" class="col-form-label required">1. Kesimpulan:</label>
+
+                                <textarea class="form-control my-3" id="edit__kesimpulan_kesimpulan" v-model="store.kesimpulan.kesimpulan"
+                                @change="post.kesimpulan = store.getKesimpulan" required></textarea>
+                            </div>
+
+                            <div class="kesimpulan__rekomendasi mt-2">
+                                <label for="edit__kesimpulan_rekomendasi" class="col-form-label required">2. Rekomendasi:</label>
+
+                                <textarea class="form-control my-3" id="edit__kesimpulan_rekomendasi" v-model="store.kesimpulan.rekomendasi" @change="post.kesimpulan = store.getKesimpulan" required></textarea>
+                            </div>
+                        </div>
+					</div>
+                    <!--/ Kesimpulan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tindak Lanjut -->
+                    <div class="mb-3">
+                        <label for="edit__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+                        <textarea class="form-control" id="edit__tindak_lanjut" v-model="edit.tindak_lanjut" required></textarea>
+                    </div>
+                    <!--/ Tindak Lanjut -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Dokumentasi Gambar -->
+                    <div class="mb-3">
+                        <label for="edit__dokumentasi_gambar" class="col-form-label optional">Dokumentasi Gambar:</label>
+                        <v-input-image id="edit__dokumentasi_gambar" :maxsize="5" v-model="edit.gambar" :init="store.image.url"></v-input-image>
+                    </div>
+                    <!--/ Dokumentasi Gambar -->
+
+                    <!-- Dokumentasi -->
+                    <div class="mb-3">
+                        <label for="edit__dokumentasi" class="col-form-label optional">Dokumentasi:</label>
+                        <input type="file" class="form-control" id="edit__dokumentasi" @change="edit.dokumentasi = $event.target.files[0]" />
+
+                        <div class="text-muted mt-3">Kosongkan bila <b>tidak ingin</b> mengganti file</div>
+                    </div>
+                    <!--/ Dokumentasi -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

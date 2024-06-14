@@ -1,0 +1,588 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Registrasi Pengguna {% endblock %}
+
+{% block modal_tambahan %}
+{% include "users/registrasi/modals/create_modal.html" %}
+{% include "users/registrasi/modals/edit_modal.html" %}
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Registrasi Pengguna</h3>
+        <span class="mb-0">
+            <a href="{% url 'dashboard:index' %}" class="text-muted fw-light">Beranda / </a>
+            <span class="ms-1 fw-medium">Daftar pengguna</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <h3 class="text-center">Data Pengguna BNNP dan BNNK SIDAMAS </h3>
+            <div id="headline" class="mb-3">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+
+                    <div class="btn-group dropstart" data-bs-toggle="tooltip" data-bs-placement="top"
+                        data-bs-custom-class="tooltip-dark" data-bs-original-title="Klik disini untuk memfilter data.">
+                        <button type="button" class="btn btn-label-success rounded-pill dropdown-toggle hide-arrow"
+                            data-bs-toggle="dropdown" aria-expanded="false" data-bs-offset="10,20"
+                            data-bs-auto-close="outside"><i class="fas fa-filter me-2"></i>Filter</button>
+                        <ul class="dropdown-menu w-px-500">
+                            <li>
+                                <h5 class="dropdown-header text-uppercase">Filter Data</h5>
+                            </li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <div class="pt-0 pb-3 px-3" id="filter_form">
+                                <div class="mb-2">
+                                    <label for="filter_satker" class="form-label">Satuan Kerja</label>
+                                    <select class="form-select form-select-md select2 no-placeholder" id="filter_satker">
+                                        <option selected value="">-- Semua --</option>
+                                        {% for item in list_satker %}
+                                        <option value="{{ item.pk }}">{{ item.nama_satker }}</option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <!-- <div class="mb-2">
+                                    <label for="filter_satker_bnnk" class="form-label">BNNK</label>
+                                    <select class="form-select form-select-md select2 no-placeholder" id="filter_satker_bnnk">
+                                        <option disabled value="">-- Pilih BNNK --</option>
+                                        <option selected value="">-- Semua --</option>
+                                    </select>
+                                </div> -->
+
+                                <!-- <div class="mb-2">
+                                    <label for="filter_status" class="form-label">Status Akun</label>
+                                    <select class="form-select form-select-md" name="role" id="filter_status">
+                                        <option selected value="">-- Semua --</option>
+                                        <option value="true">Aktif</option>
+                                        <option value="false">Tidak Aktif</option>
+                                    </select>
+                                </div> -->
+                            </div>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <div class="d-flex justify-content-end px-3 py-2">
+                                <button type="button" class="btn btn-label-secondary fw-semibold me-2 px-6" id="resetFilter" onclick="handleResetFilter()"><i class="fas fa-xmark me-2"></i>Reset</button>
+
+                                <button type="button" class="btn btn-primary fw-semibold px-6" onclick="handleApplyFilter()"
+                                    id="applyFilter"><i class="fas fa-save me-2"></i> Terapkan</button>
+                            </div>
+                        </ul>
+                    </div>
+
+                    <button class="btn btn-primary waves-effect waves-light" data-bs-toggle="modal"
+                        data-bs-target="#createModal"><i class="fas fa-plus me-2"></i>Tambah Data
+                    </button>
+
+                    <div class="btn-group">
+                        <button type="button" class="btn btn-success dropdown-toggle" data-bs-toggle="dropdown">
+                            <i class="fas fa-file-export me-2"></i>
+                                Aksi Excel
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li>
+                                <label class="dropdown-item" for="import__button">Import</label>
+                                <input type="file" class="d-none" id="import__button" onchange="handleImport()" accept=".xlsx" />
+                            </li>
+                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="handleExport('template')">Unduh Template</a></li>
+                            <hr class="dropdown-divider">
+                            <li><a class="dropdown-item" href="javascript:void(0);" onclick="handleExport()">Export</a></li>
+                        </ul>
+                    </div>
+                </div>
+                <hr />
+            </div>
+
+            <div class="table-responsive">
+                <table id="__table" class="table table-bordered table-sm">
+                    <thead class="bg-soft-success">
+                        <tr>
+                            <th class="text-center">No</th>
+                            <th class="text-center">Nama</th>
+                            <th class="text-center">Username</th>
+                            <th class="text-center">Email</th>
+                            <th class="text-center">Satuan Kerja</th>
+                            <!-- <th class="text-center">Status Akun</th> -->
+                            <!-- <th>Terakhir login</th> -->
+                            <th style="max-width: 100px">Aksi <i class="fas fa-edit ms-2"></i></th>
+                        </tr>
+                    </thead>
+                    <tbody class="align-tr-middle">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<!-- Actions -->
+<script>
+    const handleExport = async (type = 'data') => {
+        if (type == 'template') {
+            window.location.href = '/media/templates/users/registrasi.xlsx';
+            return;
+        }
+
+        try {
+            showSwalLoading();
+
+            const response = await axios.get('/users/api/v1/users/export/');
+            const data = response.data;
+
+            window.location.href = data.file_path;
+
+            showSwalSuccess('Berhasil', `Data pengguna telah <b>berhasil</b> diekspor!`);
+        } catch (error) {
+            console.error(error);
+        }
+    }
+
+    const handleImport = async () => {
+        const fileInput = document.getElementById('import__button');
+        const file = fileInput.files[0];
+
+        if (!file) return;
+
+        const fileExtension = file.name.split('.').pop().toLowerCase();
+
+        if (fileExtension !== 'xlsx') {
+            fileInput.value = '';
+
+            return showSwalError('Terjadi Kesalahan',
+                `File yang anda upload tidak sesuai format. Hanya file<b>XLSX</b> yang diperbolehkan.`
+            );
+
+            // return alert('Tolong upload file berformat Excel : xlsx');
+        }
+
+        try {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            const response = await axios.post('/users/api/v1/users/import/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+            const data = response.data;
+
+            console.log('Response', data);
+
+        } catch (error) {
+            showSwalGenericError();
+            console.error(error);
+        }
+    }
+
+
+
+    const handlePost = async (e) => {
+        e.preventDefault();
+
+        showSwalLoading();
+
+        const modal = $('#createModal');
+        const form = $('#formCreate');
+
+        const first_name = form.find('#create__first_name').val();
+        const last_name = form.find('#create__last_name').val();
+        const username = form.find('#create__username').val();
+        const notelp = form.find('#create__nomor_telepon').val();
+        const email = form.find('#create__email').val();
+        const satker = form.find('#create__satker').val();
+
+        const data = { first_name, last_name, username, notelp, email, satker };
+
+        console.log('Data :', data);
+
+        try {
+            const response = await axios.post('/users/api/v1/users/', data);
+
+            showSwalSuccess('Berhasil', `Data pengguna telah berhasil <b>ditambahkan</b>`);
+
+            modal.modal('hide');
+
+            form.trigger('reset');
+            form.find(`#satker`).val('').trigger('change');
+
+            reloadTable(table);
+
+            // toast('success', 'Berhasil', `Data akun telah dikirimkan ke alamat email ${data.email}`);
+        } catch (error) {
+            console.error(error);
+            showSwalGenericError();
+        }
+    }
+
+    const handleEdit = async (id) => {
+        const modal = $('#editModal');
+        const form = $('#formUpdate');
+
+        modal.modal('show');
+
+        const response = await axios.get(`/users/api/v1/users/${id}/`);
+
+        const data = response.data;
+
+        block(form);
+
+        modal.find('#target_edited').html(data.satker.nama_satker);
+        form.find('#edit__id').val(id);
+
+        // Form
+        form.find('#edit__first_name').val(data.first_name);
+        form.find('#edit__last_name').val(data.last_name);
+        form.find('#edit__username').val(data.username);
+        form.find('#edit__nomor_telepon').val(data.profile.notelp);
+        form.find('#edit__email').val(data.email);
+        form.find('#edit__satker').val(data.satker.id).trigger('change');
+
+        // form.find('#edit__status').prop('checked', data.is_active);
+
+        await sleep(500);
+
+        unblock(form);
+    }
+
+    const handleUpdate = async (e) => {
+        e.preventDefault();
+        showSwalLoading();
+
+        const modal = $('#editModal');
+        const form = $('#formUpdate');
+
+        const id = form.find('#edit__id').val();
+        const first_name = form.find('#edit__first_name').val();
+        const last_name = form.find('#edit__last_name').val();
+        const username = form.find('#edit__username').val();
+        let notelp = form.find('#edit__nomor_telepon').val();
+        notelp = notelp.replace(/ /g, '-');
+        const email = form.find('#edit__email').val();
+        const satker = form.find('#edit__satker').val();
+        // const edit__status = form.find('#edit__status').prop('checked');
+
+        // let is_active = false;
+
+        // if (edit__status) is_active = true;
+
+        const user_id = id;
+
+        const data = { first_name, last_name, username, notelp, email, satker, user_id };
+
+        console.log('Payload : ', data);
+
+        try {
+            await axios.patch(`/users/api/v1/users/${id}/`, data);
+
+            showSwalSuccess('Berhasil', `Data pengguna telah berhasil <b>diperbarui</b>`);
+            modal.modal('hide');
+            reloadTable(table);
+        } catch (error) {
+            console.error(error);
+            showSwalGenericError();
+        }
+    }
+
+    const handleResetPassword = async (id, nama) => {
+
+        const confirmation = await showSwalConfirm(`Apakah anda yakin untuk <b>mereset</b> password dari pengguna <b>${nama}</b>?`, 'Ya, reset password');
+
+        if (!confirmation.isConfirmed) return;
+
+        showSwalLoading();
+
+        await sleep(1000);
+
+        try {
+            await axios.post(`/users/api/v1/users/reset-password/`, { id });
+            showSwalSuccess('Berhasil',
+                `Password dari user <b>${nama}</b> telah berhasil <b>direset</b>`);
+
+            await sleep(300);
+
+            reloadTable(table);
+        } catch (error) {
+            console.error(error);
+            showSwalGenericError();
+        }
+    }
+</script>
+
+<!-- Filters -->
+<script>
+    const BASE_API_URL = "/users/api/v1/users/?format=datatables";
+
+    let s = '';
+
+    const filter = {
+        satker: 0,
+        status: '',
+    };
+
+    const semua_option = `<option value="">Semua</option>`;
+
+
+    const getURL = () => {
+        let modified_url = BASE_API_URL;
+
+        if (s !== '') {
+            s = convertToTitleCaseAndReplaceSpace(s);
+            modified_url += `&s=${s}`;
+        }
+        if (filter.satker && filter.satker != 0) {
+            modified_url += `&satker=${filter.satker}`;
+        }
+        if (filter.status != '') {
+            modified_url += `&is_active=${filter.status}`;
+        }
+        return modified_url;
+    }
+
+    $(function () {
+        let timeoutId;
+
+        $('#__table_wrapper input[type="search"]').on('keyup', function () {
+            clearTimeout(timeoutId);
+
+            timeoutId = setTimeout(function () {
+                s = $(this).val();
+
+                const url = getURL();
+
+                console.log('URL:', url);
+
+                table.ajax.url(url).load();
+            }.bind(this), 500);
+        });
+    });
+
+    const handleApplyFilter = () => {
+        const form = $('#filter_form');
+
+        filter.satker = form.find('#filter_satker').val();
+        filter.status = form.find('#filter_status').val();
+
+        console.log(filter);
+
+        const url = getURL();
+
+        console.log('URL:', url);
+
+        table.ajax.url(url).load();
+    }
+
+    const handleResetFilter = () => {
+        const form = $('#filter_form');
+
+        form.find('#filter_satker').val('').trigger('change');
+        form.find('#filter_status').val('');
+
+        filter.satker = 0;
+        filter.status = '';
+
+        const url = getURL();
+
+        console.log('URL:', url);
+
+        table.ajax.url(url).load();
+    }
+
+    const resetKabupaten = () => {
+        $('#filter_kabupaten').empty();
+        $('#filter_kabupaten').append($('<option>', {
+            value: '',
+            text: '--Pilih Kota/Kabupaten--',
+            disabled: true,
+        }));
+        $('#filter_kabupaten').prop('disabled', true);
+        $('#filter_kabupaten').append(semua_option);
+    }
+
+    const resetBnnk = () => {
+        $('#filter_satker_bnnk').empty();
+        $('#filter_satker_bnnk').append($('<option>', {
+            value: '',
+            text: '--Pilih BNNK--',
+            disabled: true,
+        }));
+        $('#filter_satker_bnnk').prop('disabled', true);
+        $('#filter_satker_bnnk').append(semua_option);
+    }
+
+    const loadKabupaten = async (provinsiId) => {
+        const kabupatenDropdown = $('#filter_kabupaten');
+
+        if (!provinsiId) return;
+
+        resetKabupaten();
+
+        try {
+            const response = await axios.get(`/dashboard/masters/api/v1/list_regencies/?provinsi=${provinsiId}`);
+
+            response.data.forEach(kabupaten => {
+                kabupatenDropdown.append($('<option>', {
+                    value: kabupaten.id,
+                    text: kabupaten.nama_kabupaten
+                }));
+            });
+
+            kabupatenDropdown.removeAttr('disabled');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    $('#filter_provinsi').change(async function () {
+        const selectedProvinsiVal = $(this).val();
+
+        if (selectedProvinsiVal && selectedProvinsiVal != '' && selectedProvinsiVal != null) {
+            await loadKabupaten(selectedProvinsiVal);
+        } else {
+            resetKabupaten();
+        }
+    });
+
+    const loadBnnk = async (provinsiId) => {
+        const bnnkDropdown = $('#filter_satker_bnnk');
+
+        if (!provinsiId) return;
+
+        resetBnnk();
+
+        try {
+            const response = await axios.get(`/users/api/v1/satker/?s=&parent=${provinsiId}`);
+
+            response.data.forEach(bnnk => {
+                bnnkDropdown.append($('<option>', {
+                    value:bnnk.id,
+                    text: bnnk.nama_satker
+                }));
+            });
+
+            bnnkDropdown.removeAttr('disabled');
+        } catch (error) {
+            console.error('Error:', error);
+        }
+    }
+
+    // $('#filter_satker').change(async function () {
+    //     filter.satker$(this).val();
+    //     resetBnnk();
+    // });
+</script>
+
+<!-- DataTable -->
+<script>
+    const table = $('#__table').DataTable({
+        language: dt_lang_config(),
+        serverSide: true,
+        searching: true,
+        responsive: true,
+        pageLength: 10,
+        ajax: {
+            url: BASE_API_URL,
+            dataSrc: 'data'
+        },
+        ordering: true,
+        columns: [{
+            data: null,
+        },
+        {
+            data: 'first_name',
+            render: function (data, type, row) {
+                return `<div class="text-center"><span class="">${data}</span></div>`;
+            }
+        },
+        {
+            data: 'username',
+            render: function (data, type, row) {
+                return `<div class="text-center"><span class="">${data}</span></div>`;
+            }
+        },
+        {
+            data: 'email',
+            render: function (data, type, row) {
+                let email = data;
+                if (email == '' || email == null) {
+                    email = '-';
+                }
+                return `<div class="text-center"><span class="">${email}</span></div>`;
+            }
+        },
+        {
+            data: 'satker.nama_satker',
+            render: function (data, type, row) {
+                return `<div class="text-center"><span class="">${data}</span></div>`;
+            }
+        },
+        /*
+        {
+            data: 'is_active',
+            render: function (data, type, row) {
+                const list_of_status = [
+                    `<span class="btn btn-success rounded-0 text-white">Aktif</span>`,
+                    `<span class="btn btn-danger rounded-0 text-white">Tidak Aktif</span>`,
+                ];
+
+                let status_index = 0;
+
+                if (!data) {
+                    status_index = 1;
+                }
+
+                return `<div class="text-center">${list_of_status[status_index]}</div>`;
+            }
+        },
+        */
+        {
+            data: 'id',
+            render: function (data, type, row) {
+                const nama_user = row.first_name;
+
+                const deleteArgs = JSON.stringify({
+                    id: data,
+                    name: 'user',
+                    detail_name: nama_user,
+                    apiURL: "/users/api/v1/users",
+                    usingDT: true,
+                });
+
+                return `
+                <div class="list-button gx-3 text-uppercase">
+                    <div>
+                        <button onclick="handleResetPassword(${data}, '${nama_user}')"
+                            class="badge bg-primary text-white mb-1"><i
+                                class="fas fa-xmark me-2"></i>Reset Password</button>
+                    </div>
+                    <div>
+                        <button onclick="handleEdit(${data})"
+                            class="badge bg-success text-white mb-1"><i
+                                class="fas fa-pen-to-square me-2"></i>Edit</button>
+                    </div>
+                    <div>
+                        <button onclick='handleDelete(${deleteArgs})'
+                            class="badge bg-danger text-white mb-1"><i
+                                class="fas fa-trash-alt me-2"></i>Hapus</button>
+                    </div>
+                </div>
+            `;
+            }
+        }],
+        initComplete: function (settings, json) {
+            console.log('Hasil fetch data : ', json);
+        },
+        columnDefs: [dt_row_pagination(), {
+            "searchable": false,
+            "targets": 5
+        }]
+    });
+</script>
+{% endblock %}

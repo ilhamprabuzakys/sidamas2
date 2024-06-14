@@ -1,0 +1,58 @@
+<!-- <li class="menu-item {% if '/kegiatan/' in request.path %}open{% endif %}">
+    <a href="javascript:void(0);" class="menu-link menu-toggle">
+       <i class="menu-icon tf-icons ti ti-report"></i>
+       <div data-i18n="Kegiatan">Kegiatan</div>
+    </a>
+
+    {% include "dashboard/partials/sidebar/kegiatan/dayatif.html" %}
+</li> -->
+
+<!-- <li class="menu-item  {% if '/lk/dayatif/' in request.path %}active{% endif %}">
+    <a href="{% url 'dayatif_laporan_kegiatan' %}" class="menu-link">
+       <i class="menu-icon tf-icons ti ti-book-2"></i>
+       <div data-i18n="Laporan Kinerja Harian">Laporan Kinerja Harian</div>
+    </a>
+ </li> -->
+
+
+<li class="menu-item {% if '/survey/' in request.path %}open{% endif %}">
+   <a href="javascript:void(0);" class="menu-link menu-toggle">
+      <i class='menu-icon tf-icons ti ti-checkbox'></i>
+      <div data-i18n="Survei">Survei</div>
+   </a>
+   <ul class="menu-sub">
+    {% comment %} <li class="menu-item {% if 'eform' in request.path %}active{% endif %}">
+        <a href="{% url 'eform' %}" class="menu-link">
+           <div data-i18n="E-FORM">E-FORM</div>
+        </a>
+     </li> {% endcomment %}
+     <li class="menu-item {% if 'formulir_elektronik' in request.path %}active{% endif %}">
+        <a href="{% url 'formulir_elektronik' %}" class="menu-link">
+           <div data-i18n="Formulir Elektronik">Formulir Elektronik</div>
+        </a>
+     </li>
+     <li class="menu-item {% if 'skm_life_skill' in request.path %}active{% endif %}">
+        <a href="{% url 'dayatif_skm_life_skill' %}" class="menu-link">
+           <div data-i18n="SKM Life Skill">SKM Life Skill</div>
+        </a>
+     </li>
+	 <li class="menu-item {% if 'keberhasilan_kewirausahaan' in request.path %}active{% endif %}">
+		 <a href="{% url 'dayatif_keberhasilan_kewirausahaan' %}" class="menu-link">
+			 <div data-i18n="Keberhasilan dan Kewirausahaan">Keberhasilan dan Kewirausahaan</div>
+		</a>
+	</li>
+	<li class="menu-item {% if 'survei_ikrn' in request.path %}active{% endif %}">
+		<a href="{% url 'dayatif_survei_ikrn' %}" class="menu-link">
+			<div data-i18n="Survei IKRN">Survei IKRN</div>
+		</a>
+	</li>
+   </ul>
+</li>
+
+
+<!-- <li class="menu-item {% if '/berita/' in request.path %} active {% endif %}">
+    <a href="{% url 'berita:list' %}" class="menu-link">
+       <i class="menu-icon tf-icons ti ti-news"></i>
+       <div data-i18n="Berita">Berita</div>
+    </a>
+ </li> -->

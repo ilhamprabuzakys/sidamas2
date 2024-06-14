@@ -1,0 +1,198 @@
+<form id="createForm" @submit.prevent="handlePost()">
+    <div class="modal fade" id="createModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Data <b> {title}</b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Satuan Kerja Pelaksana -->
+                    <div class="mb-3">
+                        <label for="create__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+                        <select class="form-control select2" id="create__satker" disabled>
+                            <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                        </select>
+                    </div>
+                    <!--/ Satuan Kerja Pelaksana -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tanggal Kegiatan -->
+                    <div class="row range_date">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="create__tanggal_awal" class="col-form-label required">Tanggal
+                                    Awal:</label>
+                                <input type="date" id="create__tanggal_awal" class="form-control" @change="post.tanggal_awal = $event.target.value; store.tanggal.awal = $event.target.value; post.jumlah_hari_pelaksanaan = store.getJumlahHari" required />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="create__tanggal_akhir" class="col-form-label required">Tanggal
+                                    Akhir:</label>
+                                <input type="date" id="create__tanggal_akhir" class="form-control" @change="post.tanggal_akhir = $event.target.value; store.tanggal.akhir = $event.target.value; post.jumlah_hari_pelaksanaan = store.getJumlahHari" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Tanggal Kegiatan -->
+
+                    <div class="text-important my-2">
+                        Jumlah Hari Pelaksanaan
+                        Kerja akan digenerate secara <b>otomatis</b> oleh sistem berdasarkan inputan dari <b>Tanggal
+                        Awal</b> dan <b>Tanggal Akhir</b>.
+                    </div>
+                    
+                    <!-- Jumlah Hari Pelaksanaan -->
+                    <div class="mb-3">
+                        <label for="create__jumlah_hari_pelaksanaan" class="col-form-label required">Jumlah Hari
+                            Pelaksanaan Kerja:</label>
+                        <input type="text" class="form-control" id="create__jumlah_hari_pelaksanaan" :value="`${store.getJumlahHari} hari`" disabled readonly />
+                    </div>
+                    <!--/ Jumlah Hari Pelaksanaan -->
+                    
+                    <hr class="mx-n4">
+
+                    <!-- Satuan Kerja Target -->
+                    <div class="mb-3">
+                        <label for="create__satker_target" class="col-form-label required">Satuan Kerja Target:</label>
+                        <select class="form-control select2" id="create__satker_target" v-model="post.satker_target" required>
+                            <option value="" selected disabled>--Pilih Satuan Kerja Target--</option>
+                            {% for item in satker_target %}
+                            <option value="{{ item.pk }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <!--/ Satuan Kerja Target -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Jumlah Peserta -->
+                    <div class="mb-3">
+                        <label for="create__jumlah_peserta" class="col-form-label required">Jumlah Peserta:</label>
+                        <input type="number" class="form-control" id="create__jumlah_peserta" v-model="post.jumlah_peserta" required />
+                    </div>
+                    <!--/ Jumlah Peserta -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Rincian Hasil -->
+					<div class="mb-3" id="create__rincian_hasil">
+                        <label for="pelaksanaan" class="col-form-label required text-light">Rincian Hasil Pelaksanaan Program Pemberdayaan Alternatif Pada Satker Target:</label>
+
+						<!-- Tujuan -->
+                        <div class="mb-3">
+                            <label for="create__tujuan" class="col-form-label required">Tujuan:</label>
+                            <textarea class="form-control" id="create__tujuan" v-model="post.tujuan" required></textarea>
+                        </div>
+                        <!--/ Tujuan -->
+
+                        <hr class="mx-n4">
+
+                        <!-- Hambatan/Kendala -->
+                        <div class="mb-3">
+                            <label for="create__kendala_yes" class="col-form-label required">Hambatan/Kendala:</label>
+    
+                            <div class="form-check mt-3">
+                                <input class="form-check-input" type="radio" name="create__kendala_ketersediaan" id="create__kendala_yes" @click="store.kendala.showKeterangan = true; post.kendala = 'Ada'" />
+                                <label class="form-check-label" for="create__kendala_yes">Ada, sebutkan ...</label>
+                            </div>
+                        
+                            <div class="ps-4">
+                                <textarea class="form-control my-3" id="create__kendala_yes_keterangan" v-if="store.kendala.showKeterangan"
+                                @change="post.kendala = $event.target.value.includes('Ada') ? $event.target.value : `Ada, ${$event.target.value}`"
+                                :required="store.kendala.showKeterangan"
+                                ></textarea>
+                            </div>
+                        
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" id="create__kendala_no" name="create__kendala_ketersediaan"
+                                    @click="store.kendala.showKeterangan = false; post.kendala = 'Tidak ada'" />
+                                <label class="form-check-label" for="create__kendala_no">Tidak ada</label>
+                            </div>
+                        </div>
+                        <!--/ Hambatan/Kendala -->
+
+                        <hr class="mx-n4">
+
+                        <!-- Kesimpulan -->
+                        <div class="mb-3">
+                            <label for="create__kesimpulan" class="col-form-label required">Kesimpulan:</label>
+                            <textarea class="form-control" id="create__kesimpulan" v-model="post.kesimpulan" required></textarea>
+                        </div>
+                        <!--/ Kesimpulan -->
+                        
+                        <hr class="mx-n4">
+
+                        <!-- Tindak Lanjut -->
+                        <div class="mb-3">
+                            <label for="create__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+    
+                            <textarea class="form-control" id="create__tindak_lanjut" v-model="post.tindak_lanjut" required></textarea>
+                            <!-- <div class="form-check mt-3">
+                                <input class="form-check-input" type="radio" name="create__tindak_lanjut_ketersediaan" id="create__tindak_lanjut_ketersediaan_yes" @click="store.tindakLanjut.yes.showKeterangan = true; store.tindakLanjut.no.showContainer = false; post.tindak_lanjut = 'Ada'" />
+                                <label class="form-check-label" for="create__tindak_lanjut_ketersediaan_yes">Ada, sebutkan ...</label>
+                            </div>
+    
+                            <div class="ps-4">
+                                <textarea class="form-control my-3" id="create__tindak_lanjut_yes_keterangan" v-if="store.tindakLanjut.yes.showKeterangan" @change="post.tindak_lanjut = `Ada, ${$event.target.value}`" :required="store.tindakLanjut.yes.showKeterangan"></textarea>
+                            </div>
+                        
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="create__tindak_lanjut_ketersediaan" id="create__tindak_lanjut_ketersediaan_no"
+                                    @click="store.tindakLanjut.yes.showKeterangan = false; store.tindakLanjut.no.showContainer = true; post.tindak_lanjut = 'Tidak'" />
+                                <label class="form-check-label" for="create__tindak_lanjut_ketersediaan_no">Tidak</label>
+                            </div>
+                        
+                            <div id="create_tindak_lanjut_no_container" class="ps-4 mt-1" v-if="store.tindakLanjut.no.showContainer">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="create__tindak_lanjut_ketersediaan_no" id="create__tindak_lanjut_ketersediaan_no_pemblokiran"
+                                        @click="post.tindak_lanjut = 'Tidak, Pemblokiran'; store.tindakLanjut.no.showContainer2 = false" :required="store.tindakLanjut.no.showContainer"/>
+                                    <label class="form-check-label" for="create__tindak_lanjut_ketersediaan_no_pemblokiran">A. Pemblokiran</label>
+                                </div>
+                        
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="create__tindak_lanjut_ketersediaan_no" id="create__tindak_lanjut_ketersediaan_no_anggaran"
+                                        @click="post.tindak_lanjut = 'Tidak, Anggaran tidak ada alokasi kegiatan'; store.tindakLanjut.no.showContainer2 = false;" :required="store.tindakLanjut.no.showContainer"
+                                        />
+                                    <label class="form-check-label" for="create__tindak_lanjut_ketersediaan_no_anggaran">B. Anggaran tidak ada alokasi kegiatan</label>
+                                </div>
+                        
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="create__tindak_lanjut_ketersediaan_no" id="create__tindak_lanjut_ketersediaan_no_lainnya" @click="store.tindakLanjut.no.showContainer2 = true; post.tindak_lanjut = 'Lainnya'"
+                                        :required="store.tindakLanjut.no.showContainer"/>
+                                    <label class="form-check-label" for="create__tindak_lanjut_ketersediaan_no_lainnya">C. Lainnya, sebutkan ...</label>
+                                </div>
+                        
+                                <div class="ps-4">
+                                    <textarea class="form-control mt-3" id="create__tindak_lanjut_ketersediaan_no_keterangan" v-if="store.tindakLanjut.no.showContainer2" @change="post.tindak_lanjut = `${$event.target.value}`" :required="store.tindakLanjut.no.showContainer2"></textarea>
+                                </div>
+                            </div> -->
+                        </div>
+                        <!--/ Tindak Lanjut -->
+					</div>
+                    <!--/ Rincian Hasil -->
+					
+                    <hr class="mx-n4">
+
+                    <!-- Dokumentasi -->
+                    <div class="mb-3">
+                        <label for="create__dokumentasi" class="col-form-label required">Dokumentasi:</label>
+                        <input type="file" class="form-control" id="create__dokumentasi" @change="post.dokumentasi = $event.target.files[0]" required
+                            accept=".csv, .xlsx, .pdf, docx." />
+                    </div>
+                    <!--/ Dokumentasi -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

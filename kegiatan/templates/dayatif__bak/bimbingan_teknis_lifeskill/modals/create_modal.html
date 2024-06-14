@@ -1,0 +1,351 @@
+<form id="createForm" @submit.prevent="handlePost()">
+    <div class="modal fade" id="createModal">
+        <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Tambah Data <b> {title}</b></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+
+                <div class="modal-body">
+
+                    <!-- Satuan Kerja Pelaksana -->
+                    <div class="mb-3">
+                        <label for="create__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+                        <select class="form-control select2" id="create__satker" disabled>
+                            <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                        </select>
+                    </div>
+                    <!--/ Satuan Kerja Pelaksana -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tanggal Kegiatan -->
+                    <div class="row range_date">
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="create__tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                                <input type="date" id="create__tanggal_awal" class="form-control" v-model="post.tanggal_awal" required />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="mb-3">
+                                <label for="create__tanggal_akhir" class="col-form-label required">Tanggal Akhir:</label>
+                                <input type="date" id="create__tanggal_akhir" class="form-control" v-model="post.tanggal_akhir" />
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Tanggal Kegiatan -->
+
+                    <div class="text-important my-2">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</div>
+
+                    <hr class="mx-n4">
+
+                    <!-- Tempat -->
+                    <div class="mb-3">
+                        <label for="create__tempat" class="col-form-label required">Tempat:</label>
+                        <textarea class="form-control" id="create__tempat" v-model="post.tempat" required></textarea>
+                    </div>
+                    <!--/ Tempat -->
+
+                    <!-- Kawasan Yang Diintervensi -->
+                    <div class="mb-3">
+                        <label for="create__kawasan" class="col-form-label required">Kawasan Yang Diintervensi:</label>
+
+                        <div class="row" id="create__kawasan">
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__provinsi" v-model="post.provinsi">
+                                    <option value="" selected>--Pilih provinsi--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__kabupaten" v-model="post.kabupaten">
+                                    <option value="" selected>--Pilih kota/kabupaten--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__kecamatan" v-model="post.kecamatan">
+                                    <option value="" selected>--Pilih kecamatan--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" disabled id="create__desa" v-model="post.desa">
+                                    <option value="" selected>--Pilih desa/kelurahan--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Kawasan Yang Diintervensi -->
+
+                    <!-- Keterampilan Yang Diberikan -->
+                    <div class="mb-3">
+                        <label for="create__keterampilan" class="col-form-label required">Keterampilan Yang Diberikan:</label>
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__keterampilan" id="create__keterampilan_menjahit"
+                            @click="store.keterampilan.showKeterangan = false; store.keterampilan.select = 'Menjahit'; post.keterampilan = 'Menjahit'" />
+                            <label class="form-check-label" for="create__keterampilan_menjahit">Menjahit</label>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__keterampilan" id="create__keterampilan_kerajinan_tangan"
+                            @click="store.keterampilan.showKeterangan = true; store.keterampilan.select = 'Kerajinan Tangan'; post.keterampilan = ''" />
+                            <label class="form-check-label" for="create__keterampilan_kerajinan_tangan">Kerajinan Tangan, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" v-if="store.checkVisibility('Kerajinan Tangan')"
+                            @change="store.keterampilan.keterangan = $event.target.value; post.keterampilan = store.getKeterampilan"
+                            :required="store.checkVisibility('Kerajinan Tangan')"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__keterampilan" id="create__keterampilan_pengolahan_makanan"
+                            @click="store.keterampilan.showKeterangan = true; store.keterampilan.select = 'Pengolahan Makanan'; post.keterampilan = ''" />
+                            <label class="form-check-label" for="create__keterampilan_pengolahan_makanan">Pengolahan Makanan, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" v-if="store.checkVisibility('Pengolahan Makanan')"
+                            @change="store.keterampilan.keterangan = $event.target.value; post.keterampilan = store.getKeterampilan"
+                            :required="store.checkVisibility('Pengolahan Makanan')"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__keterampilan" id="create__keterampilan_pembuatan_sabun"
+                            @click="store.keterampilan.showKeterangan = false; store.keterampilan.select = 'Pembuatan Sabun'; post.keterampilan = 'Pembuatan Sabun'" />
+                            <label class="form-check-label" for="create__keterampilan_pembuatan_sabun">Pembuatan Sabun</label>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__keterampilan" id="create__keterampilan_barista_kopi"
+                            @click="store.keterampilan.showKeterangan = false; store.keterampilan.select = 'Barista Kopi'; post.keterampilan = 'Barista Kopi'" />
+                            <label class="form-check-label" for="create__keterampilan_barista_kopi">Barista Kopi</label>
+                        </div>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__keterampilan" id="create__keterampilan_lainnya"
+                            @click="store.keterampilan.showKeterangan = true; store.keterampilan.select = 'Lainnya'; post.keterampilan = ''" />
+                            <label class="form-check-label" for="create__keterampilan_lainnya">Lainnya, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" v-if="store.checkVisibility('Lainnya')"
+                            @change="store.keterampilan.keterangan = $event.target.value; post.keterampilan = store.getKeterampilan"
+                            :required="store.checkVisibility('Lainnya')"
+                            ></textarea>
+                        </div>
+                    </div>
+                    <!--/ Keterampilan Yang Diberikan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Peserta -->
+                    <div id="create__peserta_container">
+                        <label for="create__peserta" class="col-form-label required text-muted">Data Peserta : </label>
+                        <div id="create__peserta" class="form-repeater px-3 mt-2">
+                            <div data-repeater-list="create_peserta_group">
+                                <div data-repeater-item>
+                                    <div class="row">
+                                        <div class="mb-3 col-lg-6 col-sm-10 mb-0">
+                                            <label class="form-label" for="form-repeater-1-1">Nama </label>
+                                            <input type="text" id="form-repeater-1-1" class="form-control" placeholder="Nama Peserta" name="nama" />
+                                        </div>
+
+                                        <div class="mb-3 col-lg-6 col-sm-10 mb-0">
+                                            <label class="form-label" for="form-repeater-1-2">Alamat</label>
+                                            <input type="text" id="form-repeater-1-2" class="form-control" placeholder="Alamat Rumah Peserta" name="alamat" />
+                                        </div>
+
+                                        <div class="mb-3 col-lg-4 col-sm-10 mb-0">
+                                            <label class="form-label" for="form-repeater-1-3">Nomor HP</label>
+                                            <input type="text" id="form-repeater-1-3" class="form-control" placeholder="Nomor HP Peserta" name="notelp" />
+                                        </div>
+
+                                        <div class="mb-3 col-lg-4 col-sm-5 mb-0">
+                                            <label class="form-label" for="form-repeater-1-4">Status</label>
+                                            <select class="form-select" id="form-repeater-1-4" name="status">
+                                                <option value="" selected>--Pilh Status--</option>
+                                                <option value="Miskin">Miskin</option>
+                                                <option value="Tidak Miskin">Tidak Miskin</option>
+                                            </select>
+                                        </div>
+
+                                        <div class="mb-3 col-lg-4 col-sm-5 mb-0">
+                                            <label class="form-label" for="form-repeater-1-5">Jenis Kelamin</label>
+
+                                            <div class="mt-3">
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="jenis_kelamin" id="create-peserta-jk-l" value="L" />
+                                                    <label class="form-check-label" for="create-peserta-jk-l">L</label>
+                                                </div>
+
+                                                <div class="form-check form-check-inline">
+                                                    <input class="form-check-input" type="radio" name="jenis_kelamin" id="create-peserta-jk-p" value="P" />
+                                                    <label class="form-check-label" for="create-peserta-jk-P">P</label>
+                                                </div>
+                                            </div>
+                                        </div>
+
+
+                                        <div class="mb-3 col-lg-12 col-xl-12 col-12 d-flex justify-content-end align-items-center mb-0">
+                                            <button class="btn btn-label-danger mt-4" data-repeater-delete type="button"
+                                                value="Delete">
+                                                <i class="ti ti-x ti-xs me-1"></i>
+                                                <span class="align-middle">Hapus</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <hr class="hr-light mx-n4">
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <button class="btn btn-primary" data-repeater-create type="button" value="Add">
+                                    <i class="ti ti-plus me-1"></i>
+                                    <span class="align-middle">Tambah peserta</span>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <!--/ Peserta -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Sinergi -->
+                    <div class="mb-3">
+						<label for="create__sinergi" class="col-form-label text-muted me-3 required" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-original-title="Centang box jika Iya, Kosongkan jika Tidak">Sinergi :</label>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="create__sinergi_desa_bersinar" value="1" v-model="post.sinergi_desa" />
+                            <label class="form-check-label" for="create__sinergi_desa_bersinar">Desa Bersinar</label>
+                        </div>
+
+                        <div class="form-check form-check-inline mt-3">
+                            <input class="form-check-input" type="checkbox" id="create__sinergi_ibm" value="1" v-model="post.sinergi_ibm" />
+                            <label class="form-check-label" for="create__sinergi_ibm">IBM</label>
+                        </div>
+					</div>
+                    <!--/ Sinergi -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Hasil SKM -->
+                    <div class="mb-3">
+						<label for="create__hasil_skm" class="col-form-label text-muted required">Hasil SKM:</label>
+
+                        <div class="row">
+                            <div class="col-md-6 col-sm-10 mb-2">
+                                <label for="create__hasil_skm_nilai" class="col-form-label required">Nilai (1,00 - 4,00) :</label>
+                                <input type="text" class="form-control mask-hasil-nilai" id="create__hasil_skm_nilai" value="1,00" required />
+                            </div>
+
+                            <div class="col-md-6 col-sm-10 mb-2">
+                                <label for="create__hasil_skm_kategori" class="col-form-label">Kategori :</label>
+                                <input type="text" class="form-control" id="create__hasil_skm_kategori" :value="store.getSKMKategori" :change="post.hasil_skm_kategori = store.getSKMKategori" disabled readonly/>
+                            </div>
+                        </div>
+
+                        <div class="d-flex mt-3">
+                            <span class="text-muted">Keterangan :</span>
+                            <ul>
+                                <li>Nilai <span class="text-danger">1,00</span> – <span class="text-danger">1,74</span> = <b>Buruk</b></li>
+                                <li>Nilai <span class="text-warning">1,75</span> – <span class="text-warning">2,50</span> = <b>Cukup</b></li>
+                                <li>Nilai <span class="text-primary">2,51</span> – <span class="text-primary">3.25</span> = <b>Baik</b></li>
+                                <li>Nilai <span class="text-success">3,26</span> – <span class="text-success">4,00</span> = <b>Sangat Baik</b></li>
+                            </ul>
+                        </div>
+					</div>
+                    <!--/ Hasil SKM -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Deskripsi -->
+					<div class="mb-3">
+						<label for="create__anggaran" class="col-form-label required">Anggaran :</label>
+
+                        <textarea class="form-control" id="create__anggaran" v-model="post.anggaran" required></textarea>
+					</div>
+                    <!--/ Deskripsi -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Hambatan/Kendala -->
+                    <div class="mb-3">
+                        <label for="create__kendala_yes" class="col-form-label required">Hambatan/Kendala:</label>
+
+                        <div class="form-check mt-3">
+                            <input class="form-check-input" type="radio" name="create__kendala_ketersediaan" id="create__kendala_yes" @click="store.kendala.showKeterangan = true; post.kendala = 'Ada'" />
+                            <label class="form-check-label" for="create__kendala_yes">Ada, sebutkan ...</label>
+                        </div>
+
+                        <div class="ps-4">
+                            <textarea class="form-control my-3" id="create__kendala_yes_keterangan" v-if="store.kendala.showKeterangan"
+                            @change="post.kendala = $event.target.value.includes('Ada') ? $event.target.value : `Ada, ${$event.target.value}`"
+                            :required="store.kendala.showKeterangan"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" id="create__kendala_no" name="create__kendala_ketersediaan"
+                                @click="store.kendala.showKeterangan = false; post.kendala = 'Tidak ada'" />
+                            <label class="form-check-label" for="create__kendala_no">Tidak ada</label>
+                        </div>
+                    </div>
+                    <!--/ Hambatan/Kendala -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Kesimpulan -->
+					<div class="mb-3">
+						<label for="create__kesimpulan" class="col-form-label required">Kesimpulan:</label>
+
+                        <textarea class="form-control my-3" placeholder="Deskripsi singkat, mencakup:
+                        1. Hasil pelaksanaan kegiatan: ....
+                        2. Hambatan/kendala:.... "
+                        id="create__kesimpulan_rekomendasi" v-model="post.kesimpulan" required></textarea>
+					</div>
+                    <!--/ Kesimpulan -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Tindak Lanjut -->
+                    <div class="mb-3">
+                        <label for="create__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+
+                        <textarea class="form-control" id="create__tindak_lanjut" placeholder="Kegiatan atau hal-hal yang akan dilaksanakan setelah kegiatan bimtek selesai dilakukan" v-model="post.tindak_lanjut" required></textarea>
+                    </div>
+                    <!--/ Tindak Lanjut -->
+
+                    <hr class="mx-n4">
+
+                    <!-- Dokumentasi Gambar -->
+                    <div class="mb-3">
+                        <label for="create__dokumentasi_gambar" class="col-form-label optional">Dokumentasi Gambar:</label>
+                        <v-input-image id="create__dokumentasi_gambar" :maxsize="5" v-model="post.gambar"></v-input-image>
+                    </div>
+                    <!--/ Dokumentasi Gambar -->
+
+                    <!-- Dokumentasi -->
+                    <div class="mb-3">
+                        <label for="create__dokumentasi" class="col-form-label required">Dokumentasi File:</label>
+                        <input type="file" class="form-control" id="create__dokumentasi" @change="post.dokumentasi = $event.target.files[0]" required
+                            accept=".csv, .xlsx, .pdf, docx." />
+                    </div>
+                    <!--/ Dokumentasi -->
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-xmark me-2"></i>Tutup</button>
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>
+                        Simpan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>

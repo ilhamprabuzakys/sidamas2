@@ -1,0 +1,124 @@
+{% extends 'auth/auth_base.html' %}
+{% load static %}
+
+{% block title %} Masuk {% endblock title %}
+
+{% block auth_img %}
+{% static 'assets/home/images/auth/login.png' %}
+{% endblock %}
+
+{% block auth_content %}
+
+{% if form.errors %}
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    <strong>Error:</strong> Masukan yang Anda berikan tidak valid. Harap periksa kembali.
+</div>
+{% endif %}
+
+<section id="login">
+    <p class="card-text text-center p-2">Masukan nama pengguna anda untuk masuk kedalam aplikasi Sistem Informasi
+        DAYAMAS
+    </p>
+    <form id="__form_login" method="POST" action="{% url 'login' %}" @submit.prevent="handleSubmit" ref="loginForm">
+        {% csrf_token %}
+
+        <v-input-group label="Nama Pengguna" placeholder="Nama Pengguna Anda" type="text" icon="fas fa-user"
+            name="username" v-model="username" required></v-input-group>
+        <v-input-group label="Kata Sandi" placeholder="Kata Sandi Anda" type="password" icon="fas fa-lock"
+            name="password" v-model="password" required></v-input-group>
+
+        <div class="text-end">
+            <span id="forgot-password-text">Lupa Kata Sandi? Klik <a @click="handleForgotPassword()"
+                    href="javascript:;">disini</a></span>
+        </div>
+
+        <v-button type="submit" icon="fa-solid fa-arrow-right-to-bracket">Masuk</v-button>
+    </form>
+</section>
+
+{% endblock %}
+{% block js_tambahan %}
+<script>
+    Vue.createApp({
+        components: {
+            "v-button": loadComponent('components/forms/Button.vue'),
+            "v-input-group": loadComponent('components/forms/InputGroup.vue'),
+        },
+        data() {
+            return {
+                username: '',
+                password: '',
+            }
+        },
+        methods: {
+            handleSubmit() {
+                this.username = this.username.trim();
+                this.password = this.password.trim();
+
+                if (this.username.includes(' ')) {
+                    Swal.fire({
+                        title: 'Peringatan!',
+                        text: 'Username tidak boleh mengandung spasi.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                } else if (this.password.includes(' ')) {
+                    Swal.fire({
+                        title: 'Peringatan!',
+                        text: 'Password tidak boleh mengandung spasi.',
+                        icon: 'warning',
+                        confirmButtonText: 'OK'
+                    });
+                    return false;
+                }
+
+                Swal.fire({
+                    title: "Mengecek data",
+                    icon: "info",
+                    html: `Mengecek <b>data kredensials</b> yang anda masukan ...`,
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                        this.$refs.loginForm.submit();
+                    },
+                });
+
+                return false;
+            },
+            handleForgotPassword() {
+                Swal.fire({
+                    title: "Lupa password anda?",
+                    html: `Kontak <b>puslitdatin</b> untuk mendapatkan <b>password</b> anda kembali!`,
+                    icon: "info",
+                    confirmButtonText: "Hubungi Puslitdatin.",
+                    showCancelButton: true,
+                    cancelButtonText: "Batalkan"
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.open(
+                            "https://puslitdatin.bnn.go.id/kontak/#fws_65ab64f055da2",
+                            '_blank' // Ini akan membuka tautan di tab baru
+                        );
+                    }
+                });
+            }
+        }
+    }).mount('#app');
+</script>
+
+{% if form.errors %}
+<script>
+    setTimeout(function () {
+        Swal.fire({
+            title: "Terjadi Kesalahan",
+            html: `Data yang Anda masukan <b>tidak valid</b>. <br/> Harap periksa kembali data anda.`,
+            icon: "error",
+            confirmButtonText: "Tutup",
+            showConfirmButton: true
+        });
+    }, 1000)
+</script>
+{% endif %}
+{% endblock js_tambahan %}

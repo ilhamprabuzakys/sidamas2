@@ -1,0 +1,134 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Tambah Berita {% endblock %}
+
+{% block css_tambahan %}
+<!-- Dropzone -->
+<script src="{% static 'assets/dashboard/vendor/libs/dropzone/dropzone.js' %}"></script>
+<link rel="stylesheet" href="https://unpkg.com/dropzone@5/dist/min/dropzone.min.css" type="text/css" />
+<link rel="stylesheet" href="{% static 'assets/dashboard/vendor/libs/dropzone/dropzone.css' %}" />
+
+<!-- CK EDITOR -->
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+<style>
+    #dropzone .light-style .dz-message:before {
+        margin-top: -70px;
+    }
+</style>
+{% endblock css_tambahan %}
+
+{% block content %}
+  <div class="breadcrumb">
+    <div class="row">
+      <h3 class="heading mb-2">Tambah Berita</h3>
+      <span class="mb-0">
+        <a href="{% url 'berita:list' %}" class="text-muted fw-light">Berita /</a>
+        <span class="ms-1 fw-medium">Tambah Berita</span>
+      </span>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-12 mb-3">
+      <div class="card h-100">
+        <div class="card-body">
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+              <label for="id_kategori">Kategori</label>
+              <select id="id_kategori" name="kategori" class="form-control">
+                {% for value, label in form.fields.kategori.choices %}
+                  <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="id_judul">Judul</label>
+              <input type="text" id="id_judul" name="judul" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+              <label for="id_isi_berita">Isi Berita</label>
+              {% comment %} <textarea id="id_isi_berita" name="isi_berita" class="form-control"></textarea> {% endcomment %}
+              <div id="isi_berita"></div>
+              {% comment %} {{ form.isi_berita }} {% endcomment %}
+            </div>
+
+            <div class="mb-3">
+              <label for="id_tanggal">Tanggal</label>
+              <input type="date" id="id_tanggal" name="tanggal" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+              <label for="id_status">Status</label>
+              <select id="id_status" name="status" class="form-control">
+                <!-- Add options dynamically based on your STATUS_CHOICES -->
+                {% for value, label in form.fields.status.choices %}
+                  <option value="{{ value }}">{{ label }}</option>
+                {% endfor %}
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label for="id_tags">Tags</label>
+              <input type="text" id="id_tags" name="tags" class="form-control" />
+            </div>
+
+            <div class="mb-3">
+                <label for="gambar-utama">Gambar Utama</label>
+                <div id="dropzone" class="dropzone"></div>
+                <input type="hidden" id="id_gambar_utama" name="gambar_utama" />
+              </div>
+
+            <div class="d-flex justify-content-end gap-2">
+              <button type="button" class="btn btn-secondary" onclick="goBack()">
+                <i class="fas fa-arrow-left me-2"></i>
+                Kembali
+              </button>
+              <button type="submit" class="btn btn-primary">
+                <i class="fas fa-save me-2"></i>
+                Simpan data
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+
+{% block js_tambahan %}
+<script>
+    Dropzone.autoDiscover = false;
+    window.addEventListener('load', function() {
+        ClassicEditor
+            .create( document.querySelector( '#isi_berita' ) )
+            .catch( error => {
+                console.error( error );
+            } );
+
+
+        const myDropzone = new Dropzone("#dropzone", {
+            url: "/dashbord/berita/tambah/upload/",  // Ganti dengan URL endpoint untuk meng-upload gambar
+            maxFilesize: 5,  // Ukuran maksimum file (dalam MB)
+            acceptedFiles: "image/*",  // Hanya menerima file gambar
+            addRemoveLinks: true,
+            init: function () {
+            this.on("success", function (file, response) {
+                // Callback saat upload berhasil
+                document.getElementById("id_gambar_utama").value = response.filename;
+            });
+            this.on("removedfile", function (file) {
+                // Callback saat file dihapus
+                const filename = file.upload.filename || file.name;
+                // Ganti dengan URL endpoint untuk menghapus gambar
+                const deleteUrl = "/dashboard/berita/tambah/upload?filename=" + filename;
+                fetch(deleteUrl, { method: "DELETE" });
+            });
+            },
+        });
+    });
+  </script>
+{% endblock js_tambahan %}

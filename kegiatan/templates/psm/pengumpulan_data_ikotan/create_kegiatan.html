@@ -1,0 +1,139 @@
+<div class="modal fade" id="tambahDataKegiatan" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalTambah">Tambah Data</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <form class="form-repeater">
+            <div class="row mb-3">
+              <div class="col-6">
+                <div class="mb-3">
+                  <label for="tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                  <input type="date" id="tanggal_awal" class="form-control" />
+                </div>
+              </div>
+              <div class="col-6">
+                <div class="mb-3">
+                  <label for="tanggal_akhir" class="col-form-label">Tanggal Akhir:</label>
+                  <input type="date" id="tanggal_akhir" class="form-control" />
+                </div>
+              </div>
+              <label for="pelaksanaan" class="col-form-label text-light">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</label>
+            </div>
+            <div class="mb-3">
+              <label for="nama_lingkungan" class="col-form-label required">Nama Lingkungan dan Satker:</label>
+              <textarea class="form-control" name="nama_lingkungan" id="nama_lingkungan"></textarea>
+            </div>
+  
+            <hr class="mx-n4 my-4" />
+  
+            <div class="mb-3">
+              <label for="pelaksanaan" class="col-form-label text-light">Peserta :</label>
+              <div data-repeater-list="group-a">
+                <div data-repeater-item>
+                  <div class="row">
+                    <div class="mb-3 col-lg-6 col-xl-6 col-12 mb-0">
+                      <label class="col-form-label" for="form-repeater-1-1">Nama dan Jabatan</label>
+                      <input type="text" id="form-repeater-1-1" class="form-control" placeholder="" />
+                    </div>
+                    <div class="mb-3 col-lg-6 col-xl-3 col-12 mb-0">
+                      <label class="col-form-label" for="form-repeater-1-1">Jenis Kelamin</label>
+                      <div class="mb-3">
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="genderOption" id="genderL" value="pria" />
+                          <label class="form-check-label" for="gender">Pria</label>
+                        </div>
+                        <div class="form-check form-check-inline">
+                          <input class="form-check-input" type="radio" name="genderOption" id="genderP" value="wanita" />
+                          <label class="form-check-label" for="gender">Wanita</label>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="mb-3 col-lg-12 col-xl-2 col-12 mb-0">
+                      <label class="col-form-label" for="form-repeater-1-3">&nbsp</label>
+                      <button class="btn btn-label-danger" data-repeater-delete>
+                        <i class="ti ti-x ti-xs me-1"></i>
+                        <span class="align-middle">Hapus</span>
+                      </button>
+                    </div>
+                  </div>
+                  <hr />
+                </div>
+              </div>
+              <div class="mb-0">
+                <button class="btn btn-primary" data-repeater-create>
+                  <i class="ti ti-plus me-1"></i>
+                  <span class="align-middle">Tambah</span>
+                </button>
+              </div>
+            </div>
+  
+            <hr class="mx-n4 my-4" />
+  
+            <div class="mb-3">
+              <label for="status_IndeksKemandirianPartisipasi" class="col-form-label required">Status Indeks Kemandirian Partisipasi</label>
+              <select id="status_IndeksKemandirianPartisipasi" name="status_IndeksKemandirianPartisipasi" class="selectpicker w-100" data-style="btn-default">
+                <option selected disabled>Pilih Status</option>
+                <option value="tidak_mandiri">Tidak Mandiri</option>
+                <option value="kurang_mandiri">Kurang Mandiri</option>
+                <option value="mandiri">Mandiri</option>
+                <option value="sangat_mandiri">Sangat Mandiri</option>
+              </select>
+            </div>
+  
+            <hr class="mx-n4 my-4" />
+  
+            <label for="pelaksanaan" class="col-form-label text-light">Status IKP Akhir :</label>
+  
+            <div class="mb-3 row">
+              <div class="col-lg-6 col-xl-6 col-12">
+                <label for="nilai_ikp" class="col-form-label required">Nilai IKP</label>
+                <input type="text" class="form-control cleave-ikp" name="nilai_ikp" id="nilai_ikp" />
+              </div>
+  
+              <div class="col-lg-6 col-xl-6 col-12">
+                <label for="status_akhir_ikp" class="col-form-label required">Status</label>
+                <select id="status_akhir_ikp" name="status_akhir_ikp" class="selectpicker w-100" data-style="btn-default">
+                  <option selected disabled>Pilih Status</option>
+                  <option value="tidak_mandiri">Tidak Mandiri</option>
+                  <option value="kurang_mandiri">Kurang Mandiri</option>
+                  <option value="mandiri">Mandiri</option>
+                  <option value="sangat_mandiri">Sangat Mandiri</option>
+                </select>
+              </div>
+            </div>
+  
+            <hr class="mx-n4 my-4" />
+  
+            <div class="mb-3">
+              <label for="deskripsi_hasil" class="col-form-label required">Deskripsi Hasil:</label>
+              <textarea class="form-control" name="deskripsi_hasil" id="deskripsi_hasil"></textarea>
+            </div>
+  
+            <div class="mb-3">
+              <label for="kesimpulan" class="col-form-label required">Kesimpulan:</label>
+              <textarea class="form-control" name="kesimpulan" id="kesimpulan"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="tindak_lanjut" class="col-form-label required">Rekomendasi Tindak Lanjut:</label>
+              <textarea class="form-control" name="tindak_lanjut" id="tindak_lanjut"></textarea>
+            </div>
+            <div class="mb-3">
+              <label for="dokumentasi" class="col-form-label required">Dokumentasi</label>
+              <input type="file" class="form-control" id="dokumentasi" aria-describedby="inputGroupFileAddon03" aria-label="Upload" />
+            </div>
+          </form>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"><i class="fas fa-xmark me-2"></i>Tutup</button>
+          <button type="button" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>
+            Simpan
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  

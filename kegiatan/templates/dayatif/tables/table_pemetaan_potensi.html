@@ -1,0 +1,47 @@
+<table class="table table-bordered" id="__table">
+    <thead class="bg-soft-green">
+        <tr>
+            <th>No.</th>
+            <th>Satuan Kerja</th>
+            <th>Jumlah Kegiatan <br>
+                <small class="text-muted">(Kali)</small>
+            </th>
+            <th class="bg-soft-danger">Pelaksanaan</th>
+            <th>Deskripsi Hasil</th>
+            <th>Kendala/Hambatan</th>
+            <th>Kesimpulan</th>
+            <th>Tidak Lanjut</th>
+            <th>Dokumentasi</th>
+            <th>AKSI<i class="fas fa-edit ms-2"></i></th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr class="">
+            <td scope="row">1</td>
+            <td>{{ user.profile.satker }}</td>
+            <td>3</td>
+            <td>
+                <a href="javascript:;" class="badge bg-primary text-decoration-none text-white" data-bs-toggle="modal"
+                    data-bs-target="#detailPelaksanaanModal">
+                    <i class="fas fa-eye me-2"></i>Lihat Detail
+                </a>
+            </td>
+            <td>Lorem ipsum dolor sit amet consectetur adipisicing elit. Iste veritatis odio sit! Totam pariatur hic
+                dolorum atque aut. Saepe, dolores?</td>
+            <td>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minima, excepturi!</td>
+            <td>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minima, excepturi!</td>
+            <td>Lorem, ipsum dolor sit amet consectetur adipisicing elit. Minima, excepturi!</td>
+            <td>
+                <a href="javascript:;" class="text-primary">Lihat dokumentasi</a>
+            </td>
+            <td>
+                <div class="list-button">
+                    <a href="javascript:;" class="badge bg-success text-white text-decoration-none mb-1">
+                        <i class="fas fa-pen-to-square me-2"></i>EDIT</a>
+                    <a href="javascript:;" class="badge bg-danger text-white text-decoration-none mb-1" id="deleteData">
+                        <i class="fas fa-trash-alt me-2"></i>HAPUS</a>
+                </div>
+            </td>
+        </tr>
+    </tbody>
+</table>

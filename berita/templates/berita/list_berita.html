@@ -1,0 +1,424 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Daftar Berita {% endblock %}
+
+{% block modal_tambahan %}
+{% include "berita/modals/create_berita_modal.html" %}
+{% include "berita/modals/edit_berita_modal.html" %}
+{% endblock modal_tambahan %}
+
+{% block content %}
+
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Daftar Berita</h3>
+        <span class="mb-0"><span class="text-muted fw-light">Berita /</span><span class="ms-1 fw-medium">Daftar
+                Berita</span></span>
+    </div>
+</div>
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Berita Sistem Pemberdayaan Masyarakat</h3>
+                <hr />
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-end mb-3 gap-2">
+                    {% comment %} <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData"><i
+                            class="fas fa-file-export me-2"></i>Ekspor Data</button> {% endcomment %}
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createModal"><i
+                            class="fas fa-plus me-2"></i>Tambah Data</button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                {% include 'berita/table_berita.html' %}
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<!-- CK EDITOR -->
+<script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+
+<script>
+    let create_berita_editor = null;
+    let edit_berita_editor = null;
+
+    ClassicEditor
+        .create(document.querySelector('#isi_berita'))
+        .then(editor => {
+            console.log('Editor was initialized :', editor);
+            create_berita_editor = editor;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+
+    ClassicEditor
+        .create(document.querySelector('#edited_isi_berita'))
+        .then(editor => {
+            console.log('Editor was initialized :', editor);
+            edit_berita_editor = editor;
+        })
+        .catch(error => {
+            console.error(error);
+        });
+</script>
+
+<script>
+    const columns = [
+        {
+            data: null,
+        },
+        {
+            data: "judul",
+            render: function (data, type, row) {
+                return `<div class="text-start"><span class="">${data}</span></div>`;
+            },
+        },
+        {
+            data: "kategori.nama",
+            render: function (data, type, row) {
+                return `<div class="text-start"><span class="">${data}</span></div>`;
+            },
+        },
+        {
+            data: "status",
+            render: function (data, type, row) {
+
+                const statusIconList = {
+                    'pending': 'far fa-clock',
+                    'published': 'fas fa-check-double',
+                    'draft': 'fas fa-edit',
+                    'archived': 'fas fa-box-archive',
+                };
+
+                const statusBGList = {
+                    'pending': 'bg-primary',
+                    'published': 'bg-success',
+                    'draft': 'bg-warning',
+                    'archived': 'bg-danger',
+                };
+
+                const status_icon = statusIconList[data] || 'fas fa-edit';
+                const status_bg = statusBGList[data] || 'bg-primary';
+
+                return `<div class="text-center"><span class="badge ${status_bg} text-white"><i class="${status_icon} me-2"></i>${data.toUpperCase()}</span></div>`;
+            },
+        },
+        {
+            data: "created_by.username",
+            render: function (data, type, row) {
+                return `<div class="text-center"><span class="">${data ?? '-'}</span></div>`;
+            },
+        },
+        {
+            data: "created_at",
+            render: function (data, type, row) {
+                const formattedDate = moment(data).format('D MMMM YYYY');
+                return `<div class="text-center"><a class="text-decoration-none">${formattedDate}</a></div>`;
+            },
+        },
+        {
+            data: "id",
+            orderable: false,
+            render: function (data, type, row) {
+                const options = JSON.stringify({ id: data, name: 'berita', detail_name: row.judul, apiURL: '/dashboard/berita/api/v1' });
+                const detailURL = `/berita/${row.slug}/`;
+
+                return `
+            <div class="list-button gx-3 text-uppercase">
+                <div>
+                    <a href="${detailURL}" class="badge bg-primary text-white text-decoration-none mb-1"><i
+                            class="fas fa-eye me-2"></i>Lihat</a>
+                </div>
+                <div>
+                    <a href="javascript:void(0);" onclick="handleEdit(${data})"
+                        class="badge bg-success text-white text-decoration-none mb-1"><i
+                            class="fas fa-pen-to-square me-2"></i>Edit</a>
+                </div>
+                <div>
+                    <a href="javascript:void(0);" class="badge bg-danger text-white text-decoration-none mb-1" onclick='handleDelete(${options})'><i
+                            class="fas fa-trash-alt me-2"></i>Hapus</a>
+                </div>
+            </div>
+            `;
+            },
+        },
+    ];
+
+    const table = $('#__table').DataTable({
+        language: dt_lang_config(),
+        // serverSide: true,
+        searching: true,
+        responsive: true,
+        pageLength: 10,
+        ajax: {
+            url: `/dashboard/berita/api/v1/?format=datatables`,
+            dataSrc: 'data'
+        },
+        // ordering: true,
+        columns: columns,
+        /* initComplete: function (settings, json) {
+            console.log('Hasil fetch data : ', json);
+        }, */
+        columnDefs: [dt_row_pagination()]
+    });
+</script>
+<script>
+    let s = '';
+
+    function getURL() {
+        let modified_url = `/dashboard/berita/api/v1/?format=datatables`;
+        if (s != '') {
+            s = convertToTitleCaseAndReplaceSpace(s);
+            modified_url += `&s=${s}`;
+        } else {
+            modified_url = '/dashboard/berita/api/v1/?format=datatables';
+        }
+        return modified_url;
+    }
+
+    $(() => {
+        let timeoutId;
+
+        $('#__table_wrapper input[type="search"]').on('keyup', function () {
+            table.settings()[0].jqXHR.abort();
+
+            clearTimeout(timeoutId);
+
+            timeoutId = setTimeout(function () {
+
+                s = $(this).val();
+
+                const url = getURL();
+
+                console.log('URL:', url);
+
+                table.ajax.url(url).load();
+            }.bind(this), 500);
+        });
+
+    });
+</script>
+<script>
+    const allowedExtensions = ['jpg', 'jpeg', 'png', 'webp'];
+
+    const editedData = {
+        src: '',
+    };
+
+    $('#gambar').on('change', handleUploadGambar);
+    $('#gambar').attr('accept', allowedExtensions.length > 0 ? '.' + allowedExtensions.join(', .') : '');
+
+    $('#edited_gambar').on('change', handleUploadGambar);
+    $('#edited_gambar').attr('accept', allowedExtensions.length > 0 ? '.' + allowedExtensions.join(', .') : '');
+
+    function handleUploadGambar(e) {
+        const file = e.target.files[0];
+        const fileExtension = file.name.split(".").pop().toLowerCase();
+        const preview = document.getElementById('preview_image');
+        const editPreview = document.getElementById('edited_preview_image');
+
+        if (!allowedExtensions.includes(fileExtension)) {
+            console.error('Invalid file type');
+            e.target.value = "";
+            const allowedExtensionsText = allowedExtensions.join(', ').toUpperCase();
+            const error_text = `File gagal diupload, hanya ekstensi <b>${allowedExtensionsText}</b> yang diizinkan untuk kategori yang dipilih.`;
+            showSwalError('Terjadi Kesalahan', error_text, 5000);
+            return null;
+        }
+
+
+        if (file.size > 5 * 1024 * 1024) {
+            console.error('File size too large');
+            e.target.value = "";
+            const error_text = `File yang anda upload <b>terlalu besar</b>, maksimal hanya <b>5MB</b>`;
+            showSwalError('Terjadi Kesalahan', error_text, 5000);
+            return null;
+        }
+
+        if (file) {
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                preview.src = e.target.result;
+                editPreview.src = e.target.result;
+            };
+
+            reader.readAsDataURL(file);
+
+            $('.clear_gambar_icon').removeClass('d-none');
+        }
+
+        return file;
+    };
+
+    $('#createModal').on('hidden.bs.modal', () => $('.clear_gambar_icon').addClass('d-none'));
+    $('#editModal').on('hidden.bs.modal', () => $('.clear_gambar_icon').addClass('d-none'));
+
+    function clearImage() {
+        const input = document.getElementById('gambar');
+        const preview = document.getElementById('preview_image');
+
+        input.value = '';
+        preview.src = '';
+
+        $('.clear_gambar_icon').addClass('d-none');
+    }
+
+    function clearEditedImage() {
+        const input = document.getElementById('edited_gambar');
+        const preview = document.getElementById('edited_preview_image');
+
+        input.value = '';
+        preview.src = editedData.src;
+
+        $('.clear_gambar_icon').addClass('d-none');
+    }
+
+    $('#createModal .clear_gambar_icon').on('click', clearImage);
+    $('#editModal .clear_gambar_icon').on('click', clearEditedImage);
+
+    async function handlePost(e) {
+        e.preventDefault();
+
+        showSwalLoading();
+
+        const modal = $('#createModal');
+        const form = modal.find('#formCreate');
+        const formData = new FormData();
+
+        const judul = form.find('#judul').val();
+        const kategori = form.find('#kategori').val();
+        const status = form.find(`input[name="status"]:checked`).val();
+        const tags = form.find('#tags').val();
+        const gambar_utama = form.find('#gambar')[0].files[0];
+
+        formData.append('judul', judul);
+        formData.append('kategori', kategori);
+        formData.append('status', status);
+        formData.append('gambar_utama', gambar_utama);
+
+        const tagsValue = JSON.parse(tags).map(item => item.value).join(',');
+
+        const isi_berita = create_berita_editor.getData();
+
+        const payload = { judul, kategori, status, tagsValue, gambar_utama, isi_berita };
+
+
+        console.log('Payload :', payload);
+
+        formData.append('tags', tagsValue);
+        formData.append('isi_berita', isi_berita);
+
+        try {
+            const response = await axios.post('/dashboard/berita/api/v1/', formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            console.log('Response saat post : ', response);
+
+            modal.modal('hide');
+
+            reloadTable(table);
+
+            showSwalSuccess('Berhasil', `Data literasi <b>${judul}</b> berhasil <b>ditambahkan</b>`, 3000);
+            // toast('success', 'Data berhasil ditambahkan!');
+        } catch (error) {
+            console.log('Terjadi kesalahan : ', error);
+            showSwalGenericError();
+        }
+    }
+
+    async function handleEdit(id) {
+        const response = await axios.get(`/dashboard/berita/api/v1/${id}/`);
+
+        console.log(`Response saat fetch detail ID ${id}: `, response.data);
+
+        const data = response.data;
+        const modal = $('#editModal');
+        const form = modal.find('#formUpdate');
+
+        modal.find('#target_edited').html(data.judul);
+        form.find('#edited_id').val(id);
+
+        form.find('#edited_judul').val(data.judul);
+        form.find('#edited_kategori').val(data.kategori.id).trigger('change');
+        form.find('#edited_tags').val(data.tags);
+        form.find(`input[name="edited_status"][value="${data.status}"]`).prop('checked', true);
+        edit_berita_editor.setData(data.isi_berita);
+
+        const url = new URL(data.gambar_utama);
+        const path_file = url.pathname;
+
+        form.find('#edited_preview_image').attr('src', path_file);
+
+        editedData.src = path_file;
+
+        modal.modal('show');
+    };
+
+    async function handleUpdate(e) {
+        e.preventDefault();
+
+        showSwalLoading();
+
+        const modal = $('#editModal');
+        const form = modal.find('#formUpdate');
+        const formData = new FormData();
+
+        const edited_id = form.find('#edited_id').val();
+        const judul = form.find('#edited_judul').val();
+        const kategori = form.find('#edited_kategori').val();
+        const status = form.find(`input[name="edited_status"]:checked`).val();
+        const tags = form.find('#edited_tags').val();
+
+        const gambar_utama = form.find('#edited_gambar')[0].files[0] ?? null;
+
+        formData.append('judul', judul);
+        formData.append('kategori', kategori);
+        formData.append('status', status);
+
+        if (gambar_utama) formData.append('gambar_utama', gambar_utama);
+
+        const tagsValue = JSON.parse(tags).map(item => item.value).join(',');
+
+        const isi_berita = edit_berita_editor.getData();
+
+        const payload = { judul, kategori, status, tagsValue, gambar_utama, isi_berita };
+
+        console.log('Payload :', payload);
+
+        formData.append('tags', tagsValue);
+        formData.append('isi_berita', isi_berita);
+
+        try {
+            const response = await axios.patch(`/dashboard/berita/api/v1/${edited_id}/`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
+            });
+
+            console.log('Response saat update : ', response);
+
+            modal.modal('hide');
+
+            reloadTable(table);
+
+            showSwalSuccess('Berhasil', `Data berita <b>${judul}</b> berhasil <b>diperbarui</b>`, 3000);
+            // toast('success', 'Data berhasil ditambahkan!');
+        } catch (error) {
+            console.log('Terjadi kesalahan : ', error);
+            showSwalGenericError();
+        }
+    }
+</script>
+{% endblock %}

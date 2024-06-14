@@ -1,0 +1,158 @@
+<form id="createForm" onsubmit="handlePost(event)">
+  <div class="modal fade" id="createModal">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title">Tambah Data <b>DUKUNGAN DATA STAKEHOLDER</b></h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+
+        <div class="modal-body" x-data="create">
+
+          <!-- satuan kerja -->
+          <div class="mb-3">
+            <label for="create__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+            <select class="form-control select2" id="create__satker" disabled>
+              <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+            </select>
+          </div>
+
+          <!-- Pemda -->
+          <div class="mb-3">
+            <label for="create__pemda" class="col-form-label required">Pemda:</label>
+            <select class="form-control select2" id="create__pemda">
+              <option value="" selected disabled>Pilih Pemda</option>
+              <option value=1>Pemda Tingkat Provinsi</option>
+              <option value=2>Pemda Tingkat Kab/Kota</option>
+              <option value=3>Pemda Tingkat Kecamatan</option>
+              <option value=4>Pemda Tingkat Kelurahan/Desa</option>
+              <option value=5>Pemda Tingkat Lingkungan</option>
+            </select>
+          </div>
+
+          <!-- kegiatan -->
+          <div class="mb-3">
+            <label for="create__kegiatan" class="col-form-label required">Kegiatan:</label>
+            <select class="form-control select2" id="create__kegiatan">
+              <option value="" selected disabled>Pilih Kegiatan</option>
+              <option value="1">Regulasi</option>
+              <option value="2">Timdu</option>
+              <option value="3">Rencana Aksi</option>
+              <option value="4">Tempat Rehabilitasi</option>
+              <option value="5">Fasilitasi Kegiatan Pemberdayaan Alternatif</option>
+              <option value="6">Sosialisasi P4GN</option>
+              <option value="7">Deteksi Dini Tes Urin</option>
+              <option value="8">dll (other)</option>
+            </select>
+          </div>
+
+          <!-- nasional -->
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Nasional:</label>
+            <input type="text" class="form-control" id="create__nasional" required placeholder="Nasional"></input>
+          </div>
+
+          <!-- alamat -->
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Provinsi:</label>
+            <select class="form-select select2" disabled id="create__provinsi">
+              <option value="" selected>--Pilih provinsi--</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Kota/Kabupaten:</label>
+            <select class="form-select select2" disabled id="create__kabupaten">
+              <option value="" selected>--Pilih kota/kabupaten--</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Kecamatan:</label>
+            <select class="form-select select2" disabled id="create__kecamatan">
+              <option value="" selected>--Pilih kecamatan--</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Desa:</label>
+            <select class="form-select select2" disabled id="create__desa">
+              <option value="" selected>--Pilih desa/kelurahan--</option>
+            </select>
+          </div>
+
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Lingkungan:</label>
+            <input type="text" class="form-control" id="create__lingkungan" required placeholder="Lingkungan"></input>
+          </div>
+
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Jumlah Sasaran:</label>
+            <input type="number" class="form-control" id="create__jumlah" required placeholder="Banyak Peserta"></input>
+          </div>
+
+          <!-- deskripsi hasil -->
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Hasil Dampak:</label>
+            <textarea class="form-control" id="create__hasil_dampak" required placeholder="Deskripsi Hasil"></textarea>
+          </div>
+
+          <!-- simpulan -->
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Kesimpulan:</label>
+            <textarea class="form-control" id="create__simpulan" required placeholder="Simpulan"></textarea>
+          </div>
+
+          <!-- tindak lanjut -->
+          <div class="mb-3">
+            <label for="create__tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+            <textarea class="form-control" id="create__tindak_lanjut" required placeholder="Tindak Lanjut"></textarea>
+          </div>
+
+          <!-- file yang di lampirkan -->
+          <div>
+            <div class="row mb-3">
+              <div class="col-6">
+                <label for="create__anggaran" class="col-form-label required">Anggaran:</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Rp</span>
+                  <input type="text" id="create__anggaran" class="form-control mask-currency" required />
+                </div>
+              </div>
+              <div class="col-6">
+                <label for="create__penyerapan_anggaran" class="col-form-label required">Penyerapan Anggaran:</label>
+                <div class="input-group mb-3">
+                  <span class="input-group-text">Rp</span>
+                  <input type="text" id="create__penyerapan_anggaran" class="form-control mask-currency" />
+                </div>
+              </div>
+              <div class="mb-3 alert alert-warning" role="alert">
+                Terdapat selisih sebesar Rp <span id="amount">0</span>
+              </div>
+            </div>
+            <hr>
+            <div class="row">
+              <div class="mb-3">
+                <label for="create__drive_url" class="col-form-label required">Tautan Drive</label>
+                <input type="url" class="form-control" id="create__drive_url" required />
+                <div class="text-muted mt-2">Contoh: https://drive.google.com/****</div>
+              </div>
+              <div class="mb-3">
+                <label for="create__dokumentasi" class="col-form-label required">Dokumentasi</label>
+                <input type="file" class="form-control" id="create__dokumentasi" required accept=".xlsx, .pdf, docx." />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+            <i class="fas fa-xmark me-2"></i>Tutup</button>
+          <button type="submit" class="btn btn-primary">
+            <i class="fas fa-save me-2"></i>
+            Simpan</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</form>

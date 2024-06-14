@@ -1,0 +1,124 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Edit Data SURVEI IKRN {% endblock title %}
+
+{% block css_tambahan %}
+<script src="/static/js/knockout.min.js"></script>
+<script src="/static/js/survey-ko.min.js"></script>
+<script src="/static/js/survey-creator.min.js"></script>
+<link rel="stylesheet" href="https://unpkg.com/survey-knockout@1.9.126/survey.css" />
+<link rel="stylesheet" href="https://unpkg.com/survey-creator@1.9.126/survey-creator.css" />
+{% endblock css_tambahan %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">
+            Edit Data SURVEI IKRN
+        </h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Survei /</span>
+            <a class="text-muted fw-light" href="{% url 'dayatif_survei_ikrn' %}">Survei IKRN /</a>
+            <span class="ms-1 fw-medium">Edit Data</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">Edit Data SURVEI IKRN Tahun 2024</h3>
+                <div class="action-button">
+                    <div class="d-flex justify-content-end mb-3 gap-2">
+                        <a class="btn btn-secondary" href="javascript:;" onclick="goBack()">
+                            <i class="fas fa-arrow-left me-2"></i>Kembali
+                        </a>
+                    </div>
+                </div>
+                <hr>
+            </div>
+
+
+            <div class="my-3">
+                <label for="nama" class="form-label required">Judul Survei</label>
+                <input type="text" id="nama" class="form-control" placeholder="Isikan judul survei anda disini ..." />
+            </div>
+
+            <div>
+                <div id="surveyCreatorContainer" style="width:100%; padding:10px;"></div>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+
+<script id="rawjson" type="text/json">{{ rawjson | safe }}</script>
+
+<script>
+	const surveySource = JSON.parse($('#rawjson').text());
+	const currentObj = {
+		id: '{{ id }}',
+		nama: '{{ nama }}'
+	};
+	$('#nama').val(currentObj.nama);
+
+    const creator = new SurveyCreator.SurveyCreator("surveyCreatorContainer");
+    SurveyCreator.StylesManager.applyTheme("Borderless");
+    SurveyCreator.localization.currentLocale = "id";
+    creator.haveCommercialLicense = true;
+    creator.showToolbox = "right";
+    creator.showPropertyGrid = "right";
+    creator.rightContainerActiveItem("toolbox");
+    creator.saveSurveyFunc = async (saveNo, callback) => {
+
+		const confirmation = await showSwalConfirm('Apakah anda yakin ingin menyimpan data ini?');
+
+		if (!confirmation.isConfirmed) return;
+
+		const nama = $('#nama').val();
+		const dataJSON = creator.JSON;
+
+		const res = await validateState(nama);
+
+		if (!res) return;
+
+		const payload = {
+			nama,
+			direktorat: 'dayatif',
+			daftar_pertanyaan: dataJSON
+		};
+
+		try {
+			const response = await axios.patch(`/survei/api/v1/tipe_survei/${currentObj.id}/`, payload);
+
+			console.log('Response', response.data);
+
+			showSwalSuccess('Berhasil', 'Data survei telah <b>berhasil</b> diperbarui!');
+
+			setTimeout(() => {
+				window.location.href = "{% url 'dayatif_survei_ikrn' %}";
+			}, 1000);
+		} catch (e) {
+			showSwalGenericError();
+			console.error(e);
+		}
+
+    };
+
+    async function validateState(nama) {
+		if (!nama) {
+			showSwalError('Terjadi Kesalahan', `Inputan <b>nama</b> wajib anda isikan!`);
+			return false;
+		}
+
+		return true;
+    }
+
+	creator.JSON = surveySource;
+    creator.render("surveyCreatorContainer");
+</script>
+{% endblock js_tambahan %}

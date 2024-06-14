@@ -1,0 +1,26 @@
+{% extends "home/home_base.html" %}
+{% load static %}
+{% block title %} Media Sosial {% endblock title %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/home/css/pages/media-sosial.css' %}">
+{% endblock css_tambahan %}
+
+{% block content %}
+<section id="media-sosial" class="px-2">
+    <v-media-sosial.social-feed name="instagram" embedid="217357"></v-media-sosial.social-feed>
+    <v-media-sosial.social-feed name="twitter" embedid="217363"></v-media-sosial.social-feed>
+    <v-media-sosial.social-feed name="tiktok" embedid="217445"></v-media-sosial.social-feed>
+    <v-media-sosial.social-feed name="youtube" embedid="217443"></v-media-sosial.social-feed>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    Vue.createApp({
+        components: {
+            "v-media-sosial.social-feed": loadComponent('components/media-sosial/SocialFeed.vue'),
+        },
+    }).mount('#app');
+</script>
+{% endblock js_tambahan %}

@@ -1,0 +1,100 @@
+<form id="createForm" onsubmit="handlePost(event)">
+  <div class="modal fade" id="createModal">
+      <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+          <div class="modal-content">
+              <div class="modal-header">
+                  <h5 class="modal-title">Tambah Data <b>KEGIATAN LAINNYA</b></h5>
+                  <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+
+              <div class="modal-body" x-data="create">
+
+                  <!-- satuan kerja -->
+                  <div class="mb-3">
+                      <label for="create__satker" class="col-form-label required">Satuan Kerja Pelaksana:</label>
+                      <select class="form-control select2" id="create__satker" disabled>
+                          <option value="{{ user.profile.satker.pk }}" selected>{{ user.profile.satker.nama_satker }}</option>
+                      </select>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="create__kode_kegiatan" class="col-form-label required">Kode Kegiatan:</label>
+                      <select class="form-control select2" id="create__kode_kegiatan" required>
+                          <option value="" selected disabled>Pilih Kode Kegiatan</option>
+                          {% for item in kegiatan_akun %}
+                            <option value="{{ item.pk }}">{{ item.no_unit }} - {{ item.akun_kegiatan }}</option>
+                          {% endfor %}
+                      </select>
+                  </div>
+
+                  <div class="mb-3">
+                      <label for="create__uraian_kegiatan" class="col-form-label required">No Uraian Kegiatan:</label>
+                      <select class="form-control select2" id="create__uraian_kegiatan" required>
+                          <option value="" selected disabled>Pilih Uraian Kegiatan</option>
+                      </select>
+                  </div>
+
+                  <!-- tanggal -->
+                  <!-- <div class="row mb-3">
+                    <div class="col-6">
+                      <div class="mb-3">
+                        <label for="create__tanggal_awal" class="col-form-label required">Tanggal Awal:</label>
+                        <input type="date" id="create__tanggal_awal" class="form-control" required onchange="handleDate(event, 'create__');" />
+                      </div>
+                    </div>
+                    <div class="col-6">
+                      <div class="mb-3">
+                        <label for="create__tanggal_akhir" class="col-form-label">Tanggal Akhir:</label>
+                        <input type="date" id="create__tanggal_akhir" class="form-control" />
+                      </div>
+                    </div>
+                    <label for="pelaksanaan" class="col-form-label" style="color: #00A0A9;">Jika pelaksanaan hanya berlangsung selama satu hari, tanggal akhir tidak perlu diisi.</label>
+                  </div> -->
+<!-- 
+                  <div class="mb-3">
+                    <label for="create__kegiatan" class="col-form-label required">Nama Kegiatan:</label>
+                    <input type="text" class="form-control" id="create__kegiatan" required placeholder="Nama Kegiatan"></input>
+                  </div> -->
+
+                  <div class="mb-3">
+                    <label for="create__metode" class="col-form-label required">Metode Kegiatan:</label>
+                    <input type="text" class="form-control" id="create__metode" required placeholder="Metode Kegiatan"></input>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="create__tempat" class="col-form-label required">Tempat Kegiatan:</label>
+                    <input type="text" class="form-control" id="create__tempat" required placeholder="Tempat Kegiatan"></input>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="create__waktu" class="col-form-label required">Waktu Kegiatan:</label>
+                    <input type="text" class="form-control" id="create__waktu" required placeholder="Waktu Kegiatan"></input>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="create__jumlah_peserta" class="col-form-label required">Jumlah Peserta:</label>
+                    <input type="number" class="form-control" id="create__jumlah_peserta" required placeholder="Jumlah Peserta"></input>
+                  </div>
+
+                  <div class="mb-3">
+                    <label for="create__keterangan" class="col-form-label required">Keterangan Kegiatan:</label>
+                    <textarea class="form-control" id="create__keterangan" required placeholder="Keterangan Kegiatan"></textarea>
+                  </div>
+
+                  <!-- <div class="mb-3">
+                    <label for="create__anggaran" class="col-form-label required">Pagu Anggaran:</label>
+                    <input type="text" class="form-control" id="create__anggaran" required placeholder="Pagu Anggaran"></input>
+                  </div> -->
+              </div>
+              
+              <div class="modal-footer">
+                  <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                      <i class="fas fa-xmark me-2"></i>Tutup</button>
+                  <button type="submit" class="btn btn-primary">
+                      <i class="fas fa-save me-2"></i>
+                      Simpan</button>
+              </div>
+          </div>
+      </div>
+  </div>
+</form>

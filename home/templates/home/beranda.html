@@ -1,0 +1,156 @@
+{% extends 'home/home_base.html' %}
+{% load static %}
+{% load partials %}
+
+{% block title %} Beranda {% endblock title %}
+{% block container %} container {% endblock %}
+
+{% block css_tambahan %}
+<link rel="stylesheet" href="{% static 'assets/home/css/pages/home.css' %}" />
+{% endblock %}
+{% block content %}
+<section id="headline">
+    <div class="row">
+        <div class="col-lg-4 col-sm-12 d-flex justify-content-lg-end">
+            <div class="me-4">
+                <img src="{% static 'assets/images/logo_baru.png' %}" class="head-img" alt="Logo SIDAMAS"
+                    style="width: 160px" />
+            </div>
+        </div>
+        <div class="col-lg-8 col-sm-12 d-flex align-items-center">
+            <div id="slogan">
+                <h1>
+                    <span style="color: #2ca8dc; font-weight: bold;">BNN AJAK MASYARAKAT <br> PRODUKTIF DAN MANDIRI</span>
+                </h1>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section id="daftar-berita" class="mt-5">
+    <div class="row" id="berita-sidamas">
+        <h4>Berita Unggulan Dari Kami</h4>
+        <hr>
+
+        {% for berita in data %}
+        <div class="col-lg-3 col-sm-6 mb-3" id="berita-{{ berita.pk }}">
+
+            <v-card-item-berita url="{% url 'home:detail_berita' berita.slug %}"
+                imageurl="{% get_media_prefix %}{{ berita.gambar_utama }}" title="{{ berita.judul }}"
+                excerpt="{{ berita.isi_berita|truncate_and_escape:20|safe }}"
+                author="Admin Dayamas - {{ berita.tanggal }}" />
+
+        </div>
+        {% endfor %}
+    </div>
+    <div class="row" id="berita-bnn-pusat">
+        <div class="d-flex justify-content-between">
+            <h4>Berita Hangat Terbaru Dari BNN Pusat</h4>
+            <a href="https://bnn.go.id/berita-satker/dayamas/" class="text-primary text-decoration-none">
+                <i class="fas fa-book-open me-2"></i>Lihat Semua</a>
+        </div>
+        <hr>
+
+        <div class="col-lg-3 col-sm-6 mb-3" v-for="(berita, index) in beritaList" :key="index"
+            :id="'berita-ke-' + (index + 1)">
+            <v-card-item-berita :url="berita.link" :imageurl="berita.imageUrl" :title="berita.title"
+                :excerpt="berita.excerpt" :author="berita.author" :tags="berita.tags" ref="cardBerita" />
+
+        </div>
+
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    const { createApp, ref, onMounted } = Vue;
+
+    const app = createApp({
+        components: {
+            "v-card-item-berita": loadComponent('components/home/CardItemBerita.vue'),
+        },
+        delimiters: ['[[', ']]'],
+        setup() {
+            const referensi = "?ref=https://sidamas.bnn.go.id";
+            const proxyUrl = "https://web-production-f9b8b.up.railway.app/";
+            const bnnUrl = "https://bnn.go.id/berita-satker/dayamas/";
+
+            const beritaList = ref([]);
+
+            const formatDateBerita = (dateText) => {
+                const dateParts = dateText.split(" ");
+                const day = dateParts[0];
+                const monthAbbreviation = dateParts[1];
+                const monthMap = {
+                    "Jan": "Januari",
+                    "Feb": "Februari",
+                    "Mar": "Maret",
+                    "Apr": "April",
+                    "May": "Mei",
+                    "Jun": "Juni",
+                    "Jul": "Juli",
+                    "Aug": "Agustus",
+                    "Ag": "Agustus",
+                    "Sep": "September",
+                    "Oct": "Oktober",
+                    "Okt": "Oktober",
+                    "Nov": "November",
+                    "Dec": "Desember",
+                    "Des": "Desember"
+                };
+
+                const month = monthMap[monthAbbreviation];
+                const year = dateParts[2];
+                const formattedDate = day + " " + month + " " + year;
+                return formattedDate;
+            }
+
+            const getBerita = async () => {
+                const apiURL = `${proxyUrl}${bnnUrl}`;
+                const response = axios.get(apiURL);
+
+                const htmlContent = $(response.data);
+
+                const articles = htmlContent.find(".posts-container article").slice(0, 4);
+
+                articles.each((index, article) => {
+                    const title = $(article).find(".title a").text();
+                    const imageUrl = $(article).find(".post-featured-img img").data("nectar-img-src");
+                    const link = $(article).find(".title a").attr("href");
+                    const date = formatDateBerita($(article).find(".grav-wrap .text span").text());
+                    const excerpt = $(article).find(".excerpt").text();
+                    const author = $(article).find(".grav-wrap .text a").attr("rel", "author").text() + ` - ${date}`;
+
+                    const tagsEl = $(article).find(".meta-category a");
+
+                    const kumpulanTag = tagsEl.map(function () {
+                        return {
+                            title: $(this).text(),
+                            link: $(this).attr("href"),
+                        };
+                    }).get();
+
+                    beritaList.value.push({
+                        imageUrl,
+                        link,
+                        title,
+                        author,
+                        excerpt,
+                        tags: kumpulanTag
+                    });
+                });
+            };
+
+            onMounted(async () => {
+                await getBerita();
+            });
+
+            return { beritaList };
+        },
+
+    });
+
+    app.mount('#app');
+</script>
+{% endblock %}

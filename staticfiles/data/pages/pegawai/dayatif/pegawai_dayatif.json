@@ -1,0 +1,89 @@
+{
+    "pages": [
+        {
+            "name": "Beranda",
+            "icon": "fas fa-home",
+            "url": "/dashboard"
+        },
+        {
+            "name": "Kegiatan - Binaan Teknis (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/binaan_teknis/"
+        },
+        {
+            "name": "Kegiatan - Pemetaan Potensi (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/pemetaan_potensi/"
+        },
+        {
+            "name": "Kegiatan - Pemetaan Stakeholder (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/pemetaan_stakeholder/"
+        },
+        {
+            "name": "Kegiatan - Rapat Sinergi Stakeholder (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/rapat_sinergi_stakeholder/"
+        },
+        {
+            "name": "Kegiatan - Bimbingan Teknis Stakeholder (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/bimbingan_teknis_stakeholder/"
+        },
+        {
+            "name": "Kegiatan - Bimbingan Teknis Lifeskill (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/bimbingan_teknis_lifeskill/"
+        },
+        {
+            "name": "Kegiatan - Monitoring dan Evaluasi (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/monev_dayatif/"
+        },
+        {
+            "name": "Kegiatan - Dukungan Stakeholder (Dayatif) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/dayatif/dukungan_stakeholder/"
+        },
+        {
+            "name": "Daftar Berita",
+            "icon": "far fa-news-paper",
+            "url": "/dashboard/berita/"
+        },
+        {
+            "name": "Survei Formulir Elektronik",
+            "icon": "fas fa-edit",
+            "url": "/survey/formulir_elektronik/"
+        },
+        {
+            "name": "Survei SKM Life Skill",
+            "icon": "fas fa-edit",
+            "url": "/survey/skm_life_skill/"
+        },
+        {
+            "name": "Keberhasilan dan Kewirausahaan",
+            "icon": "fas fa-edit",
+            "url": "/survey/dayatif/keberhasilan_kewirausahaan/"
+        },
+        {
+            "name": "Daftar Literasi",
+            "icon": "fas fa-book-open",
+            "url": "/dashboard/literasi/"
+        },
+        {
+            "name": "Verifikasi Pengguna",
+            "icon": "fas fa-book-open",
+            "url": "/users/verifikasi/"
+        },
+        {
+            "name": "Pengaturan Profil",
+            "icon": "fas fa-user",
+            "url": "/dashboard/profil_saya/"
+        },
+        {
+            "name": "Pengaturan Keamanan",
+            "icon": "fas fa-lock",
+            "url": "/dashboard/keamanan/"
+        }
+    ]
+}

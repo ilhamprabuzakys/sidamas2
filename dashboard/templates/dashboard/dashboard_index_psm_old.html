@@ -1,0 +1,1034 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Dashboard {% endblock %}
+
+{% block css_tambahan %}
+<!-- Leaflet -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+
+<link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.min.css' %}" />
+{% comment %} <link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.src.css' %}" /> {% endcomment %}
+<link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.mobile.min.css' %}" />
+<link rel="stylesheet" href="{% static 'assets/plugins/leaflet/leaflet-coordinates/leaflet-coordinates.css' %}" />
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+
+<!-- Leaflet plugins -->
+<script src="{% static 'assets/plugins/leaflet/leaflet-html-overlay.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet.time.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/spin.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet.spin.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet-search/leaflet-search.min.js' %}"></script>
+<script src="{% static 'assets/plugins/leaflet/leaflet-coordinates/leaflet-coordinates.js' %}"></script>
+
+
+
+<style>
+    #map {
+        height: 400px;
+    }
+    /* HTML LAYERS */
+    .bloc,
+    aside {
+        color: #000;
+        background: rgba(225, 238, 215, 1);
+        padding: 0.5rem;
+        width: 100px;
+        border-radius: 8px;
+        border: 2px solid #2D75B6;
+    }
+
+    .border-map {
+        border: 0.5px solid #e1a901;
+    }
+
+    .leaflet-polyline {
+        z-index: 1;
+    }
+
+    .bloc {
+        z-index: 999999;
+    }
+
+    /*
+    .leaflet-overlay-pane {
+        z-index: 5;
+    }
+
+    .leaflet-shadow-pane {
+        z-index: 4;
+    } */
+
+    /* .bloc,
+    aside {
+        color: white;
+        background: #4e42f5;
+        padding: 0.5rem;
+        width: 100px;
+    } */
+
+    .bloc_danger {
+        color: white;
+        background: #ff1100;
+        padding: 0.5rem;
+        width: 100px;
+        border-radius: 8px;
+        border: 2px solid #2D75B6;
+    }
+
+    .bloc.wide {
+        width: 460px;
+    }
+
+    .leaflet-container {
+        height: 800px;
+        width: 100%;
+        max-width: 100%;
+        max-height: 100%;
+    }
+
+    #info_kawan {
+        height: 1300px;
+    }
+
+    #data_map #map {
+        width: 100%;
+        height: 900px;
+    }
+
+    #data_map .box-data-wilayah {
+        background-color: #fcfcfc;
+        border-radius: 10px;
+        padding: 10px 0 0 10px;
+    }
+
+    #data_map .box-data-wilayah .list-group {
+        height: 600px;
+        overflow: auto;
+    }
+
+    #data_map .box-data-wilayah table thead {
+        position: sticky;
+        top: 0;
+        background-color: #fff;
+        z-index: 1;
+        box-shadow: 0px 5px 5px -5px rgba(255, 255, 255, 0.8), 0px -5px 5px -5px rgba(255, 255, 255, 0.8);
+    }
+
+    #data_map .box-data-wilayah .table-responsive {
+        border-top: 1px solid #dee2e6;
+    }
+
+    #data_map .box-data-wilayah table th {
+        position: sticky;
+        top: 0;
+    }
+
+    #data_map .box-data-wilayah .list-group .table .info .keterangan {
+        display: inline-block;
+        width: 70px;
+    }
+
+    #data_map .box-data-wilayah .list-group .table .nama_provinsi {
+        cursor: pointer;
+    }
+
+    #search_bar #search__results {
+        width: 100%;
+        z-index: 9999;
+        box-shadow: 1px 2px #d4d4d4;
+        top: 100%;
+        left: 0%;
+    }
+
+    .accordion .accordion-body {
+        padding: 10px 0 0px 20px;
+    }
+
+    .accordion .accordion-item {
+        border-radius: 0;
+    }
+
+    .accordion .accordion-button:not(.collapsed) {
+        background-color: #fff;
+    }
+
+    #tahunSelect {
+        width: 110px;
+        font-size: 14px; /* Ubah ukuran font */
+        padding: 0.5rem; /* Tambahkan ruang di sekitar teks */
+        border-radius: 5px;
+    }
+</style>
+{% endblock css_tambahan %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Beranda</h3>
+        <span class="mb-0">
+        <span class="text-muted fw-light">Beranda</span>
+        </span>
+    </div>
+</div>
+<div class="row">
+    <div class="col">
+        <section id="data_map" class="px-1">
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="margin: 0;">Peta Sebaran Kegiatan</h4>
+                </div>
+                <div class="card-body">
+                    <div id="map"></div>
+                    {% include "dashboard/partials/blok_satker.html" %}
+                </div>
+            </div>
+        </section>
+        <div class="card" style="margin-top: 20px;">
+            <div class="card-header">
+                <h4 style="margin: 0;">Jumlah Penggiat</h4>
+            </div>
+            <div class="table-responsive">
+                {% include 'dashboard/table_dashboard_psm.html' %}
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+<div class="row">
+    <div class="col-8">
+        <div class="card">
+            <div class="card-header">
+                <h4 style="margin: 0;">Daftar Peserta Positif Narkoba</h4>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive-lihat">
+                    <table class="table table-sm table-bordered" id="table_chart">
+                      <thead>
+                        <tr>
+                          <th class="bg-soft-primary text-center">No.</th>
+                          <th class="bg-soft-primary">Nama</th>
+                          <th class="bg-soft-primary">Jenis Kelamin</th>
+                          <th class="bg-soft-primary">Hasil Test</th>
+                          <th class="bg-soft-primary">Alamat</th>
+                          <th class="bg-soft-primary">Parameter</th>
+                          <th class="bg-soft-primary">Keterangan</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                      </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-4">
+        <div class="card">
+            <div class="card-header">
+                <h4 style="margin: 0;">Jumlah Positif Narkoba</h4>
+            </div>
+            <div style="width: auto; display: flex; justify-content: end;">
+                <canvas id="myPieChart" width="50" height="50"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block js_tambahan %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    $(document).ready(function(){
+        menampilkan_tabel();
+        menampilkan_chart();
+    });
+</script>
+<!-- <script>
+    // Initialize the map with Indonesia as the center
+    var mymap = L.map('map').setView([-0.7893, 113.9213], 5);
+
+    // Add a tile layer to the map (OpenStreetMap)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© OpenStreetMap contributors'
+    }).addTo(mymap);
+</script> -->
+<script>
+    
+    var temporaryMarker;
+
+    const markerIcon = new L.Icon({
+        iconSize: [15, 15],
+        iconAnchor: [6, 15],
+        popupAnchor: [1, -12],
+        iconUrl: '/static/assets/plugins/leaflet/images/marker.png',
+    });
+
+    var tahun = 2020;
+
+    //============= LAYERS ===============
+    function getLayers() {
+        const google_layer = L.tileLayer('https://{s}.google.com/vt/lyrs=m&x={x}&y={y}&z={z}', {
+            maxZoom: 20,
+            subdomains: ['mt0', 'mt1', 'mt2', 'mt3'],
+            // noWrap: true,
+        });
+
+        const osm_layer = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png');
+
+        const mapbox_layer = L.tileLayer(
+            'https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoiaXJmYW5wdWxlIiwiYSI6ImNqdnpxbHFvbzAzM3UzeWxrcWtkbTVhamIifQ.TJM77G3WOEIOIYzk_IiWKQ', {
+                maxZoom: 18,
+                attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+                    '<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+                    'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+                id: 'mapbox/streets-v11',
+                tileSize: 512,
+                zoomOffset: -1,
+            })
+
+        const esri_world_imagery_layer = L.tileLayer(
+            'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+                attribution: 'Tiles &copy; Esri &mdash; Source: Esri, i-cubed, USDA, USGS, AEX, GeoEye, Getmapping, Aerogrid, IGN, IGP, UPR-EGP, and the GIS User Community',
+                // noWrap: true,
+            });
+
+        const layers = {
+            'Default': osm_layer,
+            'MapBox': mapbox_layer,
+            'Google Maps': google_layer,
+            'Realistis': esri_world_imagery_layer,
+        };
+
+        return layers;
+    }
+
+    const map = L.map('map', {
+        maxZoom: 9,
+        minZoom: 5,
+    }).setView([-2.548926, 118.0148634], 5);
+
+    const base_layers = getLayers();
+
+    var layerControl = L.control.layers(base_layers).addTo(map);
+
+    base_layers['Google Maps'].addTo(map);
+
+    var layerGroup = L.layerGroup();
+    var layerHtml = L.layerGroup();
+    // var geoJsonLayer = L.layerGroup();
+    var geoJsonLayer = null;
+    const geoJsonCache = {};
+
+    layerControl.addOverlay(layerGroup, "Titik Lokasi");
+    layerControl.addOverlay(layerHtml, 'Blok Satker');
+    // layerControl.addOverlay(geoJsonLayer, 'Geojson layer');
+
+    const polylineLayerGroup = L.layerGroup();
+
+    layerControl.addOverlay(polylineLayerGroup, 'Polyline');
+
+    async function getDataAddMarkers({
+        label,
+        value,
+        map,
+        exclamation
+    }) {
+        tahun = label;
+
+        $('.selected_tahun').text(tahun);
+
+        layerGroup.clearLayers();
+
+        layerHtml.eachLayer(function (layer) {
+            console.log(layer._dom.firstChild.id);
+            $(`#${layer._dom.firstChild.id}`).html("");
+        });
+
+        try {
+            map.spin(true);
+
+
+            const response = await axios.get(
+                `http://103.210.54.17:8003/dashboard/masters/api/v1/kawasan_rawan/map_provinsi_geom/?tahun=${tahun}`);
+
+            const data_layer = L.geoJSON(response.data, {
+                onEachFeature: function (feature, layer) {
+                    const id_provinsi = feature.properties.kd_prov;
+                    const nama_provinsi = feature.properties.provinsi;
+                    const nama_provinsi_singkat = feature.properties.provinsi_singkat;
+                    const waspada = feature.properties.waspada;
+                    const bahaya = feature.properties.bahaya;
+                    const siaga = feature.properties.siaga;
+                    const aman = feature.properties.aman;
+                    const total_kawasan = bahaya + waspada;
+                    const url = `/kawasan-rawan/${tahun}/${id_provinsi}`;
+
+                    let popupContent = `
+                        <b>${feature.properties.satker}</b><br/>
+                        ${total_kawasan} kawasan <br/>
+                        B: ${bahaya}, W: ${waspada}<br/>
+                        <a class="badge bg-warning text-white text-decoration-none border-map" href="${url}">Buka</a>
+                    `;
+
+                    // console.log(feature.geometry.coordinates);
+
+                    if (feature.properties && feature.properties.popupContent) {
+                        popupContent += feature.properties.popupContent;
+                    }
+
+                    const el = $(`#d${id_provinsi}`);
+
+                    el.html(popupContent).removeClass("bloc").removeClass("bloc_danger");
+
+                    if (bahaya > 50) el.addClass("bloc_danger");
+                    else el.addClass("bloc");
+
+                    const markerCoords = layer.getLatLng();
+                    const data_tarik = el.attr("data-tarik").split(",").map(parseFloat);
+                    const data_belok = el.attr("data-belok").split(",").map(parseFloat);
+
+                    const tarikCoords = L.latLng(data_tarik[0], data_tarik[1]);
+                    const belokCoords = L.latLng(data_belok[0], data_belok[1]);
+
+                    let belokCoordsArray = [];
+                    for (let i = 2; i < data_belok.length; i += 2) {
+                        belokCoordsArray.push(L.latLng(data_belok[i], data_belok[i + 1]));
+                    }
+
+                    const combined = [markerCoords, belokCoords, ...belokCoordsArray, tarikCoords];
+
+                    const lineColor = '#2D75B6';
+                    const polyline = L.polyline(combined, {
+                        color: lineColor,
+                        className: 'leaflet-polyline'
+                    });
+
+                    polylineLayerGroup.addLayer(polyline);
+
+                },
+                pointToLayer: function (feature, latlng) {
+                    const id_provinsi = feature.properties.kd_prov;
+                    const nama_provinsi = feature.properties.provinsi;
+                    const nama_provinsi_singkat = feature.properties.provinsi_singkat;
+                    const waspada = feature.properties.waspada;
+                    const bahaya = feature.properties.bahaya;
+                    const siaga = feature.properties.siaga;
+                    const aman = feature.properties.aman;
+                    const total_kawasan = bahaya + waspada;
+                    const total_desa = feature.properties.total_desa;
+                    const url = `/kawasan-rawan/${tahun}/${id_provinsi}`;
+
+                    const content = {
+                        bahaya: `<b>B</b>: <span class="text-danger">${bahaya}</span>`,
+                        waspada: `<b>W</b>: <span class="text-warning">${waspada}</span>`,
+                        siaga: `<b>S</b>: <span class="text-primary">${siaga}</span>`,
+                        aman: `<b>A</b>: <span class="text-success">${aman}</span>`,
+                        koordinat: `<b>Koordinat</b> : ${latlng.lat.toFixed(4)}, ${latlng.lng.toFixed(4)} <br/>`,
+                    }
+
+                    let popupContent = `
+                        <b>${nama_provinsi_singkat}</b><br/>
+                        Total kawasan : ${total_kawasan}/${total_desa} <br/>
+
+                        <div class="mt-2">
+                            ${content.bahaya}, ${content.waspada}, ${content.siaga}, ${content.aman} <br/>
+                        </div>
+
+                        <div class="mt-2"><a class="text-primary text-decoration-none" href="${url}">Lihat detail</a></div>
+                    `;
+
+                    const marker = L.marker(latlng, {
+                        icon: markerIcon
+                    }).bindPopup(popupContent).on('click', async function() {
+                        try {
+                            let geoJsonResponse;
+                            if (geoJsonCache[id_provinsi]) {
+                                geoJsonResponse = geoJsonCache[id_provinsi];
+                            } else {
+                                geoJsonResponse = await axios.get(`/dashboard/masters/api/v1/provinces/${id_provinsi}/map_provinsi/`);
+                                geoJsonCache[id_provinsi] = geoJsonResponse;
+                            }
+
+                            if (geoJsonLayer) {
+                                map.removeLayer(geoJsonLayer);
+                            }
+
+                            geoJsonLayer = L.geoJSON(geoJsonResponse.data).addTo(map);
+                        } catch (error) {
+                            console.error('Terjadi Kesalahan dalam mengambil GeoJSON:', error);
+                        }
+                    });
+
+                    return marker;
+                },
+
+            });
+
+            layerGroup.addLayer(data_layer);
+        } catch (error) {
+            console.error('Terjadi Kesalahan :', error);
+        } finally {
+            map.spin(false);
+        }
+    };
+
+
+    function setDefaultYear() {
+        var tahunSelect = document.getElementById("tahunSelect");
+        var defaultYear = "2023";
+        for (var i = 0; i < tahunSelect.options.length; i++) {
+            if (tahunSelect.options[i].value === defaultYear) {
+                tahunSelect.selectedIndex = i;
+                break;
+            }
+        }
+
+        ubahTahun(defaultYear);
+    }
+
+    document.addEventListener("DOMContentLoaded", function () {
+        setDefaultYear();
+    });
+
+
+   // Fungsi untuk mengubah tahun saat opsi dipilih
+        function ubahTahun() {
+            var selectedYear = document.getElementById("tahunSelect").value;
+            getDataAddMarkers({
+                label: selectedYear,
+                value: selectedYear,
+                map: map,
+                exclamation: "Hello World!"
+            });
+        }
+
+        var tahunSelectControl = L.control({
+            position: 'topright'
+        });
+
+        tahunSelectControl.onAdd = function(map) {
+            var div = L.DomUtil.create('div', 'tahun-select-container');
+            div.innerHTML = `
+                <select id="tahunSelect" onchange="ubahTahun()">
+                    <option value="2021">2021</option>
+                    <option value="2022">2022</option>
+                    <option value="2023">2023</option>
+                    <option value="2024">2024</option>
+
+                </select>`;
+            return div;
+        };
+
+        tahunSelectControl.addTo(map);
+
+
+    function addTemporaryMarker(e) {
+        if (temporaryMarker) {
+            map.removeLayer(temporaryMarker);
+        }
+
+        const popupContent = `${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`;
+        const popup = L.popup().setContent(popupContent);
+
+        temporaryMarker = L.marker(e.latlng).addTo(map).bindPopup(popup).openPopup();
+
+        temporaryMarker.on('click', function () {
+            map.removeLayer(temporaryMarker);
+        });
+    } 
+
+    function mapOnClick(e) {
+        addTemporaryMarker(e);
+
+        console.log(`Koordinat : ${e.latlng.lat.toFixed(4)}, ${e.latlng.lng.toFixed(4)}`);
+        // map.flyTo(e.latlng,12);
+    }
+
+    map.on('click', mapOnClick);
+
+    function mapOnZoom() {
+        console.log("Zoom :", map.getZoom())
+    }
+
+    map.on('zoomend', mapOnZoom);
+
+
+    $(document).ready(function(){
+        $('.bloc').each(function (i, obj) {
+        let el = $(`#${obj.id}`);
+        console.log(el);
+
+        if (el) {
+            htmlLayer = el.htmlOverlay();
+            layerHtml.addLayer(htmlLayer);
+
+        }
+    });
+    })
+
+
+
+L.HtmlOverlay = L.Layer.extend({
+  /*
+  en gros une copie modifiÃ©e de ImageOverlay
+  avec quand-mÃªme pas mal de soucis avec le scale du html
+  qui ne suit pas tout seul...
+  */
+
+  options: {
+    interactive: false,
+    zIndex: 1,
+    className: '',
+    idName: '',
+    zoom: '' // le niveau de zoom ou la div est affichÃ© Ã  l'Ã©chelle 1
+  },
+
+  initialize: function (code, coords, options) { // (String, LatLngBounds, Object)
+    this._code = code; // code brut
+
+    // astuce : on fournit une seule coordonnÃ©e
+    // this._bounds = L.latLngBounds(bounds);
+    this._bounds = L.latLngBounds([coords, coords]);
+
+    L.setOptions(this, options);
+
+    // scale de dÃ©part 1, au niveau de zoom actuel...
+    this._scale = 1;
+  },
+
+  // precious tool for moving around the htmlOverlay
+  // with only one set of coords
+  setLatLng: function(coords){
+    this.setBounds(L.latLngBounds([coords, coords]));
+  },
+
+  onAdd: function(){
+    if(!this._dom){
+      this._initDom();
+    }
+
+    if (this.options.interactive) {
+      L.DomUtil.addClass(this._dom, 'leaflet-interactive');
+      this.addInteractiveTarget(this._dom);
+    }
+
+    this.getPane().appendChild(this._dom);
+    this._reset();
+
+    // zoom natif courant si pas indiquÃ©
+    if(this.options.zoom === '') this.options.zoom = this._map.getZoom();
+
+    // ok, par rapport au zoom natif il faudrait un scale de dÃ©part de...
+    this._scale = this._map.getZoomScale(this._map.getZoom(), this.options.zoom);
+
+    // on applique donc ce coef dÃ¨s maintenant, Ã§a servira de base de calcul par la suite
+    this._inner.style.transform = "scale("+this._scale+")";
+
+    // important : pdt le zoom il y a un scale css,
+    // mais Ã  la fin du zoom il est retirÃ©
+    // il faut le rÃ©tablir sur le contenu html seulement
+    this._map.on('zoomend', this._rescaleInnerHtml, this);
+  },
+
+  _rescaleInnerHtml(){ // Ã  la fin du zoom on applique un scale Ã  l'intÃ©rieur
+    this._scale *= this._rescale;
+    this._inner.style.transform = "scale("+this._scale+")";
+  },
+
+  onRemove: function () {
+    // retirer l'Ã©coute du zoom
+    this._map.off('zoomend', this._rescaleInnerHtml, this);
+
+    L.DomUtil.remove(this._dom);
+    if (this.options.interactive) {
+      this.removeInteractiveTarget(this._dom);
+    }
+  },
+
+  _initDom: function(){
+    // crea d'une div qui va contenir notre code html
+    var dom = L.DomUtil.create('div', 'leaflet-html-layer');
+
+    // Ã§a c'est comme ImageOverlay
+    if (this._zoomAnimated) { L.DomUtil.addClass(dom, 'leaflet-zoom-animated'); }
+    if (this.options.className) { L.DomUtil.addClass(dom, this.options.className); }
+
+    dom.onselectstart = function(){ return false; };
+    dom.onmousemove = function(){ return false; };
+
+    if (this.options.zIndex) {
+      this._updateZIndex();
+    }
+
+    // ok c'est lÃ  qu'on injecte le code html
+    dom.innerHTML = this._code;
+
+    this._dom = dom;
+    this._dom.style.position = "relative";
+
+    // avec des rÃ©glages css pour Ã©viter des soucis...
+    this._inner = this._dom.childNodes[0]; // un seul noeud
+    this._inner.style.position = "absolute";
+    this._inner.style.left = 0;
+    this._inner.style.top = 0;
+    this._inner.style['transform-origin'] = 'left top';
+  },
+
+
+  _animateZoom: function (e) {
+
+    var scale = this._map.getZoomScale(e.zoom),
+        offset = this._map._latLngBoundsToNewLayerBounds(this._bounds, e.zoom, e.center).min;
+
+    L.DomUtil.setTransform(this._dom, offset, scale);
+
+    // _animateZoom() est lancÃ©e en dÃ©but de zoom
+    // on aura besoin du coef de scale Ã  la fin...
+    this._rescale = scale;
+  },
+
+
+  // la suite est une copie Ã  peine modifiÃ©e de ImageOverlay
+  bringToFront: function () {
+    if (this._map) {
+      L.DomUtil.toFront(this._dom);
+    }
+    return this;
+  },
+  bringToBack: function () {
+    if (this._map) {
+      L.DomUtil.toBack(this._dom);
+    }
+    return this;
+  },
+  getElement: function () {
+    return this._dom;
+  },
+
+  _reset: function () {
+    var dom = this._dom,
+        bounds = new L.Bounds(
+            this._map.latLngToLayerPoint(this._bounds.getNorthWest()),
+            this._map.latLngToLayerPoint(this._bounds.getSouthEast())),
+        size = bounds.getSize();
+
+    L.DomUtil.setPosition(dom, bounds.min);
+
+    dom.style.width  = size.x + 'px';
+    dom.style.height = size.y + 'px';
+  },
+  _updateZIndex: function () {
+    if (this._dom && this.options.zIndex !== undefined && this.options.zIndex !== null) {
+      this._dom.style.zIndex = this.options.zIndex;
+    }
+  },
+  _overlayOnError: function () {
+    this.fire('error');
+  },
+
+  // copie extacte de ImageOverlay
+  setBounds: function (bounds) {
+    this._bounds = L.latLngBounds(bounds);
+
+    if (this._map) {
+      this._reset();
+    }
+    return this;
+  },
+  getEvents: function () {
+    var events = {
+      zoom: this._reset,
+      viewreset: this._reset
+    };
+
+    if (this._zoomAnimated) {
+      events.zoomanim = this._animateZoom;
+    }
+
+    return events;
+  },
+  setZIndex: function (value) {
+    this.options.zIndex = value;
+    this._updateZIndex();
+    return this;
+  },
+  getBounds: function () {
+    return this._bounds;
+  }
+
+});
+
+//  shorthand method
+L.htmlOverlay = function(code, bounds, options) {
+    return new L.HtmlOverlay(code, bounds, options);
+}
+
+
+
+// Bonus : jQuery mini-library !
+
+// only usable if you linked the jQuery library in your HTML document...
+if(typeof $ != 'undefined'){
+
+  $.fn.htmlOverlay = function(coords, options){
+    if(typeof options == 'undefined'){ options = {}; }
+
+    var layers = [];
+
+    $(this).each(function(i){
+      // console.log("i", i);
+
+      var code = $(this)[0].outerHTML;
+
+      // zoom d'origine via code html : data-zoom="15"
+      if($(this).data('zoom')){
+        options.zoom = $(this).data('zoom');
+      }
+      // position via code html : data-pos="1.54, 48.25"
+      if($(this).data('pos')){
+        coords = $(this).data('pos').replace(' ', '').split(',');
+      }
+      // console.log("coords", coords);
+      // console.log("code", code);
+
+      // on retire le bloc html d'origine
+      $(this).remove();
+
+      // on retourne le nouveau layer Leaflet
+      layers.push( L.htmlOverlay(code, coords, options) );
+
+    });
+
+    if(layers.length>1){
+      // on retourne un groupe de markers
+      return L.layerGroup(layers);
+
+    } else if(layers.length==1){
+      // on retourne juste le layer
+      return layers[0];
+
+    } else {
+      // aucun layer Ã  renvoyer !
+      console.log("No html element to inject in map !");
+      return {};
+    }
+  };
+
+}
+
+    map.addLayer(layerGroup);
+    map.addLayer(layerHtml);
+    map.addLayer(polylineLayerGroup);
+
+    /*
+        var searchControl = new L.Control.Search({
+            layer: layerGroup,
+            propertyName: 'provinsi',
+            marker: false,
+            moveToLocation: function (latlng, title, map) {
+                map.fitBounds(latlng.layer.getBounds());
+                let zoom = map.getBoundsZoom(latlng.layer.getBounds());
+                map.setView(latlng, zoom); // access the zoom
+
+                // map.flyTo(latlng, 8);
+            }
+        });
+    */
+
+    // map.addControl(searchControl);
+
+    L.control.coordinates({
+        position: "bottomleft",
+        decimals: 6,
+        decimalSeperator: ",",
+        labelTemplateLat: "Latitude: {y}",
+        labelTemplateLng: "Longitude: {x}"
+    }).addTo(map);
+</script>
+
+<!-- memanggil count data P4GN -->
+<script>
+    function menampilkan_tabel(){
+        axios.get('/kegiatan/api/v1/psm/bimtek_penggiat_p4gn_count/')
+        .then(function(response) {
+            const tableBody = $('#__table_p4gn tbody');
+
+            $.each(response.data, function(index, row) {
+                const newRow = `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td>${row.nama_satker}</td>
+                        <td>${row.peserta_count_2021}</td>
+                        <td>${row.peserta_count_2022}</td>
+                        <td>${row.peserta_count_2023}</td>
+                        <td>${row.peserta_count_2024}</td>
+                    </tr>
+                `;
+                tableBody.append(newRow);
+            });
+            $('#__table_p4gn').DataTable();
+        })
+        .catch(function(error) {
+            console.error('Error fetching data:', error);
+        });
+    }
+</script>
+
+<!-- memanggil hasil chart -->
+<script>
+    var myChart;
+
+    async function menampilkan_chart(){
+        try {
+        const response = await axios.get(`/kegiatan/api/v1/psm/tes_urine_crud/get_detail_data_detail_all/`);
+        const data = response.data;
+        let all_data_peserta = [];
+
+        $.each(data, function(index, item){
+            var data_peserta = item.peserta
+            $.each(data_peserta, function(index2, item2){
+                console.log(item2);
+                all_data_peserta.push(item2);
+            });
+        });
+                
+        var tableBody = $('.table-responsive-lihat tbody');
+        tableBody.empty();
+        
+
+        $.each(all_data_peserta, function(index, item) {
+            var var_isi = getSubstanceName(item.isi_parameter);
+            var keterangan;
+            var angka = index+1;
+
+            if (item.isi_parameter == "ll") {
+                keterangan = item.keterangan_isi_parameter;
+            } else {
+                keterangan = "-"
+            }
+
+            var row = $('<tr>');
+            row.append('<td>' + angka + '</td>');
+            row.append('<td>' + item.nama_peserta + '</td>');
+            row.append('<td>' + item.jenis_kelamin + '</td>');
+            row.append('<td>' + item.hasil_test + '</td>');
+            row.append('<td>' + item.alamat + '</td>');
+            row.append('<td>' + var_isi + '</td>');
+            row.append('<td>' + keterangan + '</td>');
+
+            tableBody.append(row);
+        });
+
+        $('#table_chart').DataTable();
+
+
+        if (myChart) {
+            myChart.destroy();
+        }
+
+        showPieChart(countLabels(all_data_peserta));
+        checkAndDisplayCanvas(all_data_peserta);
+
+        } catch (error) {
+            showSwalGenericError();
+            console.error('Terjadi kesalahan :', error);
+        }
+    }
+
+    // helper
+    function getSubstanceName(parameter) {
+        const lowercaseParameter = parameter.toLowerCase();
+
+        const substances = {
+            amp: "Amphetamine",
+            met: "Methamphetamine",
+            mop: "Morphine",
+            thc: "Thc/marijuana",
+            coc: "Cocaine",
+            bzo: "Benzoidazepine",
+            soma: "Carisoprodol",
+            ll: "Parameter Lainnya"
+        };
+
+        return substances[lowercaseParameter] || "-";
+    }
+
+    function countLabels(data) {
+        var counts = {};
+
+        $.each(data, function(index, item) {
+            var isi_parameter = item.isi_parameter;
+
+            if (isi_parameter != "") {
+                if (!counts[isi_parameter]) {
+                    counts[isi_parameter] = 1;
+                } else {
+                    counts[isi_parameter]++;
+                }
+            }
+        });
+
+        var labels = [];
+        var values = [];
+
+        for (var label in counts) {
+            labels.push(getSubstanceName(label));
+            values.push(counts[label]);
+        }
+
+        return {
+            labels: labels,
+            values: values
+        };
+    }
+
+    function checkAndDisplayCanvas(data) {
+        var hasPositiveResult = false;
+        for (var i = 0; i < data.length; i++) {
+            if (data[i].hasil_test === "Positif") {
+                hasPositiveResult = true;
+                break; // Exit the loop once a positive result is found
+            }
+        }
+        if (hasPositiveResult) {
+            $('#myPieChart').show();
+        } else {
+            $('#myPieChart').hide();
+        }
+    }
+
+    function showPieChart(data) {
+        var ctx = $('#myPieChart');
+
+        myChart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: data.labels,
+            datasets: [{
+            data: data.values,
+            backgroundColor: [
+                    'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 205, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(153, 102, 255)',
+                    'rgb(255, 159, 64)',
+                    'rgb(255, 192, 203)'
+            ],
+            borderColor: [
+                'rgb(255, 99, 132)',
+                    'rgb(54, 162, 235)',
+                    'rgb(255, 205, 86)',
+                    'rgb(75, 192, 192)',
+                    'rgb(153, 102, 255)',
+                    'rgb(255, 159, 64)',
+                    'rgb(255, 192, 203)'
+            ],
+            borderWidth: 1
+            }]
+        },
+        
+        });
+    }
+</script>
+{% endblock %}

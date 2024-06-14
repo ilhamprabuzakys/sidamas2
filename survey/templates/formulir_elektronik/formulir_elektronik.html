@@ -1,0 +1,97 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block css_tambahan %}
+{% comment %} <link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator.min.css" rel="stylesheet"> {% endcomment %}
+<link href="https://unpkg.com/tabulator-tables@5.5.2/dist/css/tabulator_bootstrap5.min.css" rel="stylesheet">
+{% endblock css_tambahan %}
+{% block title %} Formulir Elektronik {% endblock title %}
+{% block content %}
+<div class="breadcrumb">
+   <div class="row">
+      <h3 class="heading mb-2">
+         Formulir Elektronik
+      </h3>
+      <span class="mb-0">
+         <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">Formulir Elektronik</span>
+       </span>
+   </div>
+</div>
+
+<section id="__data">
+   <div class="card">
+      <div class="card-body">
+
+        <div id="headline" class="mb-3">
+            <h3 class="text-center">PENGELOLAAN FORMULIR ELEKTRONIK</h3>
+            <hr>
+        </div>
+
+         <div class="action-button">
+            <div class="d-flex justify-content-end mb-3 gap-2">
+               <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData">
+                  <i class="fas fa-file-export me-2"></i>Ekspor Data
+               </button>
+               <a class="btn btn-primary" href="/survey/formulir_elektronik/create/">
+                  <i class="fas fa-plus me-2"></i>Tambah Data
+               </a>
+            </div>
+         </div>
+         <div id="eform-table"></div>
+      </div>
+   </div>
+</section>
+{% endblock content %}
+{% block js_tambahan %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/luxon/3.4.4/luxon.min.js" integrity="sha512-dUlSLLkxslGILhPdCkALwk4szPhp3xmZIKFtlUD+O9Lslq41Aksmdt5OGqpomDoT4FsCUH70jQU8ezZHI3v1RQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@5.5.2/dist/js/tabulator.min.js"></script>
+<script>
+// Initiliaze table
+var printIcon = function(cell, formatterParams) { //plain text value
+   return "<i class='fa fa-print'></i>";
+};
+const API_URL = `${window.location.origin}/survey/api/v1/survey/`;
+var table = new Tabulator("#eform-table", {
+   ajaxURL: API_URL,
+   pagination:"local",
+   paginationSize:6,
+   paginationSizeSelector:[5, 10, 15],
+   paginationCounter:"rows",
+   columns:[
+   {
+    title: "Judul",
+    field: "judul",
+    width: "40%"
+},
+{
+    title: "Pemilik",
+    field: "pemilik",
+    width: "10%"
+},
+{
+    title: "Dibuat oleh",
+    field: "dibuat_oleh.username",
+    width: "10%"
+},
+{
+    title: "Dibuat pada",
+    field: "created",
+    width: "20%"
+},
+{
+    title: "Status",
+    field: "status",
+    width: "10%"
+},
+{
+    title: "Actions",
+    formatter: printIcon,
+    cellClick: function(e, cell) {
+        alert("Printing row data for: " + cell.getRow().getData().name)
+    },
+    width: "10%"
+}
+    ],
+});
+</script>
+
+{% endblock js_tambahan %}

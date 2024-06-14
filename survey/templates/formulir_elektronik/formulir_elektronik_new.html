@@ -1,0 +1,169 @@
+{% extends "dashboard/dashboard_base.html" %}
+{% load static %}
+{% block title %} Formulir Elektronik {% endblock title %}
+{% block content %}
+<div class="breadcrumb">
+   <div class="row">
+      <h3 class="heading mb-2">
+         Formulir Elektronik
+      </h3>
+      <span class="mb-0">
+         <span class="text-muted fw-light">Survei /</span><span class="ms-1 fw-medium">Formulir Elektronik</span>
+       </span>
+   </div>
+</div>
+
+<section id="__data">
+   <div class="card">
+      <div class="card-body">
+
+        <div id="headline" class="mb-3">
+            <h3 class="text-center">PENGELOLAAN DATA FORMULIR ELEKTRONIK TAHUN  2024</h3>
+            <hr>
+        </div>
+
+         <div class="action-button">
+            <div class="d-flex justify-content-end mb-3 gap-2">
+               <!-- <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#exportData">
+                  <i class="fas fa-file-export me-2"></i>Ekspor Data
+               </button> -->
+               <a class="btn btn-primary" href="/survey/formulir_elektronik/create/">
+                  <i class="fas fa-plus me-2"></i>Tambah Data
+               </a>
+            </div>
+         </div>
+         <div class="table-responsive">
+            <!-- <div id="table-formulir-elektronik">
+                <v-table></v-table>
+            </div> -->
+            {% include "formulir_elektronik/table.html" %}
+         </div>
+      </div>
+   </div>
+</section>
+{% endblock content %}
+
+{% block js_tambahan %}
+<script>
+    $(document).ready(function () {
+
+        let dataTable = $('#__table').DataTable({
+            language: dt_lang_config(),
+            columnDefs: [{
+                targets: [1, 2],
+                visible: false,
+            }],
+            order: [[1, 'desc']]
+        });
+
+        $('#__table tbody').on('click', '.button_cetak', function () {
+
+            let rowData = dataTable.row($(this).closest('tr')).data();
+            let kode = rowData[2];
+
+            if (kode == "None") {
+               Swal.fire({
+                  icon: "error",
+                  title: "Terjadi kesalahan !",
+                  text: "Kode bermasalah !",
+               });
+            } else {
+               getLink(kode);
+            }
+        });
+
+        $('#__table tbody').on('click', '.button_edit', function () {
+
+            let rowData = dataTable.row($(this).closest('tr')).data();
+            let id = rowData[1];
+
+            window.location.href = "/survey/formulir_elektronik/edit/"+id+"/";
+
+        });
+
+        $('#__table tbody').on('click', '.button_result', function () {
+
+            let rowData = dataTable.row($(this).closest('tr')).data();
+            let id = rowData[1];
+
+            window.location.href = "/survey/formulir_elektronik/result/"+id+"/";
+
+        });
+
+        $('#__table tbody').on('click', '.button_delete', function () {
+
+            let rowData = dataTable.row($(this).closest('tr')).data();
+            let id = rowData[1];
+
+            Swal.fire({
+                title: "Peringatan !",
+                text: "Hapus data survey ?",
+                icon: "warning",
+                showDenyButton: true,
+                confirmButtonText: "Hapus !",
+                denyButtonText: "Batal"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    axios.delete('/survey/api/v1/survey_create/'+id+'/')
+                        .then(function (response) {
+                            Swal.fire({
+                                icon: "success",
+                                title: "Delete data berhasil !",
+                                text: "Data terhapus !",
+                                showConfirmButton: false,
+                                timer: 1000
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            });
+                        })
+                        .catch(function (error) {
+                            Swal.fire({
+                                icon: "error",
+                                title: "Terjadi kesalahan !",
+                                text: "API bermasalah !",
+                            });
+                    });
+
+                } else if (result.isDenied) {
+                }
+            });
+
+         });
+    });
+</script>
+
+<script>
+   // helper
+   function getLink(kode) {
+        toastr.clear();
+        const surveyUrl = `${window.location.origin}/pengisian-survei?kode=${kode}`;
+
+        Swal.fire({
+            title: `Kode survei : ${kode}`,
+            html: `
+                Silahkan salin kode anda : <br><br>
+                <b>${surveyUrl}</b>
+            `,
+            icon: "success",
+            confirmButtonText: "Salin link",
+        }).then((result) => {
+            if (result.isConfirmed) {
+                const clipboard = new ClipboardJS('.swal2-confirm', {
+                    text: function (trigger) {
+                        if (trigger.innerHTML.includes('Salin link')) {
+                            mauGenerateLink = false;
+                            return surveyUrl;
+                        }
+                    }
+                });
+
+                clipboard.on('success', function (e) {
+                    toastr.success('Link berhasil disalin ke clipboard', 'Berhasil', { preventDuplicates: true });
+                });
+            }
+        });
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,654 @@
+{% extends 'dashboard/dashboard_base.html' %}
+{% load static %}
+{% block title %} Pemetaan Potensi {% endblock %}
+
+{% block modal_tambahan %}
+{% include 'dayatif/pemetaan_potensi/modals/create_modal.html' %}
+{% include 'dayatif/pemetaan_potensi/modals/edit_modal.html'  %}
+{% endblock %}
+
+{% block content %}
+<div class="breadcrumb">
+    <div class="row">
+        <h3 class="heading mb-2">Pemetaan Potensi</h3>
+        <span class="mb-0">
+            <span class="text-muted fw-light">Kegiatan /</span>
+            <span class="ms-1 fw-medium">Pemetaan Potensi</span>
+        </span>
+    </div>
+</div>
+
+<section id="__data">
+    <div class="card">
+        <div class="card-body">
+            <div id="headline" class="mb-3">
+                <h3 class="text-center">
+                    PEMETAAN POTENSI SDM DAN SDA KAWASAN RAWAN NARKOBA <br />
+                    <span id="currentYear"></span>
+                </h3>
+                <hr />
+            </div>
+
+            <div class="action-button">
+                <div class="d-flex justify-content-between mb-3">
+                    <div id="filter__btn_container" class="d-flex align-items-center gap-2">
+                        <v-generic-filter :satker="{ id: satkerPK, level: satkerLevel }" :data="tableData" @update="(data) => filteredPage = data"></v-generic-filter>
+                    </div>
+
+                    <v-page-action-button :satker="{ id: satkerPK, level: satkerLevel }" :data="{ url: 'pemetaan_potensi', name: 'Pemetaan Potensi' }"></v-page-action-button>
+                </div>
+            </div>
+
+            <v-table-basic-filter :item="{ columns : searchAbleColumns, tableData, totalDefault: 10 }" @set-page="(page) => currentPage = page" @set-data="(data) => filteredPage = data" @set-perpage="(page) => perPage = page">
+            </v-table-basic-filter>
+
+
+            <div class="table-responsive" id="__table_container">
+                <v-table :item="{ pagedData }" :pagination="{ currentPage, totalPage, perPage, total: filteredPage?.length }" @go-pagination="(page) => currentPage = page">
+                    <template #thead>
+                        <tr>
+                            <th class="bg-soft-success text-center cursor-pointer" rowspan="2" @click="handleSort('no')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>No.</span>
+                                    <i class="fas d-block" :class="sortColumn == 'no' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="2">Satuan Kerja Pelaksana</th>
+                            <th class="bg-soft-success" rowspan="1" colspan="2">Pelaksanaan</th>
+                            <th class="bg-soft-success" rowspan="2">Deskripsi Hasil</th>
+                            <th class="bg-soft-success" rowspan="2">Hambatan/Kendala</th>
+                            <th class="bg-soft-success" rowspan="2">Kesimpulan</th>
+                            <th class="bg-soft-success" rowspan="2">Tindak Lanjut</th>
+                            <th class="bg-soft-success" rowspan="2">Dokumentasi</th>
+                            <th class="bg-soft-success text-center" rowspan="2" style="max-width: 150px">Aksi <i class="fas fa-edit ms-2"></i>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th class="bg-soft-success cursor-pointer" rowspan="1" @click="handleSort('tanggal')">
+                                <div>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'asc' ? 'text-secondary fa-sort-up' : 'fa-sort-up'"></i>
+                                    <span>Tanggal</span>
+                                    <i class="fas d-block" :class="sortColumn == 'tanggal' && sortDirection === 'desc' ? 'text-secondary fa-sort-down' : 'fa-sort-down'"></i>
+                                </div>
+                            </th>
+                            <th class="bg-soft-success" rowspan="1">Lokasi</th>
+                        </tr>
+                    </template>
+                    <template #tbody>
+                        <template v-for="(item, index) in pagedData" :key="index">
+                            <tr :class="item.class">
+                                <td class='text-center' v-text="item.index"></td>
+                                <td :colspan="item.hide_satker ? 0 : 9">
+                                    <template v-if="!item.hide_satker">
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan"></v-item-header>
+                                    </template>
+                                    <template v-else>
+                                        <v-item-header :nama="item.satker.nama_satker" :length="item.jumlah_kegiatan" :fade="true" :index="item.index"></v-item-header>
+                                    </template>
+                                </td>
+                                <template v-if="item.hide_satker">
+                                    <td>
+                                        <v-item-tanggal :awal="item.tanggal_awal" :akhir="item.tanggal_akhir"></v-item-tanggal>
+                                    </td>
+                                    <td>
+                                        <v-lokasi :lokasi="item.lokasi"></v-lokasi>
+                                    </td>
+                                    <td>
+                                        <v-potensi :information="{ satker: item.satker.nama_satker, tanggal: item.tanggal }" :potensi="item.potensi" :id="index"></v-potensi>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.kendala"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.kesimpulan"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-text :text="item.tindak_lanjut"></v-item-text>
+                                    </td>
+                                    <td>
+                                        <v-item-dokumentasi :information="{ satker: item.satker.nama_satker, tanggal: item.tanggal }" :file="item.dokumentasi" :image="item.gambar || item.file" :id="index"></v-item-dokumentasi>
+                                    </td>
+                                    <td>
+                                        <v-action-button :item="{ id: item.id, nama: item.satker.nama_satker, level: item.satker.level, status: item.status }" :level="satkerLevel" :url="'pemetaan_potensi'" @update="refreshData()" @edit="(id) => handleEdit(id)"></v-action-button>
+                                    </td>
+                                </template>
+                            </tr>
+                        </template>
+                    </template>
+                    <template #not-found>
+                        <v-result-not-found colspan="10" text="Hasil pencarian tidak ditemukan"></v-result-not-found>
+                    </template>
+                </v-table>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock %}
+
+{% block js_tambahan %}
+<script>
+    const { createApp, watch, reactive, ref, onMounted, computed } = Vue;
+
+    const useFormStore = defineStore('form', () => {
+        const base = {
+            lokasi: { provinsi: '', kabupaten: '', kecamatan: '', desa: '' },
+            kendala: { showKeterangan: false },
+            image: { url: '' },
+        };
+
+        const lokasi = ref({ ...base.lokasi });
+        const kendala = ref({ ...base.kendala });
+        const image = ref({ ...base.image });
+
+        return { kendala, lokasi, image };
+    });
+</script>
+
+{% include "dayatif/partials/components.html" %}
+
+<script>
+    const app = createApp({
+        delimiters,
+        components,
+        setup() {
+            const store = useFormStore()
+
+            const title = ref('Pemetaan Potensi');
+
+            const satkerPK = ref(parseInt('{{ user.profile.satker.pk }}'));
+            const satkerNama = ref('{{ user.profile.satker.nama_satker }}');
+            const satkerLevel = ref(parseInt('{{ user.profile.satker.level }}'));
+
+            const tableData = ref(null);
+            const filteredPage = ref(null);
+
+            const apiURL = `/kegiatan/api/v1/dayatif/pemetaan_potensi/list${satkerLevel.value == 1 ? '/bnnk/' : '/'}?format=datatables`;
+
+            const searchAbleColumns = [
+                'nama_satker', 'deskripsi', 'tanggal', 'jumlah_kegiatan', 'nama_provinsi', 'nama_kabupaten', 'nama_kecamatan', 'nama_desa', 'deskripsi', 'kendala', 'kesimpulan', 'tindak_lanjut'
+            ];
+
+            const loadData = async () => {
+                setIsLoading(true);
+
+                const tableContent = [];
+                const response = await axios.get(apiURL);
+                const data = response.data.data;
+
+                let key, value, key2, value2, key3, value3, key4, value4;
+
+                const getClass = (level) => ({
+                    2: 'bg-soft-danger',
+                    0: 'bg-soft-primary',
+                    1: 'bg-soft-warning',
+                    3: 'bg-soft-light',
+                }[level]);
+
+                const getBaseKeys = (className, jumlahKegiatan, hide, indexKey, value) => ({
+                    class: className,
+                    id: value.id,
+                    jumlah_kegiatan: jumlahKegiatan,
+                    status: value.status,
+                    hide_satker: hide,
+                    index: indexKey,
+                    satker: value.satker,
+                });
+
+                const initialKeys = {
+                    tanggal: "",
+                    tanggal_awal: "",
+                    tanggal_akhir: "",
+
+                    lokasi: {},
+
+                    potensi: {},
+                    kendala: "",
+                    kesimpulan: "",
+                    tindak_lanjut: "",
+                    dokumentasi: "",
+                    gambar: "",
+                }
+
+                const getExtendedKeys = (value) => ({
+                    tanggal: getTanggalKegiatan(value.tanggal_awal, value.tanggal_akhir),
+                    tanggal_awal: value.tanggal_awal,
+                    tanggal_akhir: value.tanggal_akhir,
+
+                    lokasi: { provinsi: value.nama_provinsi, kabupaten: value.nama_kabupaten, kecamatan: value.nama_kecamatan, desa: value.nama_desa },
+
+                    potensi: value.potensi,
+                    kendala: value.kendala,
+                    kesimpulan: value.kesimpulan,
+                    tindak_lanjut: value.tindak_lanjut,
+                    dokumentasi: value.dokumentasi,
+                    gambar: value.gambar,
+                });
+
+                const getBaris = (className, jumlahKegiatan, hide, indexKey, value) => {
+                    const baseKeys = getBaseKeys(className, jumlahKegiatan, hide, indexKey, value);
+                    const additionalKeys = hide ? getExtendedKeys(value) : initialKeys;
+
+                    return { ...baseKeys, ...additionalKeys };
+                };
+
+                for ([key, value] of Object.entries(data)) {
+                    const indexKey = parseInt(key) + 1;
+                    const baris = getBaris(getClass(value.satker.level), value.data.length, false, indexKey, value);
+
+                    tableContent.push(baris);
+
+                    for ([key2, value2] of Object.entries(value.data)) {
+                        const indexKey = `${parseInt(key) +1}.${parseInt(key2) + 1}`;
+                        const baris = getBaris("bg-soft-light", value.data.length, true, indexKey, value2);
+
+                        tableContent.push(baris);
+                    }
+
+                    if (value?.detail?.length > 0) {
+                        for ([key3, value3] of Object.entries(value.detail)) {
+                            const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}`;
+                            const baris = getBaris("bg-soft-warning", value3.data.length, false, indexKey, value3);
+                            tableContent.push(baris);
+
+                            for ([key4, value4] of Object.entries(value3.data)) {
+                                const indexKey = `${parseInt(key) + 1}.${parseInt(key2) + 1}.${parseInt(key3) + 1}.${parseInt(key4) + 1}`;
+                                const baris = getBaris("bg-soft-light", value3.data.length, true, indexKey, value4);
+                                tableContent.push(baris);
+                            }
+                        }
+                    }
+                }
+
+                tableData.value = tableContent;
+                filteredPage.value = tableData.value;
+
+                setIsLoading(false);
+            }
+
+            const formScheme = {
+                provinsi: '',
+                kabupaten: '',
+                kecamatan: '',
+                desa: '',
+                potensi: {
+                    sda: {
+                        text: '',
+                        swot: {
+                            text: '',
+                            kekuatan: '' ,
+                            kelemahan: '' ,
+                            peluang: '' ,
+                            tantangan: '' ,
+                        },
+                        kesimpulan: '',
+                    },
+                    sdm: {
+                        text: '',
+                        swot: {
+                            text: '',
+                            kekuatan: '' ,
+                            kelemahan: '' ,
+                            peluang: '' ,
+                            tantangan: '' ,
+                        },
+                        kesimpulan: '',
+                    }
+                },
+            };
+
+            const post = ref({ ...formScheme });
+            const edit = ref({ ...formScheme });
+
+            const handlePost = async () => {
+                showSwalLoading();
+
+                const modal = $('#createModal');
+
+                const { tanggal_awal, tanggal_akhir, provinsi, kabupaten, kecamatan, desa, nama_provinsi, nama_kabupaten, nama_kecamatan, nama_desa, potensi, kendala, kesimpulan, tindak_lanjut, gambar, dokumentasi } = post.value;
+
+                const satker = satkerPK.value
+
+                const payload = {
+                    satker,
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    potensi: JSON.stringify(potensi),
+                    kendala,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(gambar && {
+                        gambar
+                    }),
+                    dokumentasi
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                try {
+                    await axios.post(`/kegiatan/api/v1/dayatif/pemetaan_potensi/`,
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> ditambahkan!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    await loadData();
+                    store.$reset();
+                    post.value = { ...formScheme };
+                }
+            }
+
+            const handleEdit = async (id) => {
+                try {
+                    const response = await axios.get(`/kegiatan/api/v1/dayatif/pemetaan_potensi/${id}/`);
+
+                    const data = response.data;
+
+                    console.log('Data:', data);
+
+                    const modal = $('#editModal');
+                    const form = $('#editForm');
+
+                    form.find('#edit__info').text(data.satker.nama_satker);
+                    form.find('#edit__satker').val(data.satker.id).trigger('change');
+
+                    // Lokasi
+                    store.lokasi = {
+                        provinsi: data.nama_provinsi,
+                        kabupaten: data.nama_kabupaten,
+                        kecamatan: data.nama_kecamatan,
+                        desa: data.nama_desa,
+                    };
+
+                    // Kendala
+                    store.kendala.showKeterangan = data.kendala.startsWith('Ada');
+
+                    edit.value = {
+                        provinsi: data.provinsi,
+                        kabupaten: data.kabupaten,
+                        kecamatan: data.kecamatan,
+                        desa: data.desa,
+                        ...data
+                    };
+
+                    // Reset files
+                    edit.value.dokumentasi = null;
+
+                    // Gambar
+                    store.image.url = data.gambar;
+
+                    modal.modal('show');
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                }
+            }
+
+            const handleUpdate = async (id) => {
+                showSwalLoading();
+
+                const modal = $('#editModal');
+
+                const { tanggal_awal, tanggal_akhir, provinsi, kabupaten, kecamatan, desa, nama_provinsi, nama_kabupaten, nama_kecamatan, nama_desa, deskripsi, kendala, kesimpulan, tindak_lanjut, dokumentasi, gambar } = edit.value;
+
+                let delete_gambar = false;
+                let fileGambar = null;
+
+                if (gambar && gambar.size) {
+                    fileGambar = gambar;
+                } else if (!gambar) {
+                    delete_gambar = true;
+                }
+
+                const payload = {
+                    tanggal_awal,
+                    ...(tanggal_akhir && {
+                        tanggal_akhir
+                    }),
+                    provinsi,
+                    nama_provinsi,
+                    kabupaten,
+                    nama_kabupaten,
+                    kecamatan,
+                    nama_kecamatan,
+                    desa,
+                    nama_desa,
+                    deskripsi,
+                    kendala,
+                    kesimpulan,
+                    tindak_lanjut,
+                    ...(dokumentasi && {
+                        dokumentasi
+                    }),
+                    ...(fileGambar && {
+                        gambar: fileGambar
+                    }),
+                    ...(delete_gambar && { delete_gambar }),
+                };
+
+                const formData = new FormData();
+
+                Object.entries(payload).forEach(([key, value]) => formData.append(key, value));
+
+                console.log('Payload :', payload);
+
+                try {
+                    await axios.patch(
+                        `/kegiatan/api/v1/dayatif/pemetaan_potensi/${edit.value.id}/`,
+                        formData, {
+                            headers: {
+                                'Content-Type': 'multipart/form-data',
+                            },
+                        }
+                    );
+
+                    modal.modal('hide');
+                    showSwalSuccess('Berhasil!', `Data kegiatan telah <b>berhasil</b> diperbarui!`);
+                } catch (error) {
+                    showSwalGenericError();
+                    console.error('Terjadi kesalahan :', error);
+                } finally {
+                    await loadData();
+                    store.$reset();
+                    edit.value = { ...formScheme }
+                }
+            }
+
+            const inputTargets = ['provinsi', 'kabupaten', 'kecamatan', 'desa'];
+
+            const handleChange = (type, name, event) => {
+                const text = $(`#${type}__${name}`).find(':selected').text();
+                const value = event.target.value;
+
+                if (type === 'create') {
+                    post.value[name] = value;
+                    post.value[`nama_${name}`] = text;
+                } else {
+                    edit.value[name] = value;
+                    edit.value[`nama_${name}`] = text;
+                }
+            };
+
+            const getUserInfo = () => {
+                const roles = { 0: 'BNNP', 1: 'BNNK', 2: 'PUSAT' };
+                console.log('[INFO] Logged in Satker Level :', satkerLevel.value, `- ${roles[satkerLevel.value]}`);
+            };
+
+            onMounted(async () => {
+                await loadData();
+
+                getUserInfo()
+
+                inputTargets.forEach(name => {
+                    ['create', 'edit'].forEach(type => {
+                        $(`#${type}__${name}`).on('change', (event) => handleChange(type, name, event));
+                    });
+                });
+
+                await sleep(1000);
+
+                console.log('[INFO] Paged data :', pagedData.value);
+
+                $('#editModal, #createModal').on('hidden.bs.modal', () => store.$reset());
+            });
+
+            /* ========================================
+                  !! GENERIC TABLE CONFIGURATION !!
+            =========================================== */
+
+            /* -----------------------------------------
+             * Pagination
+            -----------------------------------------*/
+            const getPage = () => {
+                const params = new URLSearchParams(window.location.search);
+                let page = parseInt(params.get('page'));
+
+                if (isNaN(page) || page <= 0) {
+                    removeParams('page');
+                    page = 1;
+                }
+
+                return page;
+            }
+
+            const perPage = ref(10); // Placeholder
+            const currentPage = ref(getPage());
+            const totalPage = computed(() => filteredPage.value ? Math.ceil(filteredPage.value.length / perPage.value) : 0);
+
+            watch(totalPage, () => {
+                // console.log({'TotalPage': totalPage.value, 'perPage': perPage.value, 'currentPage': currentPage.value});
+                const checkingState = totalPage.value != 0 && (currentPage.value > totalPage.value);
+                if (!checkingState) return;
+
+                const message = `Kembali ke halaman <b>1</b> dikarenakan Data pada halaman <b>${currentPage.value}</b> tidak ditemukan`;
+                toastr['warning'](message, "Terjadi kesalahan");
+                currentPage.value = 1;
+                removeParams('page');
+            })
+
+            const pagedData = computed(() => {
+                if (!filteredPage.value) return [];
+                const startIndex = (currentPage.value - 1) * perPage.value;
+                const endIndex = currentPage.value * perPage.value;
+                return filteredPage.value.slice(startIndex, endIndex);
+            });
+
+            /**-----------------------------------------
+             * Sorting
+            -----------------------------------------*/
+            const sortColumn = ref('no')
+            const sortDirection = ref('asc')
+
+            const handleSort = (column) => {
+                currentPage.value = 1;
+                removeParams('page');
+                sortColumn.value = column;
+
+                sortDirection.value = sortDirection.value === 'asc' ? 'desc' : 'asc';
+
+                if (column === 'no') {
+                    filteredPage.value.sort((a, b) => {
+                        const dataA = `${a.index}`;
+                        const dataB = `${b.index}`;
+
+                        const indexA = dataA.split('.').map(Number);
+                        const indexB = dataB.split('.').map(Number);
+
+                        for (let i = 0; i < Math.max(indexA.length, indexB.length); i++) {
+                            const numA = indexA[i] || 0;
+                            const numB = indexB[i] || 0;
+
+                            if (numA !== numB) {
+                                return sortDirection.value === 'asc' ? (numA - numB) : (numB - numA);
+                            }
+                        }
+                        return 0;
+                    });
+                } else if (column === 'tanggal') {
+                    filteredPage.value.sort((a, b) => {
+                        const dateA = new Date(a.tanggal_awal);
+                        const dateB = new Date(b.tanggal_awal);
+                        return sortDirection.value === 'asc' ? (dateA - dateB) : (dateB - dateA);
+                    });
+                }
+            }
+
+            /**-----------------------------------------
+             * Websocket
+            -----------------------------------------*/
+            // const basePathName = window.location.pathname.split('/');
+            // const slug = basePathName[basePathName.length - 2];
+            // const wsProtocol = window.location.protocol === "https:" ? "wss" : "ws";
+            // const wsEndpoint = `${wsProtocol}://${window.location.host}/ws/${slug}/`;
+            // const socket = new WebSocket(wsEndpoint);
+
+            // socket.onmessage = async (e) => await loadData();
+
+            // const refreshData = () => socket.send(JSON.stringify({ message: 'Data updated ...', sender: satkerNama.value }));
+            const refreshData = async () => await loadData();
+
+            return {
+                // Preparation
+                store,
+                satkerLevel,
+                satkerPK,
+                satkerNama,
+                title,
+
+                // Action
+                post,
+                handlePost,
+
+                edit,
+                handleEdit,
+                handleUpdate,
+
+                // Data
+                loadData,
+                tableData,
+                refreshData,
+                searchAbleColumns,
+
+                // Pagination
+                perPage,
+                currentPage,
+                filteredPage,
+                totalPage,
+                pagedData,
+
+                // Sorting
+                sortColumn,
+                sortDirection,
+                handleSort,
+            }
+        },
+    })
+
+    app.use(pinia)
+    app.mount('#app');
+</script>
+
+<script src="{% static 'dayatif/fetch-lokasi.js' %}"></script>
+{% endblock %}

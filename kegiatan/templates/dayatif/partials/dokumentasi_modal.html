@@ -1,0 +1,37 @@
+
+
+<div class="modal fade" id="detailDokumenModal">
+    <div class="modal-dialog modal-xl modal-dialog-scrollable" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Detail Dokumentasi Kegiatan dari Satuan Kerja <strong>{ satker }</strong>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row justify-content-between">
+                    <div class="col-md-6">
+                        <h4>Unduh dokumentasi file berikut :</h4>
+                    </div>
+                    <div class="col-md-6">
+                        <a href="javascript:void(0)" class="btn btn-success" :download="file">
+                            <i class="fas fa-me-2"></i>Unduh File
+                        </a>
+                    </div>
+                </div>
+
+                <div class="d-flex">
+                    <div class="position-relative p-3 bg-secondary">
+                        <img :src="image" alt="Detail Image" class="img-fluid p-0" style="height: 400px; width: -webkit-fill-available; object-fit: contain;">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-label-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>
+                    Tutup
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

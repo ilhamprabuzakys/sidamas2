@@ -1,0 +1,100 @@
+<div class="modal fade" id="tambahData" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambah">Tambah Data</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section id="formTambah">
+                    <div class="mb-3">
+                        <label for="satker" class="col-form-label required">Satuan Kerja:</label>
+                        <select class="form-control select2" name="selectSatker" id="selectSatker">
+                            <option value="" selected disabled>Pilih Satuan Kerja</option>
+                            {% for item in satker %}
+                            <option value="{{ item.nama_satker }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="jumlah_kegiatan" class="col-form-label required">Jumlah Kegiatan:</label>
+                        <input type="number" name="jumlah_kegiatan" class="form-control" id="jumlah_kegiatan" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="kesimpulan" class="col-form-label required">Pelaksanaan:</label>
+                        <form class="form-repeater">
+                            <div data-repeater-list="pelaksanaan-group">
+                                <div data-repeater-item>
+                                    <div class="row">
+                                        <div class="mb-3 col-lg-5 col-sm-10 mb-0">
+                                            <label class="form-label" for="form-repeater-1-1">Tanggal</label>
+                                            <input type="date" id="form-repeater-1-1" class="form-control" />
+                                        </div>
+                                        <div class="mb-3 col-lg-5 col-sm-10 mb-0">
+                                            <label class="form-label" for="form-repeater-1-2">Lokasi</label>
+                                            <input type="text" id="form-repeater-1-2" class="form-control" />
+                                        </div>
+                                        <div class="mb-3 col-lg-12 col-xl-2 col-12 d-flex align-items-center mb-0">
+                                            <button class="btn btn-label-danger mt-4" data-repeater-delete type="button"
+                                                value="Delete">
+                                                <i class="ti ti-x ti-xs me-1"></i>
+                                                <span class="align-middle">Hapus</span>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <hr>
+                                </div>
+                            </div>
+                            <div class="mb-0">
+                                <button class="btn btn-primary" data-repeater-create type="button" value="Add">
+                                    <i class="ti ti-plus me-1"></i>
+                                    <span class="align-middle">Tambah pelaksanaan</span>
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tanggal" class="col-form-label required">Tanggal:</label>
+                        <input type="date" name="tanggal" class="form-control" id="tanggal" />
+                    </div>
+                    <div class="mb-3">
+                        <label for="satker_dibintek" class="col-form-label required">Satuan Kerja Bintek:</label>
+                        <select class="form-control select2" name="selectSatkerBintek" id="selectSatkerBintek">
+                            <option value="" selected disabled>Pilih Satuan Kerja</option>
+                            {% for item in satker %}
+                            <option value="{{ item.nama_satker }}">{{ item.nama_satker }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="deskripsi" class="col-form-label required">Deskripsi Hasil</label>
+                        <textarea class="form-control" name="deskripsi" id="deskripsi"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="hambatan_kendala" class="col-form-label required">Kendala Hambatan:</label>
+                        <textarea class="form-control" name="hambatan_kendala" id="hambatan_kendala"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kesimpulan" class="col-form-label required">Kesimpulan:</label>
+                        <textarea class="form-control" name="kesimpulan" id="kesimpulan"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+                        <textarea class="form-control" name="tindak_lanjut" id="tindak_lanjut"></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="dokumentasi" class="col-form-label required">Dokumentasi:</label>
+                        <input type="file" class="form-control" name="dokumentasi" id="dokumentasi"></input>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>Tutup</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>

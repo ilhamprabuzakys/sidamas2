@@ -1,0 +1,124 @@
+{
+    "pages": [
+        {
+            "name": "Beranda",
+            "icon": "fas fa-home",
+            "url": "/dashboard"
+        },
+        {
+            "name": "Kegiatan - Rapat Kerja Teknis (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/rakernis/"
+        },
+        {
+            "name": "Kegiatan - Binaan Teknis (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/bintek/"
+        },
+        {
+            "name": "Kegiatan - Rakor Pemetaan (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/rakor_pemetaan/"
+        },
+        {
+            "name": "Kegiatan - Audiensi (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/audiensi/"
+        },
+        {
+            "name": "Kegiatan - Konsolidasi Kebijakan (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/konsolidasi_kebijakan/"
+        },
+        {
+            "name": "Kegiatan - Workshop Penggiat (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/workshop_penggiat/"
+        },
+        {
+            "name": "Kegiatan - Bimbingan Teknis Penggiat P4GN (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/bimtek_peggiat_p4gn/"
+        },
+        {
+            "name": "Kegiatan - Sinkronisasi Kebijakan (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/sinkronisasi_kebijakan/"
+        },
+        {
+            "name": "Kegiatan - Workshop Tematik (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/workshop_tematik/"
+        },
+        {
+            "name": "Kegiatan - Asistensi (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/asistensi/"
+        },
+        {
+            "name": "Kegiatan - Tes Urine Deteksi Dini (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/tes_urine/"
+        },
+        {
+            "name": "Kegiatan - Monev Supervisi Kegiatan Kotan (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/monev_supervisi_kegiatan_kotan/"
+        },
+        {
+            "name": "Kegiatan - Pengumpulan Data Ikotan (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/pengumpulan_data_ikotan/"
+        },
+        {
+            "name": "Kegiatan - Dukungan Stakeholder (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/dukungan_stakeholder/"
+        },
+        {
+            "name": "Kegiatan - Kegiatan Lainnya (PSM) ",
+            "icon": "fas fa-list-check",
+            "url": "/kegiatan/psm/kegiatan_lainnya/"
+        },
+        {
+            "name": "Daftar Berita",
+            "icon": "far fa-news-paper",
+            "url": "/dashboard/berita/"
+        },
+        {
+            "name": "Survei Formulir Elektronik",
+            "icon": "fas fa-edit",
+            "url": "/survey/formulir_elektronik/"
+        },
+        {
+            "name": "Survei SKM Tes Urine",
+            "icon": "fas fa-edit",
+            "url": "/survey/skm_tes_urine/"
+        },
+        {
+            "name": "Jadwal Kegiatan Tahunan",
+            "icon": "fas fa-calendar",
+            "url": "/dashboard/psm/jadwal_kegiatan_tahunan/"
+        },
+        {
+            "name": "Daftar Literasi",
+            "icon": "fas fa-book-open",
+            "url": "/dashboard/literasi/"
+        },
+        {
+            "name": "Verifikasi Pengguna",
+            "icon": "fas fa-book-open",
+            "url": "/users/verifikasi/"
+        },
+        {
+            "name": "Pengaturan Profil",
+            "icon": "fas fa-user",
+            "url": "/dashboard/profil_saya/"
+        },
+        {
+            "name": "Pengaturan Keamanan",
+            "icon": "fas fa-lock",
+            "url": "/dashboard/keamanan/"
+        }
+    ]
+}

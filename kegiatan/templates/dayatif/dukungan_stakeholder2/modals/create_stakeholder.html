@@ -1,0 +1,120 @@
+<div class="modal fade" id="tambahDataStakeholder" aria-labelledby="modalTambah" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="modalTambah">
+                    Tambah Data
+                    <b>Stakeholder</b> untuk Satuan Kerja
+                    <b>{{ user.profile.satker }}</b>
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <section id="formTambah">
+                    <div class="mb-3">
+                        <label for="nama_stakeholder" class="col-form-label required">Nama stakeholder:</label>
+                        <input type="text" id="nama_stakeholder" class="form-control" />
+                    </div>
+
+                    <label for="dukungan" class="col-form-label text-muted">Dukungan yang diberikan:</label>
+
+                    <div class="row mb-3">
+                        <div class="col-12">
+                            <div>
+                                <label for="dukungan_jenis" class="col-form-label required">Jenis:</label>
+                                <select class="form-control select2" name="dukungan_jenis" id="dukungan_jenis">
+                                    <option value="" selected disabled>--Pilih Jenis Dukungan--</option>
+                                    {% for item in daftar_jenis_dukungan %}
+                                    <option value="{{ item.value }}">{{ item.label }}</option>
+                                    {% endfor %}
+                                </select>
+
+                                <div id="dukungan_jenis_sebutkan" class="d-none mt-3">
+                                    <label for="input_dukungan_jenis_sebutkan" class="col-form-label required">Sebutkan</label>
+                                    <input type="text" id="input_dukungan_jenis_sebutkan" class="form-control w-50 d-inline"
+                                        placeholder="Sebutkan" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <label for="dukungan_bentuk" class="col-form-label required">Bentuk:</label>
+                                <input type="text" id="dukungan_bentuk" class="form-control" value="" />
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div>
+                                <label for="dukungan_jumlah" class="col-form-label required">Jumlah:</label>
+                                <input type="text" id="dukungan_jumlah" class="form-control" value="" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="kawasan_yang_di_intervensi" class="col-form-label required">Kawasanan yang
+                            diintervensi:</label>
+
+                        <div class="row" id="kawasan_yang_di_intervensi">
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="provinsi" id="pilih_provinsi">
+                                    <option value="" selected disabled>--Pilih provinsi--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="kota" id="pilih_kota">
+                                    <option value="" selected disabled>--Pilih kota/kabupaten--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="kecamatan" id="pilih_kecamatan">
+                                    <option value="" selected disabled>--Pilih kecamatan--</option>
+                                </select>
+                            </div>
+
+                            <div class="col-6 mb-3">
+                                <select class="form-select select2" name="desa" id="pilih_desa">
+                                    <option value="" selected disabled>--Pilih desa/kelurahan--</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="jumlah_sasaran" class="col-form-label required">Jumlah Sasaran:</label>
+                        <input type="text" id="jumlah_sasaran" class="form-control" />
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="pengaruh_manfaat" class="col-form-label required">Pengaruh/Manfaat:</label>
+                        <textarea class="form-control" name="pengaruh_manfaat" id="pengaruh_manfaat"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="kesimpulan" class="col-form-label required">Kesimpulan:</label>
+                        <textarea class="form-control" name="kesimpulan" id="kesimpulan"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tindak_lanjut" class="col-form-label required">Tindak Lanjut:</label>
+                        <textarea class="form-control" name="tindak_lanjut" id="tindak_lanjut"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dokumentasi" class="col-form-label required">Dokumentasi:</label>
+                        <input type="file" class="form-control" name="dokumentasi" id="dokumentasi"></input>
+                    </div>
+                </section>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                    <i class="fas fa-xmark me-2"></i>Tutup</button>
+                <button type="button" class="btn btn-primary">
+                    <i class="fas fa-save me-2"></i>
+                    Simpan</button>
+            </div>
+        </div>
+    </div>
+</div>
